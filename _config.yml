@@ -10,7 +10,7 @@ url:         "http://clancyz.github.io"
 duoshuo: 
 
 #Baidu analytics / 百度统计(异步的js码，注意使用异步版本的)
-baidu_analyze: 3908cbb144cf558ba6a823230d653fc22 
+baidu_analyze: 552e4c4f02c7d240bdb63847dd7ea798
 
 # Google analytics
 google_analytics:
