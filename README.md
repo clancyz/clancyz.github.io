@@ -1,2 +1,0 @@
-# clancyz.github.io
-blog
