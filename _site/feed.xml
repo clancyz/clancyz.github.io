@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Clancy Zhu</title>
-    <description>A simple, beautiful theme for Jekyll that emphasizes content rather than aesthetic fluff.</description>
+    <description>Clancy Zhu&#39;s blog</description>
     <link>http://clancyz.github.io/</link>
     <atom:link href="http://clancyz.github.io/feed.xml" rel="self" type="application/rss+xml" />
     
