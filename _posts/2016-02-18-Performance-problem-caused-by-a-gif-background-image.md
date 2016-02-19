@@ -3,7 +3,7 @@ layout:     post
 title:      单页应用中使用gif作为背景带来的性能问题
 date:       2016-02-18 15:31:19
 summary:    在单页应用中，HTML全局引入大帧率GIF动画作为背景时，有可能导致性能问题。通过这次优化让CPU占用率降低了50%。
-categories: blog 2016
+categories: blog
 ---
 
 ### 问题描述 ###
