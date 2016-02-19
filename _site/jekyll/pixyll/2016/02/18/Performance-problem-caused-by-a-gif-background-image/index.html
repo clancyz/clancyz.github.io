@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>单页应用中使用gif作为背景带来的性能问题 &#8211; Clancy Zhu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="在单页应用中，HTML全局引入大帧率GIF动画作为背景时，有可能导致性能问题。通过这次优化让CPU占用率降低了50%。">
+    <meta name="author" content="Clancy Zhu">
+    <meta name="keywords" content="jekyll, pixyll">
+    <link rel="canonical" href="http://clancyz.github.io/jekyll/pixyll/2016/02/18/Performance-problem-caused-by-a-gif-background-image/">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css" type="text/css">
+
+    <!-- Fonts -->
+    <link href='//fonts.useso.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.useso.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="单页应用中使用gif作为背景带来的性能问题">
+    <meta property="og:description" content="A simple, beautiful theme for Jekyll that emphasizes content rather than aesthetic fluff.">
+    <meta property="og:url" content="http://clancyz.github.io/jekyll/pixyll/2016/02/18/Performance-problem-caused-by-a-gif-background-image/">
+    <meta property="og:site_name" content="Clancy Zhu">
+    
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?3908cbb144cf558ba6a823230d653fc22";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</head>
+
+<body class="">
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="http://clancyz.github.io" class="site-title">Clancy Zhu</a>
+      <nav class="site-nav right">
+        <a href="/about/">About</a>
+<a href="/contact/">Contact</a>
+
+      </nav>
+      <div class="clearfix"></div>
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        
+
+
+<div class="post-header mb2">
+  
+  <h1 class="py2">单页应用中使用gif作为背景带来的性能问题</h1>
+  
+  <span class="post-meta">02月 18日, 2016</span><br>
+  
+  <span class="post-meta small">1 minute read</span>
+</div>
+
+<article class="post-content">
+  <h3 id="section">问题描述</h3>
+
+<p>据用户反馈，目前项目的前端存在卡顿现象，具体现象为打开页面后，CPU使用率上升很快，且一直保持在很高的状态，导致页面卡顿。</p>
+
+<p>项目使用了angular, 卡顿页面中使用了echarts。</p>
+
+<p>后端经过排查，HTTP接口返回都在200ms以下，故为前端问题。</p>
+
+<h3 id="section-1">问题定位</h3>
+
+<p>使用devTools timeline定位。 因为CPU始终保持高状态，所以在页面加载完之后再使用timeline record 2s左右。</p>
+
+<p><img src="/assets/images/1.png" alt="image" /></p>
+
+<p>发现有周期性的node paint, 且触发了全页面paint (1751 * 4915). CPU一直保持波动状态。</p>
+
+<p>首先怀疑angular有没有周期性触发echart重新渲染？在$watch方法里面打个断点，很快就被排除，只init了一次。</p>
+
+<p>怀疑是echarts周期性的requestAnimationFrame引起，故对echart demo页面：http://echarts.baidu.com/echarts2/doc/example/pie1.html 进行timeline分析
+<img src="/assets/images/2.png" alt="image" /></p>
+
+<p>上图证明echart的确会周期性地执行(具体为一个start方法)，但是未引起任何页面重绘。</p>
+
+<p>同样的，使用浏览器打开没有echarts引入的视图页（下图），页面仍有周期性重绘，故可排除echarts原因。</p>
+
+<p><img src="/assets/images/3.png" alt="image" /></p>
+
+<p>根据上图可发现，每次paint都带有对loading.gif的image decode操作。
+周期性地带来rasterize paint(GPU渲染)和全页面paint。</p>
+
+<p>想起项目中有一个loading.gif作为视图未加载时的显示。
+查找代码发现，</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby">  <span class="n">html</span> <span class="p">{</span>
+   <span class="ss">background: </span><span class="n">url</span><span class="p">(</span><span class="s1">'/static/common/img/loading.gif'</span><span class="p">);</span>
+   <span class="n">background</span><span class="o">-</span><span class="ss">attachment: </span><span class="n">fixed</span><span class="p">;</span>
+   <span class="n">background</span><span class="o">-</span><span class="ss">repeat: </span><span class="n">no</span><span class="o">-</span><span class="n">repeat</span><span class="p">;</span> 
+   <span class="n">background</span><span class="o">-</span><span class="ss">position: </span><span class="n">center</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p><strong>这个loading.gif直接写在了html上面。</strong></p>
+
+<h3 id="section-2">问题解决</h3>
+
+<p>注释掉带有loading.gif的这一行css，再次使用timeline记录页面加载后的2s时间：</p>
+
+<p><img src="/assets/images/4.png" alt="image" /></p>
+
+<p>已经没有全页面重绘（node重绘在图中标记应为绿色。）
+剩下的周期性的黄色灰色主要是echarts的animationframe，下面的锯齿形状的内存使用也表明了这一点，
+因为一个empty requestAnimationFrame动画会固定形成内存占用的锯齿图（<strong>sawtooth graph</strong>）。
+让用户打开测试页面，反馈不卡了。CPU占用率在原来的一半以下。
+问题解决。</p>
+
+<h3 id="section-3">问题原因</h3>
+
+<ol>
+  <li>项目是angular的单页，所以在html上写css, 是影响全局的。当时的想法是在loading的时候有动画看。。。</li>
+  <li>在html标签上打上loading.gif的话，因为gif需要周期性的paint，当时引入的这个gif体积较大（170*170），一个转圈动画，帧数超过100帧且<strong>始终在不停地paint</strong>，是引起本次性能问题的主要原因。页面看不见的原因是layer问题，实际是一直存在的。</li>
+</ol>
+
+<h3 id="section-4">结论</h3>
+
+<p>在单页应用中，HTML全局引入大帧率GIF动画作为背景时，有可能导致性能问题。
+通过这次优化让CPU占用率降低了50%。</p>
+
+</article>
+
+
+
+
+
+		
+	
+
+      	
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+  <div class="p2 wrap">
+    <div class="measure mt1 center">
+      <small>
+        <a href="https://github.com/clancyz">My Github</a>.
+      </small>
+    </div>
+  </div>
+</footer>
+
+
+
+</body>
+</html>

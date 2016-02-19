@@ -1,0 +1,39 @@
+# Site settings
+title:       Clancy Zhu 
+email:       clancyzhu@me.com 
+author:      Clancy Zhu
+description: "A simple, beautiful theme for Jekyll that emphasizes content rather than aesthetic fluff."
+baseurl:     ""
+url:         "http://clancyz.github.io"
+
+#Duoshuo short Name / 多说的shortname
+duoshuo: 
+
+#Baidu analytics / 百度统计(异步的js码，注意使用异步版本的)
+baidu_analyze: 3908cbb144cf558ba6a823230d653fc22 
+
+# Google analytics
+google_analytics:
+
+# Optional features
+animated:           false
+show_related_posts: false
+show_post_footers:  false
+
+# Social icons
+show_social_icons: false
+github_username:
+twitter_username:
+google_plus_id:
+linkedin_username:
+bitcoin_url:
+paypal_url:
+flattr_button:
+
+# Build settings
+markdown:     kramdown
+permalink:    pretty
+gems: [jekyll-paginate]
+paginate:     3
+sass:
+  compressed: true
