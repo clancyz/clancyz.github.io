@@ -7,7 +7,7 @@ baseurl:     ""
 url:         "http://clancyz.github.io"
 
 #Duoshuo short Name / 多说的shortname
-duoshuo: 
+duoshuo: clancyz
 
 #Baidu analytics / 百度统计(异步的js码，注意使用异步版本的)
 baidu_analyze: 552e4c4f02c7d240bdb63847dd7ea798
@@ -21,8 +21,8 @@ show_related_posts: false
 show_post_footers:  false
 
 # Social icons
-show_social_icons: false
-github_username:
+show_social_icons: true
+github_username: clancyz
 twitter_username:
 google_plus_id:
 linkedin_username:
