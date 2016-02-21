@@ -7,6 +7,15 @@
     <atom:link href="http://clancyz.github.io/feed.xml" rel="self" type="application/rss+xml" />
     
       <item>
+        <title>使用angular+fis-plus+oclazyload搭建单页应用</title>
+        <description>
+</description>
+        <pubDate>Sun, 21 Feb 2016 05:36:11 +0800</pubDate>
+        <link>http://clancyz.github.io/blog/2016/02/21/angular-and-fisp-frontend-architecture/</link>
+        <guid isPermaLink="true">http://clancyz.github.io/blog/2016/02/21/angular-and-fisp-frontend-architecture/</guid>
+      </item>
+    
+      <item>
         <title>单页应用中使用gif作为背景带来的性能问题</title>
         <description>&lt;h3 id=&quot;section&quot;&gt;问题描述&lt;/h3&gt;
 
