@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Javascript：重温原型链继承（extend） &#8211; Clancy Zhu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="3年前学习js的时候写的笔记，重新编排了下，修改了部分内容。">
+    <meta name="author" content="Clancy Zhu">
+    <meta name="keywords" content="blog">
+    <link rel="canonical" href="http://clancyz.github.io/blog/2016/02/22/javascript-prototype-extend/">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css" type="text/css">
+
+    <!-- Fonts -->
+    <link href='//fonts.useso.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.useso.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+      <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Javascript：重温原型链继承（extend）">
+    <meta property="og:description" content="Clancy Zhu's blog">
+    <meta property="og:url" content="http://clancyz.github.io/blog/2016/02/22/javascript-prototype-extend/">
+    <meta property="og:site_name" content="Clancy Zhu">
+    
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?552e4c4f02c7d240bdb63847dd7ea798";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</head>
+
+<body class="">
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="http://clancyz.github.io" class="site-title">Clancy Zhu</a>
+      <nav class="site-nav right">
+        <a href="/about/">About</a>
+<a href="/contact/">Contact</a>
+
+      </nav>
+      <div class="clearfix"></div>
+      
+        <div class="social-icons">
+  <div class="left">
+    
+      <a class="fa fa-github" href="https://github.com/clancyz"></a>
+    
+    <a class="fa fa-rss" href="/feed.xml"></a>
+    
+    
+    
+      <a class="fa fa-envelope" href="mailto:clancyzhu@me.com"></a>
+    
+    
+  </div>
+  <div class="right">
+    
+    
+    
+  </div>
+</div>
+<div class="clearfix"></div>
+
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        
+
+
+<div class="post-header mb2">
+  
+  <h1 class="py2">Javascript：重温原型链继承（extend）</h1>
+  
+  <span class="post-meta">02月 22日, 2016</span><br>
+  
+  <span class="post-meta small">3 minute read</span>
+</div>
+
+<article class="post-content">
+  <h1 id="section">原型链继承</h1>
+
+<h2 id="section-1">最简单的类声明</h2>
+
+<p>估计所有学过js的人都会这个吧 :p</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"> 
+<span class="n">function</span> <span class="no">Person</span> <span class="p">(</span><span class="nb">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">this</span><span class="p">.</span><span class="nf">name</span> <span class="o">=</span> <span class="nb">name</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="no">Person</span><span class="p">.</span><span class="nf">prototype</span><span class="p">.</span><span class="nf">getName</span> <span class="o">=</span> <span class="n">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="n">this</span><span class="p">.</span><span class="nf">name</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<h2 id="section-2">原型链继承的标准代码</h2>
+
+<p>现在用一个Author类继承Person类。</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"> 
+<span class="n">function</span> <span class="no">Author</span> <span class="p">(</span><span class="nb">name</span><span class="p">,</span> <span class="n">book</span><span class="p">)</span> <span class="p">{</span>
+  <span class="sr">//</span> <span class="err">父类使用</span><span class="n">call</span><span class="err">到子类的</span><span class="n">scope</span><span class="err">上</span>
+  <span class="no">Person</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="nb">name</span><span class="p">);</span> 
+  <span class="sr">//</span> <span class="no">Author</span><span class="err">的自有属性</span>
+  <span class="n">this</span><span class="p">.</span><span class="nf">book</span> <span class="o">=</span> <span class="n">book</span><span class="p">;</span> 
+<span class="p">}</span>
+<span class="sr">//</span> <span class="err">子类的</span><span class="n">prototype</span><span class="err">等于父类的新实例</span>
+<span class="no">Author</span><span class="p">.</span><span class="nf">prototype</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Person</span><span class="p">();</span>
+<span class="sr">//</span> <span class="err">子类的原型构造器等于它本身</span>  
+<span class="no">Author</span><span class="p">.</span><span class="nf">prototype</span><span class="p">.</span><span class="nf">constructor</span> <span class="o">=</span> <span class="no">Author</span><span class="p">;</span> 
+<span class="no">Author</span><span class="p">.</span><span class="nf">prototype</span><span class="p">.</span><span class="nf">getBook</span> <span class="o">=</span> <span class="n">function</span> <span class="p">(</span><span class="n">book</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="n">this</span><span class="p">.</span><span class="nf">book</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>做一个实际的使用：</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"> 
+<span class="n">var</span> <span class="no">Jim</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Author</span><span class="p">(</span><span class="s1">'Jim'</span><span class="p">,</span> <span class="s1">'Jim\'s Book'</span><span class="p">);</span>
+<span class="n">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="no">Jim</span><span class="p">.</span><span class="nf">getName</span><span class="p">());</span> <span class="sr">//</span> <span class="o">=&gt;</span> <span class="no">Jim</span>
+<span class="n">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="no">Jim</span><span class="p">.</span><span class="nf">getBook</span><span class="p">());</span> <span class="sr">//</span> <span class="o">=&gt;</span> <span class="no">Jim</span><span class="err">'</span><span class="n">s</span> <span class="no">Book</span></code></pre></figure>
+
+<blockquote>
+  <p><strong>那么问题来了。为什么类继承要这么写？这里面发生了什么？</strong></p>
+</blockquote>
+
+<p>首先看prototype属性的定义：</p>
+
+<blockquote>
+  <ul>
+    <li>js中任意对象都有prototype属性，记为<strong>__proto__</strong>.</li>
+    <li>原型链相当于一个链表，链表中的一个位置相当于指针，指向下一个结构体；</li>
+    <li>当定义一个prototype的时候，相当于把该实例的__proto__指向一个结构体，这个被指向结构体即为该实例的原型。</li>
+    <li>默认指向: Object.prototype</li>
+    <li>Object.prototype.__proto__ === null 此为顶端。</li>
+  </ul>
+</blockquote>
+
+<p>如下图的foo对象：</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">var</span> <span class="n">foo</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="ss">x: </span><span class="mi">20</span><span class="p">,</span>
+  <span class="ss">y: </span><span class="mi">30</span>
+<span class="p">}</span>
+<span class="n">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="n">foo</span><span class="p">.</span><span class="nf">__proto__</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="n">object</span><span class="p">{}</span></code></pre></figure>
+
+<h2 id="section-3">原型链如何产生？</h2>
+
+<p>看一段代码。</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">var</span> <span class="n">a</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="n">x</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+  <span class="ss">add: </span><span class="n">function</span> <span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">this</span><span class="p">.</span><span class="nf">x</span> <span class="o">+</span> <span class="n">this</span><span class="p">.</span><span class="nf">y</span> <span class="o">+</span> <span class="n">z</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">var</span> <span class="n">b</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="ss">y: </span><span class="mi">20</span><span class="p">,</span>
+  <span class="ss">__proto__: </span><span class="n">a</span> <span class="sr">//</span><span class="err">把</span><span class="n">b</span><span class="err">的</span><span class="n">__proto__</span><span class="err">指针指向</span><span class="n">a</span>
+<span class="p">}</span>
+
+<span class="n">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="n">b</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="mi">30</span><span class="p">));</span>  <span class="sr">//</span> <span class="o">=&gt;</span> <span class="mi">60</span></code></pre></figure>
+
+<p>如上代码所示，以b为例，当b有明确的__proto__属性时，执行b.add(30)的时候，先在自己的属性里面找，没找到，就到上级的__proto__属性中找，如果还没找到就继续往上找……这样就构成了一条<strong>原型链</strong>。</p>
+
+<blockquote>
+  <p>回到原来的问题： 为什么要使用Author.prototype = new Person()？</p>
+</blockquote>
+
+<p>实际做的事情：</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"> 
+<span class="no">Author</span><span class="p">.</span><span class="nf">prototype</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Person</span><span class="p">();</span>
+<span class="sr">//</span> <span class="err">执行这一句的时候，实际执行了下面的事情：</span>
+<span class="no">Author</span><span class="p">.</span><span class="nf">__proto__</span> <span class="o">=</span> <span class="no">Person</span><span class="p">.</span><span class="nf">prototype</span>
+<span class="sr">//</span> <span class="err">验证之</span>
+<span class="no">Author</span><span class="p">.</span><span class="nf">prototype</span><span class="p">.</span><span class="nf">__proto__</span> <span class="o">===</span> <span class="no">Person</span><span class="p">.</span><span class="nf">prototype</span>  <span class="sr">//</span> <span class="o">=&gt;</span> <span class="kp">true</span>
+<span class="no">Jim</span><span class="p">.</span><span class="nf">__proto__</span> <span class="o">===</span> <span class="no">Author</span><span class="p">.</span><span class="nf">prototype</span> <span class="sr">//</span> <span class="o">=&gt;</span> <span class="kp">true</span>
+<span class="sr">//</span> <span class="err">把上面两行结合在一块，得到：</span>
+<span class="no">Jim</span><span class="p">.</span><span class="nf">__proto__</span><span class="p">.</span><span class="nf">__proto__</span> <span class="o">==</span> <span class="no">Person</span><span class="p">.</span><span class="nf">prototype</span> </code></pre></figure>
+
+<p>所以，执行这Author.prototype = new Person()后，相当于形成了一条原型链。</p>
+
+<blockquote>
+  <p>为什么要使用Author.prototype.constructor = Author?</p>
+</blockquote>
+
+<p>因为定一个函数的prototype时，默认情况下prototype属性会默认获得一个constructor属性，是一个指向prototype构造函数的指针。</p>
+
+<p>所以，执行完Author.prototype = new Person()后，隐式声明了</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"> 
+<span class="no">Author</span><span class="p">.</span><span class="nf">prototype</span><span class="p">.</span><span class="nf">constructor</span> <span class="o">===</span> <span class="no">Person</span></code></pre></figure>
+
+<p>而在实际的开发过程中，经常要修改子类的prototype, 比如我们又定义了一个Author的子类FictionAuthor：</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">function</span> <span class="no">FictonAuthor</span> <span class="p">(</span><span class="nb">name</span><span class="p">,</span><span class="n">book</span><span class="p">,</span><span class="n">fiction</span><span class="p">)</span> <span class="p">{</span>
+  <span class="no">Author</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="nb">name</span><span class="p">,</span><span class="n">book</span><span class="p">);</span> 
+  <span class="n">this</span><span class="p">.</span><span class="nf">fiction</span> <span class="o">=</span> <span class="n">fiction</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="no">FictonAuthor</span><span class="p">.</span><span class="nf">prototype</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Author</span><span class="p">();</span>
+
+<span class="sr">//</span> <span class="no">FictionAuthor</span><span class="err">的构造函数我们希望是</span><span class="no">Author</span><span class="p">,</span><span class="err">而实际上呢？</span>
+<span class="n">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="no">FictonAuthor</span><span class="p">.</span><span class="nf">prototype</span><span class="p">.</span><span class="nf">constructor</span><span class="p">)</span> 
+<span class="sr">//</span> <span class="o">=&gt;</span> <span class="no">Person</span></code></pre></figure>
+
+<p>所以，在子类继承中我们在执行完Author.prototype = new Person()后，需要对构造函数constructor做一个修正，即：</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"> 
+<span class="no">Author</span><span class="p">.</span><span class="nf">prototype</span><span class="p">.</span><span class="nf">constructor</span> <span class="o">=</span> <span class="no">Author</span></code></pre></figure>
+
+<p>这样就达到了我们想要的结果。</p>
+
+<p>综上，可以总结一个extend函数：</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">function</span> <span class="kp">extend</span> <span class="p">(</span><span class="n">subClass</span><span class="p">,</span> <span class="n">superClass</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">var</span> <span class="n">f</span> <span class="o">=</span> <span class="n">function</span> <span class="p">()</span> <span class="p">{};</span> 
+  <span class="sr">//</span> <span class="err">避免创建超类的新实例，因为它可能比较庞大，或者要执行</span><span class="n">init</span><span class="err">之类需要大量计算的任务</span>
+  <span class="n">f</span><span class="p">.</span><span class="nf">prototype</span> <span class="o">=</span> <span class="n">superClass</span><span class="p">.</span><span class="nf">prototype</span><span class="p">;</span>
+  <span class="n">subClass</span><span class="p">.</span><span class="nf">prototype</span> <span class="o">=</span> <span class="kp">new</span> <span class="n">f</span><span class="p">();</span>
+  <span class="n">subClass</span><span class="p">.</span><span class="nf">prototype</span><span class="p">.</span><span class="nf">constructor</span> <span class="o">=</span> <span class="n">subClass</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+
+</article>
+
+
+
+
+
+		
+	
+<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="Javascript：重温原型链继承（extend）" data-title="Javascript：重温原型链继承（extend）" data-url="http://clancyz.github.io/blog/2016/02/22/javascript-prototype-extend/"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"clancyz"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end -->
+
+
+      	
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+  <div class="p2 wrap">
+    <div class="measure mt1 center">
+      <small>
+        2016 Clancy Zhu
+      </small>
+    </div>
+  </div>
+</footer>
+
+
+
+</body>
+</html>
