@@ -95,11 +95,332 @@ var _hmt = _hmt || [];
   
   <span class="post-meta">02月 21日, 2016</span><br>
   
-  <span class="post-meta small">1 minute read</span>
+  <span class="post-meta small">6 minute read</span>
 </div>
 
 <article class="post-content">
-  
+  <h2 id="section">项目背景</h2>
+
+<p>此项目前端为一个单页（Single Page Application），header和footer固定，中间视图页随导航点击而变化。后端为百度内部的PHP框架ODP。
+使用的主要框架和类库有：</p>
+
+<blockquote>
+  <ul>
+    <li>angular 1.4.7</li>
+    <li>angular ui-router</li>
+    <li>angular-bootstrap</li>
+    <li><a href="http://oak.baidu.com/fis-plus" title="fis-plus">fis-plus</a> （以下简称fisp）</li>
+    <li><a href="https://github.com/ocombe/ocLazyLoad" title="oclazyload">oclazyload</a></li>
+    <li>echarts</li>
+    <li>d3</li>
+  </ul>
+</blockquote>
+
+<h2 id="section-1">框架选型的考虑</h2>
+
+<p>当时angular的最新版本是1.4.7，俺学习angular的时候版本为1.2。选新不选旧的原则，就上了最新版本。
+前端ui框架方面选择了angular-bootstrap, 因为组内对bs还是比较熟的。
+工程化方面，后端同学是搞PHP的，以前配合的时候都是使用fis-plus, 所以继续采用。</p>
+
+<h2 id="section-2">项目架构</h2>
+<p><img src="/assets/images/5.png" alt="image" /></p>
+
+<p>逐项说明。</p>
+
+<blockquote>
+  <ul>
+    <li>build_offline.sh: 线下部署脚本</li>
+    <li>build_online.sh: 线上部署脚本</li>
+    <li>output: 部署脚本产生的tar包目录，执行脚本即打包dist目录生成tar包并拷贝到ODP目录解压</li>
+    <li>src: 源码目录</li>
+    <li>src/business: 业务目录，目录下是分块的业务</li>
+    <li>common: 公共目录，同时也一是一个fisp模块，存放公共资源</li>
+    <li>common/page: 单页的主页面分解，index.tpl, app.html, aside, header, nav,footer等</li>
+    <li>common/plugin: fisp的php插件</li>
+    <li>common/static: 公共静态资源目录</li>
+    <li>dist: 经过fis-plus编译的产出目录，供打包使用</li>
+  </ul>
+</blockquote>
+
+<h2 id="section-3">搭建架构和开发的一些心得</h2>
+
+<h3 id="section-4">业务优先，类型次之</h3>
+
+<p>首先，刚开始的时候想过用view/controller/directive/service这样的结构的。
+（之前做一个backbone项目的时候就是使用view/model/collection/这样的分层，当时没有使用啥工程化手段）</p>
+
+<p>但因为fisp是推崇 <code class="highlighter-rouge">模块机制</code> 的，即一个业务一个模块。
+fisp编译一个模块：</p>
+
+<p><code class="highlighter-rouge"># fisp release -d dist</code></p>
+
+<p>显然这种做法就被排除了，因为如果后续要修改某个页面模块时，如果是按这样划分，那么要到n个文件夹下去编译，
+我们更多需要的是 <code class="highlighter-rouge">只编译修改的部分</code> 。
+所以形成了business目录，下面一个页面一个模块，这样很清晰，也符合fisp的规范。</p>
+
+<h3 id="section-5">应用程序入口</h3>
+<p>由于是一个单页应用，服务器配置路由来加载index.tpl首页。
+index.tpl除了加载各种公共静态资源外，会进行以下的配置行为：</p>
+
+<blockquote>
+  <ul>
+    <li>config.js： 进行全局设定</li>
+    <li>config.router.js: 路由设定</li>
+    <li>config.lazyload.js: 按需加载设定</li>
+    <li>storage.js: 缓存设定</li>
+  </ul>
+</blockquote>
+
+<h3 id="oclazyloadui-router">使用oclazyload配合ui-router实现按需加载</h3>
+<p>首先来看<a href="https://github.com/ocombe/ocLazyLoad">oclazyload</a>的官方key features:</p>
+
+<blockquote>
+  <ul>
+    <li>Dependencies are automatically loaded</li>
+    <li>Debugger friendly (no eval code)</li>
+    <li>The ability to mix normal boot and load on demand</li>
+    <li>Load via the service or the directive</li>
+    <li>Use the embedded async loader or use your own (requireJS, …)</li>
+    <li>Load js (angular or not) / css / templates files</li>
+    <li>Compatible with AngularJS 1.2.x/1.3.x/1.4.x</li>
+  </ul>
+</blockquote>
+
+<p>这种按需加载的模式是很有必要的，毕竟没有人想页面一进来把整个项目的所有脚本和静态资源都加载吧。。
+而且自带async loader, 我觉得已经没有必要用啥requireJS, 真要用的话fisp有个mod.js也足够使用了，要用它还得改造。</p>
+
+<p>oclazyload配合ui-router的代码如下：</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"> 
+<span class="sr">//</span> <span class="n">config</span><span class="p">.</span><span class="nf">lazyload</span><span class="p">.</span><span class="nf">js</span>
+<span class="n">angular</span><span class="p">.</span><span class="nf">module</span><span class="p">(</span><span class="s1">'app'</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">config</span><span class="p">([</span><span class="s1">'$ocLazyLoadProvider'</span><span class="p">,</span> <span class="n">function</span> <span class="p">(</span><span class="vg">$ocLazyLoadProvider</span><span class="p">)</span> <span class="p">{</span>
+        <span class="vg">$ocLazyLoadProvider</span><span class="p">.</span><span class="nf">config</span><span class="p">({</span>
+            <span class="ss">debug: </span><span class="kp">true</span><span class="p">,</span> <span class="sr">//</span><span class="err">是否开启调试</span>
+            <span class="ss">events: </span><span class="kp">true</span><span class="p">,</span> <span class="sr">//</span> <span class="err">是否给</span><span class="n">console</span><span class="p">.</span><span class="nf">log</span><span class="err">一个模块加载事件</span>
+            <span class="ss">modules: </span><span class="p">[</span>
+            <span class="sr">//</span> <span class="err">定义一个模块</span>
+            <span class="p">{</span>
+                <span class="ss">name: </span><span class="s1">'ui.grid'</span><span class="p">,</span>
+                <span class="ss">files: </span><span class="p">[</span>
+                    <span class="s1">'/static/common/vendor/modules/angular-ui-grid/ui-grid.min.js'</span><span class="p">,</span>
+                    <span class="s1">'/static/common/vendor/modules/angular-ui-grid/ui-grid.min.css'</span>
+                <span class="p">]</span>
+            <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">});</span>
+    <span class="p">}]);</span></code></pre></figure>
+
+<p>可以看见上述config已经定义了模块名如 <code class="highlighter-rouge">ui.grid</code> ，配合ui-router时直接load这个模块名就行了</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="sr">//</span><span class="n">config</span><span class="p">.</span><span class="nf">router</span><span class="p">.</span><span class="nf">js</span>
+<span class="n">var</span> <span class="n">app</span> <span class="o">=</span> <span class="n">angular</span><span class="p">.</span><span class="nf">module</span><span class="p">(</span><span class="s1">'app'</span><span class="p">);</span>
+<span class="n">app</span><span class="p">.</span><span class="nf">config</span><span class="p">(</span>
+    <span class="p">[</span><span class="s1">'$stateProvider'</span><span class="p">,</span> <span class="s1">'$urlRouterProvider'</span><span class="p">,</span>
+        <span class="n">function</span> <span class="p">(</span><span class="vg">$stateProvider</span><span class="p">,</span> <span class="vg">$urlRouterProvider</span><span class="p">)</span> <span class="p">{</span>
+            <span class="vg">$urlRouterProvider</span>
+                <span class="p">.</span><span class="nf">otherwise</span><span class="p">(</span><span class="s1">'/app/home'</span><span class="p">);</span>
+            <span class="vg">$stateProvider</span>
+                <span class="p">.</span><span class="nf">state</span><span class="p">(</span><span class="s1">'app'</span><span class="p">,</span> <span class="p">{</span>
+                    <span class="s1">'abstract'</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span>
+                    <span class="s1">'url'</span><span class="p">:</span> <span class="s1">'/app'</span><span class="p">,</span>
+                    <span class="s1">'templateUrl'</span><span class="p">:</span> <span class="s1">'/static/common/page/app.html'</span>
+                <span class="p">})</span>
+                <span class="p">.</span><span class="nf">state</span><span class="p">(</span><span class="s1">'app.home'</span><span class="p">,</span> <span class="p">{</span>
+                    <span class="ss">url: </span><span class="s1">'/home'</span><span class="p">,</span>
+                    <span class="ss">templateUrl: </span><span class="s1">'/static/home/page/home.html'</span><span class="p">,</span>
+                    <span class="ss">resolve: </span><span class="p">{</span>
+                        <span class="ss">deps: </span><span class="p">[</span><span class="s1">'$ocLazyLoad'</span><span class="p">,</span> <span class="n">function</span> <span class="p">(</span><span class="vg">$ocLazyLoad</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="k">return</span> <span class="vg">$ocLazyLoad</span><span class="p">.</span><span class="nf">load</span><span class="p">([</span><span class="s1">'ui.grid'</span><span class="p">])</span>
+                            <span class="p">.</span><span class="nf">then</span><span class="p">(</span><span class="n">function</span> <span class="p">()</span> <span class="p">{</span>
+                                      <span class="k">return</span> <span class="vg">$ocLazyLoad</span><span class="p">.</span><span class="nf">load</span><span class="p">(</span>
+                                          <span class="s1">'/static/home/homeController.js'</span><span class="p">,</span> <span class="p">{</span><span class="ss">cache: </span><span class="kp">false</span><span class="p">});</span>
+                                  <span class="p">});</span>
+                        <span class="p">}]</span>
+                    <span class="p">}</span>
+                <span class="p">})</span></code></pre></figure>
+
+<p>这里要注意：</p>
+
+<blockquote>
+  <ul>
+    <li>$oclazyload是支持类似promise的链式写法的。</li>
+    <li>我们在这里一般的做法是，先load依赖，最后再load业务代码 <code class="highlighter-rouge">homeController.js</code> 。</li>
+    <li>最后跟了 <code class="highlighter-rouge"><span class="p">{</span><span class="err">cache:false</span><span class="p">}</span></code> 参数，$oclazyload会生成时间戳，修改上线时用户不会缓存原文件。</li>
+  </ul>
+</blockquote>
+
+<h3 id="section-6">缓存设计</h3>
+
+<p>项目需要缓存一些默认信息，比如产品线信息。
+我是使用了localStorage来缓存，在body的controller对应的$scope.setting中存储。
+核心代码很简单：</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">if</span> <span class="p">(</span><span class="n">angular</span><span class="p">.</span><span class="nf">isDefined</span><span class="p">(</span><span class="vg">$localStorage</span><span class="p">.</span><span class="nf">settings</span><span class="p">))</span> <span class="p">{</span>
+    <span class="vg">$scope</span><span class="p">.</span><span class="nf">app</span><span class="p">.</span><span class="nf">settings</span> <span class="o">=</span> <span class="vg">$localStorage</span><span class="p">.</span><span class="nf">settings</span><span class="p">;</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="vg">$localStorage</span><span class="p">.</span><span class="nf">settings</span> <span class="o">=</span> <span class="vg">$scope</span><span class="p">.</span><span class="nf">app</span><span class="p">.</span><span class="nf">settings</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="vg">$scope</span><span class="o">.</span><span class="vg">$watch</span><span class="p">(</span><span class="s1">'app.settings'</span><span class="p">,</span> <span class="n">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="vg">$localStorage</span><span class="p">.</span><span class="nf">settings</span> <span class="o">=</span> <span class="vg">$scope</span><span class="p">.</span><span class="nf">app</span><span class="p">.</span><span class="nf">settings</span><span class="p">;</span>
+<span class="p">},</span> <span class="kp">true</span><span class="p">);</span></code></pre></figure>
+
+<p>这样，在页面开发中如果要更改某些信息，修改app.settings即可。</p>
+
+<h3 id="section-7">静态资源的缓存</h3>
+<p>如果使用fisp的规范，每个页面是一个tpl, 经过服务器编译；而项目是个单页，一开始只向服务器请求index.tpl模板编译, 后续路由由前端来设定，每个view均是html。
+这样带来了一个问题：
+&gt; view中的静态资源无法使用fisp的规则来缓存。</p>
+
+<p>但是前面提到了oclazyload是可以设定缓存资源策略的。所以我们最终采用的方式是：</p>
+
+<blockquote>
+  <p>入口点加载公共静态资源，并缓存。
+每个视图加载的静态资源由oclazyload控制；组件类的静态资源缓存（因为基本不修改），业务类的静态资源不缓存（因为经常修改）</p>
+</blockquote>
+
+<h3 id="section-8">代码规范</h3>
+
+<p>代码规范主要依据的是著名的<a href="https://github.com/johnpapa/angular-styleguide/blob/master/a1/i18n/zh-CN.md">angular-styleguide</a>。建议在项目开始时组织项目成员都学习一遍，定期code review。</p>
+
+<h3 id="section-9">工程化</h3>
+<p>因为项目主要使用fisp, 使用svn做代码管理（度厂估计今年有可能转git），所以主要的部署逻辑是：
+1. 执行 <code class="highlighter-rouge">fisp release -pd dist</code> 编译至dist目录
+2. svn add/ci
+3. 上服务器，svn up
+4. 执行build.sh部署至odp</p>
+
+<p>之前快速迭代没有使用厂内规范的icafe来编译，后续可能采用。</p>
+
+<p>在fisp的配置fis-conf里面，除了遵循一些odp服务器的目录规范外，主要是 <code class="highlighter-rouge">合并零散资源</code> ，比如一个页面有多个controller, 最终会打包成controller.pack.js. 一些公共组件也做了相应的打包。</p>
+
+<h2 id="section-10">最后说一些坑。。</h2>
+
+<h3 id="html-ng-appfisp">html ng-app结合fisp报错问题</h3>
+
+<p>如上所述，我们只有入口点index.tpl去请求服务器编译。
+fisp的规范下，原来设想应该这么写：</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="sr">//</span> <span class="n">tag</span><span class="err">前我没加</span><span class="o">%</span><span class="p">,</span> <span class="err">意会就行了</span><span class="p">.</span><span class="nf">.</span><span class="o">.</span>
+<span class="p">{</span><span class="n">html</span> <span class="n">framework</span><span class="o">=</span><span class="s2">"common:static/script/vendor/libs/mod.js"</span> <span class="n">ng</span><span class="o">-</span><span class="n">app</span><span class="o">=</span><span class="s2">"app"</span><span class="p">}</span>
+  <span class="p">{</span><span class="n">body</span> <span class="n">ng</span><span class="o">-</span><span class="n">controller</span><span class="o">=</span><span class="s2">"appCtrl"</span><span class="p">}</span>
+<span class="p">{</span><span class="sr">/html%}</span></code></pre></figure>
+
+<p>结果，卧槽，返回的html中格式正确，但是似乎angular没有parse到ng-app,整个页面一片空白（当然了，ng-app都没有你还想干啥…）</p>
+
+<p>最后用了个很土气的方法解决了这个问题：</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="o">&lt;</span><span class="n">script</span><span class="o">&gt;</span>
+    <span class="n">document</span><span class="p">.</span><span class="nf">querySelector</span><span class="p">(</span><span class="s1">'html'</span><span class="p">).</span><span class="nf">setAttribute</span><span class="p">(</span><span class="s1">'data-ng-app'</span><span class="p">,</span> <span class="s1">'app'</span><span class="p">);</span>
+    <span class="n">document</span><span class="p">.</span><span class="nf">body</span><span class="p">.</span><span class="nf">setAttribute</span><span class="p">(</span><span class="s1">'ng-controller'</span><span class="p">,</span> <span class="s1">'AppCtrl'</span><span class="p">);</span>
+<span class="o">&lt;</span><span class="sr">/script&gt;</span></code></pre></figure>
+
+<h3 id="section-11">使用包管理工具安装依赖</h3>
+<p>angular-boostrap是依赖angular主干版本的，所以最好使用包管理工具如 <code class="highlighter-rouge">bower</code> 之类的来安装。
+否则会报这样的问题</p>
+
+<p><code class="highlighter-rouge">$position is now deprecated. Use $uibPosition instead.</code></p>
+
+<p>用好像还是可以用的，但是强迫症，还是升级版本吧。</p>
+
+<h3 id="section-12">避免头咬尾巴的行为</h3>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="vg">$scope</span><span class="o">.</span><span class="vg">$watch</span><span class="p">(</span><span class="s1">'users'</span><span class="p">,</span> <span class="n">function</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="p">{</span>
+  <span class="vg">$scope</span><span class="p">.</span><span class="nf">users</span> <span class="o">=</span> <span class="p">[];</span>
+<span class="p">});</span></code></pre></figure>
+
+<p>有时就会写出这样的循环代码，new Error</p>
+
+<p><code class="highlighter-rouge">10 $digest() iterations reached. Aborting!</code></p>
+
+<p>等着你~</p>
+
+<h3 id="use-angular-post-in-jquery-way">Use angular post in “jQuery way”</h3>
+<p>angular中的post api乍一看跟jQuery区别不大，实际上post的是json, 不是parameter。</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="vg">$http</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span><span class="s2">"/foo/bar"</span><span class="p">,</span> <span class="p">{</span>
+  <span class="ss">param1: </span><span class="n">value1</span><span class="p">,</span>
+  <span class="ss">param2: </span><span class="n">value2</span>
+<span class="p">})</span>
+  <span class="p">.</span><span class="nf">success</span><span class="p">(</span><span class="n">function</span><span class="p">(</span><span class="n">responseData</span><span class="p">){</span>
+    <span class="sr">//</span><span class="k">do</span> <span class="n">something</span>
+  <span class="p">}});</span></code></pre></figure>
+
+<p>要直接这么用, 骚年，一般来说一个5xx Server Response error等着你～</p>
+
+<p>看看 <code class="highlighter-rouge">dev tools</code> 中的 <code class="highlighter-rouge">network</code> tab可以解救你：</p>
+
+<blockquote>
+  <p>jQuery:</p>
+
+  <ul>
+    <li>Content-Type: x-www-form-urlencoded</li>
+    <li>data: param1=value1&amp;param2=value2</li>
+  </ul>
+
+  <p>Angular:</p>
+
+  <ul>
+    <li>Content-Type: application/json</li>
+    <li>data: {param1: value1,param2: value2}</li>
+  </ul>
+</blockquote>
+
+<p>一个完整的解决方案如下：</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">var</span> <span class="n">app</span> <span class="o">=</span> <span class="n">angular</span><span class="p">.</span><span class="nf">module</span><span class="p">(</span><span class="s1">'app'</span><span class="p">);</span>
+<span class="n">app</span><span class="p">.</span><span class="nf">config</span><span class="p">(</span>
+    <span class="p">[</span><span class="s1">'$httpProvider'</span><span class="p">,</span>
+        <span class="n">function</span> <span class="p">(</span><span class="vg">$httpProvider</span><span class="p">)</span> <span class="p">{</span>
+            <span class="vg">$httpProvider</span><span class="p">.</span><span class="nf">defaults</span><span class="p">.</span><span class="nf">headers</span><span class="p">.</span><span class="nf">post</span><span class="p">[</span><span class="s1">'Content-Type'</span><span class="p">]</span>
+                <span class="o">=</span> <span class="s1">'application/x-www-form-urlencoded;charset=utf-8'</span><span class="p">;</span>
+
+            <span class="n">var</span> <span class="n">param</span> <span class="o">=</span> <span class="n">function</span> <span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">var</span> <span class="n">query</span> <span class="o">=</span> <span class="s1">''</span><span class="p">;</span>
+                <span class="n">var</span> <span class="nb">name</span><span class="p">;</span>
+                <span class="n">var</span> <span class="n">value</span><span class="p">;</span>
+                <span class="n">var</span> <span class="n">fullSubName</span><span class="p">;</span>
+                <span class="n">var</span> <span class="n">subName</span><span class="p">;</span>
+                <span class="n">var</span> <span class="n">subValue</span><span class="p">;</span>
+                <span class="n">var</span> <span class="n">innerObj</span><span class="p">;</span>
+                <span class="n">var</span> <span class="n">i</span><span class="p">;</span>
+
+                <span class="k">for</span> <span class="p">(</span><span class="nb">name</span> <span class="k">in</span> <span class="n">obj</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">obj</span><span class="p">[</span><span class="nb">name</span><span class="p">];</span>
+
+                    <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="n">instanceof</span> <span class="no">Array</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">value</span><span class="p">.</span><span class="nf">length</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="n">subValue</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+                            <span class="n">fullSubName</span> <span class="o">=</span> <span class="nb">name</span> <span class="o">+</span> <span class="s1">'['</span> <span class="o">+</span> <span class="n">i</span> <span class="o">+</span> <span class="s1">']'</span><span class="p">;</span>
+                            <span class="n">innerObj</span> <span class="o">=</span> <span class="p">{};</span>
+                            <span class="n">innerObj</span><span class="p">[</span><span class="n">fullSubName</span><span class="p">]</span> <span class="o">=</span> <span class="n">subValue</span><span class="p">;</span>
+                            <span class="n">query</span> <span class="o">+=</span> <span class="n">param</span><span class="p">(</span><span class="n">innerObj</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'&amp;'</span><span class="p">;</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="n">instanceof</span> <span class="no">Object</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">for</span> <span class="p">(</span><span class="n">subName</span> <span class="k">in</span> <span class="n">value</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="n">subValue</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="n">subName</span><span class="p">];</span>
+                            <span class="n">fullSubName</span> <span class="o">=</span> <span class="nb">name</span> <span class="o">+</span> <span class="s1">'['</span> <span class="o">+</span> <span class="n">subName</span> <span class="o">+</span> <span class="s1">']'</span><span class="p">;</span>
+                            <span class="n">innerObj</span> <span class="o">=</span> <span class="p">{};</span>
+                            <span class="n">innerObj</span><span class="p">[</span><span class="n">fullSubName</span><span class="p">]</span> <span class="o">=</span> <span class="n">subValue</span><span class="p">;</span>
+                            <span class="n">query</span> <span class="o">+=</span> <span class="n">param</span><span class="p">(</span><span class="n">innerObj</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'&amp;'</span><span class="p">;</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">!==</span> <span class="n">undefined</span> <span class="o">&amp;&amp;</span> <span class="n">value</span> <span class="o">!==</span> <span class="n">null</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="n">query</span> <span class="o">+=</span> <span class="n">encodeURIComponent</span><span class="p">(</span><span class="nb">name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'='</span> <span class="o">+</span> <span class="n">encodeURIComponent</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'&amp;'</span><span class="p">;</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+
+                <span class="k">return</span> <span class="n">query</span><span class="p">.</span><span class="nf">length</span> <span class="p">?</span> <span class="n">query</span><span class="p">.</span><span class="nf">substr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">query</span><span class="p">.</span><span class="nf">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="p">:</span> <span class="n">query</span><span class="p">;</span>
+            <span class="p">};</span>
+
+            <span class="vg">$httpProvider</span><span class="p">.</span><span class="nf">defaults</span><span class="p">.</span><span class="nf">transformRequest</span> <span class="o">=</span> <span class="p">[</span><span class="n">function</span> <span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="n">angular</span><span class="p">.</span><span class="nf">isObject</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="no">String</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">!==</span> <span class="s1">'[object File]'</span> <span class="p">?</span> <span class="n">param</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="p">:</span>
+                    <span class="n">data</span><span class="p">;</span>
+            <span class="p">}];</span>
+        <span class="p">}</span>
+    <span class="p">]);</span></code></pre></figure>
+
+<p>额，暂时要去搬砖了，以后有想到的再来更。</p>
+
 
 </article>
 
