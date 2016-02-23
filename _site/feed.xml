@@ -345,11 +345,14 @@ index.tpl除了加载各种公共静态资源外，会进行以下的配置行�
 &lt;p&gt;代码规范主要依据的是著名的&lt;a href=&quot;https://github.com/johnpapa/angular-styleguide/blob/master/a1/i18n/zh-CN.md&quot;&gt;angular-styleguide&lt;/a&gt;。建议在项目开始时组织项目成员都学习一遍，定期code review。&lt;/p&gt;
 
 &lt;h3 id=&quot;section-9&quot;&gt;工程化&lt;/h3&gt;
-&lt;p&gt;因为项目主要使用fisp, 使用svn做代码管理（度厂估计今年有可能转git），所以主要的部署逻辑是：
-1. 执行 &lt;code class=&quot;highlighter-rouge&quot;&gt;fisp release -pd dist&lt;/code&gt; 编译至dist目录
-2. svn add/ci
-3. 上服务器，svn up
-4. 执行build.sh部署至odp&lt;/p&gt;
+&lt;p&gt;因为项目主要使用fisp, 使用svn做代码管理（度厂估计今年有可能转git），所以主要的部署逻辑是：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;执行 &lt;code class=&quot;highlighter-rouge&quot;&gt;fisp release -pd dist&lt;/code&gt; 编译至dist目录&lt;/li&gt;
+  &lt;li&gt;svn add/ci&lt;/li&gt;
+  &lt;li&gt;上服务器，svn up&lt;/li&gt;
+  &lt;li&gt;执行build.sh部署至odp&lt;/li&gt;
+&lt;/ol&gt;
 
 &lt;p&gt;之前快速迭代没有使用厂内规范的icafe来编译，后续可能采用。&lt;/p&gt;
 

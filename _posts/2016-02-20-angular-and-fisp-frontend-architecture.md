@@ -179,6 +179,7 @@ $scope.$watch('app.settings', function () {
 
 ### 工程化
 因为项目主要使用fisp, 使用svn做代码管理（度厂估计今年有可能转git），所以主要的部署逻辑是：
+
 1. 执行 `fisp release -pd dist` 编译至dist目录
 2. svn add/ci
 3. 上服务器，svn up
@@ -190,7 +191,7 @@ $scope.$watch('app.settings', function () {
 
 
 
-##最后说一些坑。。
+## 最后说一些坑。。
 
 ### html ng-app结合fisp报错问题
 
