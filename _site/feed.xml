@@ -386,7 +386,7 @@ fisp的规范下，原来设想应该这么写：&lt;/p&gt;
 &lt;p&gt;angular-boostrap是依赖angular主干版本的，所以最好使用包管理工具如 &lt;code class=&quot;highlighter-rouge&quot;&gt;bower&lt;/code&gt; 之类的来安装。
 否则会报这样的问题&lt;/p&gt;
 
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;$position is now deprecated. Use $uibPosition instead.&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;$position is now deprecated. &lt;/code&gt;&lt;/p&gt;
 
 &lt;p&gt;用好像还是可以用的，但是强迫症，还是升级版本吧。&lt;/p&gt;
 

@@ -34,6 +34,6 @@ flattr_button:
 markdown:     kramdown
 permalink:    pretty
 gems: [jekyll-paginate]
-paginate:     3
+paginate:     10
 sass:
   compressed: true

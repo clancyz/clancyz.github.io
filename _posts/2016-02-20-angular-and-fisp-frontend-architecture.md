@@ -217,7 +217,7 @@ fisp的规范下，原来设想应该这么写：
 angular-boostrap是依赖angular主干版本的，所以最好使用包管理工具如 `bower` 之类的来安装。
 否则会报这样的问题
 
-`$position is now deprecated. Use $uibPosition instead.`
+`$position is now deprecated. `
 
 用好像还是可以用的，但是强迫症，还是升级版本吧。
 

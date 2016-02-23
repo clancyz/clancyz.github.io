@@ -5,4 +5,12 @@ permalink: /contact/
 no_duoshuo: true
 ---
 
-<a id="contact" href="mailto:clancyzhu@me.com">clancyzhu@me.com</a>
+mail: `clancyzhu@me.com`
+
+wechat:
+
+![image](/assets/images/wechat.png)
+
+
+
+
