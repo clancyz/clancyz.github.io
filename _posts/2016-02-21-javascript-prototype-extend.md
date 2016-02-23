@@ -12,7 +12,7 @@ categories: blog
 
 估计所有学过js的人都会这个吧 :p
 
-{% highlight ruby %} 
+{% highlight js %} 
 function Person (name) {
   this.name = name;
 }
@@ -27,7 +27,7 @@ Person.prototype.getName = function () {
 
 现在用一个Author类继承Person类。
 
-{% highlight ruby %} 
+{% highlight js %} 
 function Author (name, book) {
   // 父类使用call到子类的scope上
   Person.call(this, name); 
@@ -44,7 +44,7 @@ Author.prototype.getBook = function (book) {
 
 {% endhighlight %}
 做一个实际的使用：
-{% highlight ruby %} 
+{% highlight js %} 
 var Jim = new Author('Jim', 'Jim\'s Book');
 console.log(Jim.getName()); // => Jim
 console.log(Jim.getBook()); // => Jim's Book
@@ -63,7 +63,7 @@ console.log(Jim.getBook()); // => Jim's Book
 
 如下图的foo对象：
 
-{% highlight ruby %}
+{% highlight js %}
 var foo = {
   x: 20,
   y: 30
@@ -75,7 +75,7 @@ console.log(foo.__proto__) => object{}
 ## 原型链如何产生？
 
 看一段代码。
-{% highlight ruby %}
+{% highlight js %}
 var a = {
   x : 10,
   add: function (z) {
@@ -98,7 +98,7 @@ console.log(b.add(30));  // => 60
 
 实际做的事情：
 
-{% highlight ruby %} 
+{% highlight js %} 
 Author.prototype = new Person();
 // 执行这一句的时候，实际执行了下面的事情：
 Author.__proto__ = Person.prototype
@@ -116,12 +116,12 @@ Jim.__proto__.__proto__ == Person.prototype
 
 所以，执行完Author.prototype = new Person()后，隐式声明了
 
-{% highlight ruby %} 
+{% highlight js %} 
 Author.prototype.constructor === Person
 {% endhighlight %}
 
 而在实际的开发过程中，经常要修改子类的prototype, 比如我们又定义了一个Author的子类FictionAuthor：
-{% highlight ruby %}
+{% highlight js %}
 function FictonAuthor (name,book,fiction) {
   Author.call(this, name,book); 
   this.fiction = fiction;
@@ -134,13 +134,13 @@ console.log(FictonAuthor.prototype.constructor)
 
 {% endhighlight %}
 所以，在子类继承中我们在执行完Author.prototype = new Person()后，需要对构造函数constructor做一个修正，即：
-{% highlight ruby %} 
+{% highlight js %} 
 Author.prototype.constructor = Author
 {% endhighlight %}
 这样就达到了我们想要的结果。
 
 综上，可以总结一个extend函数：
-{% highlight ruby %}
+{% highlight js %}
 function extend (subClass, superClass) {
   var f = function () {}; 
   // 避免创建超类的新实例，因为它可能比较庞大，或者要执行init之类需要大量计算的任务

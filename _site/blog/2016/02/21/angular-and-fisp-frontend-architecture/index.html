@@ -192,18 +192,18 @@ index.tpl除了加载各种公共静态资源外，会进行以下的配置行�
 
 <p>oclazyload配合ui-router的代码如下：</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"> 
-<span class="sr">//</span> <span class="n">config</span><span class="p">.</span><span class="nf">lazyload</span><span class="p">.</span><span class="nf">js</span>
-<span class="n">angular</span><span class="p">.</span><span class="nf">module</span><span class="p">(</span><span class="s1">'app'</span><span class="p">)</span>
-    <span class="p">.</span><span class="nf">config</span><span class="p">([</span><span class="s1">'$ocLazyLoadProvider'</span><span class="p">,</span> <span class="n">function</span> <span class="p">(</span><span class="vg">$ocLazyLoadProvider</span><span class="p">)</span> <span class="p">{</span>
-        <span class="vg">$ocLazyLoadProvider</span><span class="p">.</span><span class="nf">config</span><span class="p">({</span>
-            <span class="ss">debug: </span><span class="kp">true</span><span class="p">,</span> <span class="sr">//</span><span class="err">是否开启调试</span>
-            <span class="ss">events: </span><span class="kp">true</span><span class="p">,</span> <span class="sr">//</span> <span class="err">是否给</span><span class="n">console</span><span class="p">.</span><span class="nf">log</span><span class="err">一个模块加载事件</span>
-            <span class="ss">modules: </span><span class="p">[</span>
-            <span class="sr">//</span> <span class="err">定义一个模块</span>
+<figure class="highlight"><pre><code class="language-js" data-lang="js"> 
+<span class="c1">// config.lazyload.js</span>
+<span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s1">'app'</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">config</span><span class="p">([</span><span class="s1">'$ocLazyLoadProvider'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">$ocLazyLoadProvider</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">$ocLazyLoadProvider</span><span class="p">.</span><span class="nx">config</span><span class="p">({</span>
+            <span class="na">debug</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span> <span class="c1">//是否开启调试</span>
+            <span class="na">events</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span> <span class="c1">// 是否给console.log一个模块加载事件</span>
+            <span class="na">modules</span><span class="p">:</span> <span class="p">[</span>
+            <span class="c1">// 定义一个模块</span>
             <span class="p">{</span>
-                <span class="ss">name: </span><span class="s1">'ui.grid'</span><span class="p">,</span>
-                <span class="ss">files: </span><span class="p">[</span>
+                <span class="na">name</span><span class="p">:</span> <span class="s1">'ui.grid'</span><span class="p">,</span>
+                <span class="na">files</span><span class="p">:</span> <span class="p">[</span>
                     <span class="s1">'/static/common/vendor/modules/angular-ui-grid/ui-grid.min.js'</span><span class="p">,</span>
                     <span class="s1">'/static/common/vendor/modules/angular-ui-grid/ui-grid.min.css'</span>
                 <span class="p">]</span>

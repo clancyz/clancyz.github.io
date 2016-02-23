@@ -132,11 +132,11 @@ var _hmt = _hmt || [];
 <p>想起项目中有一个loading.gif作为视图未加载时的显示。
 查找代码发现，</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby">  <span class="n">html</span> <span class="p">{</span>
-   <span class="ss">background: </span><span class="n">url</span><span class="p">(</span><span class="s1">'/static/common/img/loading.gif'</span><span class="p">);</span>
-   <span class="n">background</span><span class="o">-</span><span class="ss">attachment: </span><span class="n">fixed</span><span class="p">;</span>
-   <span class="n">background</span><span class="o">-</span><span class="ss">repeat: </span><span class="n">no</span><span class="o">-</span><span class="n">repeat</span><span class="p">;</span> 
-   <span class="n">background</span><span class="o">-</span><span class="ss">position: </span><span class="n">center</span><span class="p">;</span>
+<figure class="highlight"><pre><code class="language-css" data-lang="css">  <span class="nt">html</span> <span class="p">{</span>
+   <span class="nl">background</span><span class="p">:</span> <span class="sx">url('/static/common/img/loading.gif')</span><span class="p">;</span>
+   <span class="nl">background-attachment</span><span class="p">:</span> <span class="nb">fixed</span><span class="p">;</span>
+   <span class="nl">background-repeat</span><span class="p">:</span> <span class="nb">no-repeat</span><span class="p">;</span> 
+   <span class="nl">background-position</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
 <span class="p">}</span></code></pre></figure>
 
 <p><strong>这个loading.gif直接写在了html上面。</strong></p>

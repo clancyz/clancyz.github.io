@@ -87,7 +87,7 @@ index.tpl除了加载各种公共静态资源外，会进行以下的配置行�
 
 oclazyload配合ui-router的代码如下：
 
-{% highlight ruby %} 
+{% highlight js %} 
 // config.lazyload.js
 angular.module('app')
     .config(['$ocLazyLoadProvider', function ($ocLazyLoadProvider) {

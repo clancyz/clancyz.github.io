@@ -44,7 +44,7 @@ categories: blog
 想起项目中有一个loading.gif作为视图未加载时的显示。
 查找代码发现，
 
-{% highlight ruby %}
+{% highlight css %}
   html {
    background: url('/static/common/img/loading.gif');
    background-attachment: fixed;

@@ -105,40 +105,40 @@ var _hmt = _hmt || [];
 
 <p>估计所有学过js的人都会这个吧 :p</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"> 
-<span class="n">function</span> <span class="no">Person</span> <span class="p">(</span><span class="nb">name</span><span class="p">)</span> <span class="p">{</span>
-  <span class="n">this</span><span class="p">.</span><span class="nf">name</span> <span class="o">=</span> <span class="nb">name</span><span class="p">;</span>
+<figure class="highlight"><pre><code class="language-js" data-lang="js"> 
+<span class="kd">function</span> <span class="nx">Person</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="nx">name</span><span class="p">;</span>
 <span class="p">}</span>
 
-<span class="no">Person</span><span class="p">.</span><span class="nf">prototype</span><span class="p">.</span><span class="nf">getName</span> <span class="o">=</span> <span class="n">function</span> <span class="p">()</span> <span class="p">{</span>
-  <span class="k">return</span> <span class="n">this</span><span class="p">.</span><span class="nf">name</span><span class="p">;</span>
+<span class="nx">Person</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">getName</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">name</span><span class="p">;</span>
 <span class="p">}</span></code></pre></figure>
 
 <h2 id="section-2">原型链继承的标准代码</h2>
 
 <p>现在用一个Author类继承Person类。</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"> 
-<span class="n">function</span> <span class="no">Author</span> <span class="p">(</span><span class="nb">name</span><span class="p">,</span> <span class="n">book</span><span class="p">)</span> <span class="p">{</span>
-  <span class="sr">//</span> <span class="err">父类使用</span><span class="n">call</span><span class="err">到子类的</span><span class="n">scope</span><span class="err">上</span>
-  <span class="no">Person</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="nb">name</span><span class="p">);</span> 
-  <span class="sr">//</span> <span class="no">Author</span><span class="err">的自有属性</span>
-  <span class="n">this</span><span class="p">.</span><span class="nf">book</span> <span class="o">=</span> <span class="n">book</span><span class="p">;</span> 
+<figure class="highlight"><pre><code class="language-js" data-lang="js"> 
+<span class="kd">function</span> <span class="nx">Author</span> <span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">book</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// 父类使用call到子类的scope上</span>
+  <span class="nx">Person</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">name</span><span class="p">);</span> 
+  <span class="c1">// Author的自有属性</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">book</span> <span class="o">=</span> <span class="nx">book</span><span class="p">;</span> 
 <span class="p">}</span>
-<span class="sr">//</span> <span class="err">子类的</span><span class="n">prototype</span><span class="err">等于父类的新实例</span>
-<span class="no">Author</span><span class="p">.</span><span class="nf">prototype</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Person</span><span class="p">();</span>
-<span class="sr">//</span> <span class="err">子类的原型构造器等于它本身</span>  
-<span class="no">Author</span><span class="p">.</span><span class="nf">prototype</span><span class="p">.</span><span class="nf">constructor</span> <span class="o">=</span> <span class="no">Author</span><span class="p">;</span> 
-<span class="no">Author</span><span class="p">.</span><span class="nf">prototype</span><span class="p">.</span><span class="nf">getBook</span> <span class="o">=</span> <span class="n">function</span> <span class="p">(</span><span class="n">book</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">return</span> <span class="n">this</span><span class="p">.</span><span class="nf">book</span><span class="p">;</span>
+<span class="c1">// 子类的prototype等于父类的新实例</span>
+<span class="nx">Author</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Person</span><span class="p">();</span>
+<span class="c1">// 子类的原型构造器等于它本身  </span>
+<span class="nx">Author</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">constructor</span> <span class="o">=</span> <span class="nx">Author</span><span class="p">;</span> 
+<span class="nx">Author</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">getBook</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">book</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">book</span><span class="p">;</span>
 <span class="p">}</span></code></pre></figure>
 
 <p>做一个实际的使用：</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"> 
-<span class="n">var</span> <span class="no">Jim</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Author</span><span class="p">(</span><span class="s1">'Jim'</span><span class="p">,</span> <span class="s1">'Jim\'s Book'</span><span class="p">);</span>
-<span class="n">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="no">Jim</span><span class="p">.</span><span class="nf">getName</span><span class="p">());</span> <span class="sr">//</span> <span class="o">=&gt;</span> <span class="no">Jim</span>
-<span class="n">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="no">Jim</span><span class="p">.</span><span class="nf">getBook</span><span class="p">());</span> <span class="sr">//</span> <span class="o">=&gt;</span> <span class="no">Jim</span><span class="err">'</span><span class="n">s</span> <span class="no">Book</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-js" data-lang="js"> 
+<span class="kd">var</span> <span class="nx">Jim</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Author</span><span class="p">(</span><span class="s1">'Jim'</span><span class="p">,</span> <span class="s1">'Jim\'s Book'</span><span class="p">);</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">Jim</span><span class="p">.</span><span class="nx">getName</span><span class="p">());</span> <span class="c1">// =&gt; Jim</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">Jim</span><span class="p">.</span><span class="nx">getBook</span><span class="p">());</span> <span class="c1">// =&gt; Jim's Book</span></code></pre></figure>
 
 <blockquote>
   <p><strong>那么问题来了。为什么类继承要这么写？这里面发生了什么？</strong></p>
@@ -158,29 +158,29 @@ var _hmt = _hmt || [];
 
 <p>如下图的foo对象：</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">var</span> <span class="n">foo</span> <span class="o">=</span> <span class="p">{</span>
-  <span class="ss">x: </span><span class="mi">20</span><span class="p">,</span>
-  <span class="ss">y: </span><span class="mi">30</span>
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">foo</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">x</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+  <span class="na">y</span><span class="p">:</span> <span class="mi">30</span>
 <span class="p">}</span>
-<span class="n">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="n">foo</span><span class="p">.</span><span class="nf">__proto__</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="n">object</span><span class="p">{}</span></code></pre></figure>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">foo</span><span class="p">.</span><span class="nx">__proto__</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">object</span><span class="p">{}</span></code></pre></figure>
 
 <h2 id="section-3">原型链如何产生？</h2>
 
 <p>看一段代码。</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">var</span> <span class="n">a</span> <span class="o">=</span> <span class="p">{</span>
-  <span class="n">x</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
-  <span class="ss">add: </span><span class="n">function</span> <span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">this</span><span class="p">.</span><span class="nf">x</span> <span class="o">+</span> <span class="n">this</span><span class="p">.</span><span class="nf">y</span> <span class="o">+</span> <span class="n">z</span><span class="p">;</span>
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">a</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">x</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+  <span class="na">add</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">z</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">x</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">y</span> <span class="o">+</span> <span class="nx">z</span><span class="p">;</span>
   <span class="p">}</span>
 <span class="p">}</span>
 
-<span class="n">var</span> <span class="n">b</span> <span class="o">=</span> <span class="p">{</span>
-  <span class="ss">y: </span><span class="mi">20</span><span class="p">,</span>
-  <span class="ss">__proto__: </span><span class="n">a</span> <span class="sr">//</span><span class="err">把</span><span class="n">b</span><span class="err">的</span><span class="n">__proto__</span><span class="err">指针指向</span><span class="n">a</span>
+<span class="kd">var</span> <span class="nx">b</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">y</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+  <span class="na">__proto__</span><span class="p">:</span> <span class="nx">a</span> <span class="c1">//把b的__proto__指针指向a</span>
 <span class="p">}</span>
 
-<span class="n">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="n">b</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="mi">30</span><span class="p">));</span>  <span class="sr">//</span> <span class="o">=&gt;</span> <span class="mi">60</span></code></pre></figure>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">b</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="mi">30</span><span class="p">));</span>  <span class="c1">// =&gt; 60</span></code></pre></figure>
 
 <p>如上代码所示，以b为例，当b有明确的__proto__属性时，执行b.add(30)的时候，先在自己的属性里面找，没找到，就到上级的__proto__属性中找，如果还没找到就继续往上找……这样就构成了一条<strong>原型链</strong>。</p>
 
@@ -190,15 +190,15 @@ var _hmt = _hmt || [];
 
 <p>实际做的事情：</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"> 
-<span class="no">Author</span><span class="p">.</span><span class="nf">prototype</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Person</span><span class="p">();</span>
-<span class="sr">//</span> <span class="err">执行这一句的时候，实际执行了下面的事情：</span>
-<span class="no">Author</span><span class="p">.</span><span class="nf">__proto__</span> <span class="o">=</span> <span class="no">Person</span><span class="p">.</span><span class="nf">prototype</span>
-<span class="sr">//</span> <span class="err">验证之</span>
-<span class="no">Author</span><span class="p">.</span><span class="nf">prototype</span><span class="p">.</span><span class="nf">__proto__</span> <span class="o">===</span> <span class="no">Person</span><span class="p">.</span><span class="nf">prototype</span>  <span class="sr">//</span> <span class="o">=&gt;</span> <span class="kp">true</span>
-<span class="no">Jim</span><span class="p">.</span><span class="nf">__proto__</span> <span class="o">===</span> <span class="no">Author</span><span class="p">.</span><span class="nf">prototype</span> <span class="sr">//</span> <span class="o">=&gt;</span> <span class="kp">true</span>
-<span class="sr">//</span> <span class="err">把上面两行结合在一块，得到：</span>
-<span class="no">Jim</span><span class="p">.</span><span class="nf">__proto__</span><span class="p">.</span><span class="nf">__proto__</span> <span class="o">==</span> <span class="no">Person</span><span class="p">.</span><span class="nf">prototype</span> </code></pre></figure>
+<figure class="highlight"><pre><code class="language-js" data-lang="js"> 
+<span class="nx">Author</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Person</span><span class="p">();</span>
+<span class="c1">// 执行这一句的时候，实际执行了下面的事情：</span>
+<span class="nx">Author</span><span class="p">.</span><span class="nx">__proto__</span> <span class="o">=</span> <span class="nx">Person</span><span class="p">.</span><span class="nx">prototype</span>
+<span class="c1">// 验证之</span>
+<span class="nx">Author</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">__proto__</span> <span class="o">===</span> <span class="nx">Person</span><span class="p">.</span><span class="nx">prototype</span>  <span class="c1">// =&gt; true</span>
+<span class="nx">Jim</span><span class="p">.</span><span class="nx">__proto__</span> <span class="o">===</span> <span class="nx">Author</span><span class="p">.</span><span class="nx">prototype</span> <span class="c1">// =&gt; true</span>
+<span class="c1">// 把上面两行结合在一块，得到：</span>
+<span class="nx">Jim</span><span class="p">.</span><span class="nx">__proto__</span><span class="p">.</span><span class="nx">__proto__</span> <span class="o">==</span> <span class="nx">Person</span><span class="p">.</span><span class="nx">prototype</span> </code></pre></figure>
 
 <p>所以，执行这Author.prototype = new Person()后，相当于形成了一条原型链。</p>
 
@@ -210,36 +210,36 @@ var _hmt = _hmt || [];
 
 <p>所以，执行完Author.prototype = new Person()后，隐式声明了</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"> 
-<span class="no">Author</span><span class="p">.</span><span class="nf">prototype</span><span class="p">.</span><span class="nf">constructor</span> <span class="o">===</span> <span class="no">Person</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-js" data-lang="js"> 
+<span class="nx">Author</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">constructor</span> <span class="o">===</span> <span class="nx">Person</span></code></pre></figure>
 
 <p>而在实际的开发过程中，经常要修改子类的prototype, 比如我们又定义了一个Author的子类FictionAuthor：</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">function</span> <span class="no">FictonAuthor</span> <span class="p">(</span><span class="nb">name</span><span class="p">,</span><span class="n">book</span><span class="p">,</span><span class="n">fiction</span><span class="p">)</span> <span class="p">{</span>
-  <span class="no">Author</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="nb">name</span><span class="p">,</span><span class="n">book</span><span class="p">);</span> 
-  <span class="n">this</span><span class="p">.</span><span class="nf">fiction</span> <span class="o">=</span> <span class="n">fiction</span><span class="p">;</span>
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">FictonAuthor</span> <span class="p">(</span><span class="nx">name</span><span class="p">,</span><span class="nx">book</span><span class="p">,</span><span class="nx">fiction</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">Author</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span><span class="nx">book</span><span class="p">);</span> 
+  <span class="k">this</span><span class="p">.</span><span class="nx">fiction</span> <span class="o">=</span> <span class="nx">fiction</span><span class="p">;</span>
 <span class="p">}</span>
-<span class="no">FictonAuthor</span><span class="p">.</span><span class="nf">prototype</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Author</span><span class="p">();</span>
+<span class="nx">FictonAuthor</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Author</span><span class="p">();</span>
 
-<span class="sr">//</span> <span class="no">FictionAuthor</span><span class="err">的构造函数我们希望是</span><span class="no">Author</span><span class="p">,</span><span class="err">而实际上呢？</span>
-<span class="n">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="no">FictonAuthor</span><span class="p">.</span><span class="nf">prototype</span><span class="p">.</span><span class="nf">constructor</span><span class="p">)</span> 
-<span class="sr">//</span> <span class="o">=&gt;</span> <span class="no">Person</span></code></pre></figure>
+<span class="c1">// FictionAuthor的构造函数我们希望是Author,而实际上呢？</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">FictonAuthor</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">constructor</span><span class="p">)</span> 
+<span class="c1">// =&gt; Person</span></code></pre></figure>
 
 <p>所以，在子类继承中我们在执行完Author.prototype = new Person()后，需要对构造函数constructor做一个修正，即：</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"> 
-<span class="no">Author</span><span class="p">.</span><span class="nf">prototype</span><span class="p">.</span><span class="nf">constructor</span> <span class="o">=</span> <span class="no">Author</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-js" data-lang="js"> 
+<span class="nx">Author</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">constructor</span> <span class="o">=</span> <span class="nx">Author</span></code></pre></figure>
 
 <p>这样就达到了我们想要的结果。</p>
 
 <p>综上，可以总结一个extend函数：</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">function</span> <span class="kp">extend</span> <span class="p">(</span><span class="n">subClass</span><span class="p">,</span> <span class="n">superClass</span><span class="p">)</span> <span class="p">{</span>
-  <span class="n">var</span> <span class="n">f</span> <span class="o">=</span> <span class="n">function</span> <span class="p">()</span> <span class="p">{};</span> 
-  <span class="sr">//</span> <span class="err">避免创建超类的新实例，因为它可能比较庞大，或者要执行</span><span class="n">init</span><span class="err">之类需要大量计算的任务</span>
-  <span class="n">f</span><span class="p">.</span><span class="nf">prototype</span> <span class="o">=</span> <span class="n">superClass</span><span class="p">.</span><span class="nf">prototype</span><span class="p">;</span>
-  <span class="n">subClass</span><span class="p">.</span><span class="nf">prototype</span> <span class="o">=</span> <span class="kp">new</span> <span class="n">f</span><span class="p">();</span>
-  <span class="n">subClass</span><span class="p">.</span><span class="nf">prototype</span><span class="p">.</span><span class="nf">constructor</span> <span class="o">=</span> <span class="n">subClass</span><span class="p">;</span>
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">extend</span> <span class="p">(</span><span class="nx">subClass</span><span class="p">,</span> <span class="nx">superClass</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">f</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{};</span> 
+  <span class="c1">// 避免创建超类的新实例，因为它可能比较庞大，或者要执行init之类需要大量计算的任务</span>
+  <span class="nx">f</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="nx">superClass</span><span class="p">.</span><span class="nx">prototype</span><span class="p">;</span>
+  <span class="nx">subClass</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">f</span><span class="p">();</span>
+  <span class="nx">subClass</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">constructor</span> <span class="o">=</span> <span class="nx">subClass</span><span class="p">;</span>
 <span class="p">}</span></code></pre></figure>
 
 
