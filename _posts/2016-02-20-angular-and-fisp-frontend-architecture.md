@@ -110,7 +110,7 @@ angular.module('app')
 
 可以看见上述config已经定义了模块名如 `ui.grid` ，配合ui-router时直接load这个模块名就行了
 
-{% highlight ruby %}
+{% highlight js %}
 //config.router.js
 var app = angular.module('app');
 app.config(
@@ -151,7 +151,7 @@ app.config(
 我是使用了localStorage来缓存，在body的controller对应的$scope.setting中存储。
 核心代码很简单：
 
-{% highlight ruby %}
+{% highlight js %}
 if (angular.isDefined($localStorage.settings)) {
     $scope.app.settings = $localStorage.settings;
 } else {
@@ -166,6 +166,7 @@ $scope.$watch('app.settings', function () {
 ### 静态资源的缓存
 如果使用fisp的规范，每个页面是一个tpl, 经过服务器编译；而项目是个单页，一开始只向服务器请求index.tpl模板编译, 后续路由由前端来设定，每个view均是html。
 这样带来了一个问题：
+
 > view中的静态资源无法使用fisp的规则来缓存。
 
 但是前面提到了oclazyload是可以设定缓存资源策略的。所以我们最终采用的方式是：
@@ -197,7 +198,7 @@ $scope.$watch('app.settings', function () {
 
 如上所述，我们只有入口点index.tpl去请求服务器编译。
 fisp的规范下，原来设想应该这么写：
-{% highlight ruby %}
+{% highlight js %}
 // tag前我没加%, 意会就行了...
 {html framework="common:static/script/vendor/libs/mod.js" ng-app="app"}
   {body ng-controller="appCtrl"}
@@ -206,7 +207,7 @@ fisp的规范下，原来设想应该这么写：
 结果，卧槽，返回的html中格式正确，但是似乎angular没有parse到ng-app,整个页面一片空白（当然了，ng-app都没有你还想干啥...）
 
 最后用了个很土气的方法解决了这个问题：
-{% highlight ruby %}
+{% highlight js %}
 <script>
     document.querySelector('html').setAttribute('data-ng-app', 'app');
     document.body.setAttribute('ng-controller', 'AppCtrl');
@@ -221,7 +222,7 @@ angular-boostrap是依赖angular主干版本的，所以最好使用包管理工
 用好像还是可以用的，但是强迫症，还是升级版本吧。
 
 ### 避免头咬尾巴的行为
-{% highlight ruby %}
+{% highlight js %}
 $scope.$watch('users', function(value) {
   $scope.users = [];
 });
@@ -234,7 +235,7 @@ $scope.$watch('users', function(value) {
 
 ### Use angular post in "jQuery way"
 angular中的post api乍一看跟jQuery区别不大，实际上post的是json, 不是parameter。
-{% highlight ruby %}
+{% highlight js %}
 $http.post("/foo/bar", {
   param1: value1,
   param2: value2
@@ -258,7 +259,7 @@ $http.post("/foo/bar", {
 > - data: {param1: value1,param2: value2}
 
 一个完整的解决方案如下：
-{% highlight ruby %}
+{% highlight js %}
 var app = angular.module('app');
 app.config(
     ['$httpProvider',

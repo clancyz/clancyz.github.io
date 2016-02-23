@@ -214,28 +214,28 @@ index.tpl除了加载各种公共静态资源外，会进行以下的配置行�
 
 <p>可以看见上述config已经定义了模块名如 <code class="highlighter-rouge">ui.grid</code> ，配合ui-router时直接load这个模块名就行了</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="sr">//</span><span class="n">config</span><span class="p">.</span><span class="nf">router</span><span class="p">.</span><span class="nf">js</span>
-<span class="n">var</span> <span class="n">app</span> <span class="o">=</span> <span class="n">angular</span><span class="p">.</span><span class="nf">module</span><span class="p">(</span><span class="s1">'app'</span><span class="p">);</span>
-<span class="n">app</span><span class="p">.</span><span class="nf">config</span><span class="p">(</span>
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">//config.router.js</span>
+<span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s1">'app'</span><span class="p">);</span>
+<span class="nx">app</span><span class="p">.</span><span class="nx">config</span><span class="p">(</span>
     <span class="p">[</span><span class="s1">'$stateProvider'</span><span class="p">,</span> <span class="s1">'$urlRouterProvider'</span><span class="p">,</span>
-        <span class="n">function</span> <span class="p">(</span><span class="vg">$stateProvider</span><span class="p">,</span> <span class="vg">$urlRouterProvider</span><span class="p">)</span> <span class="p">{</span>
-            <span class="vg">$urlRouterProvider</span>
-                <span class="p">.</span><span class="nf">otherwise</span><span class="p">(</span><span class="s1">'/app/home'</span><span class="p">);</span>
-            <span class="vg">$stateProvider</span>
-                <span class="p">.</span><span class="nf">state</span><span class="p">(</span><span class="s1">'app'</span><span class="p">,</span> <span class="p">{</span>
-                    <span class="s1">'abstract'</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span>
+        <span class="kd">function</span> <span class="p">(</span><span class="nx">$stateProvider</span><span class="p">,</span> <span class="nx">$urlRouterProvider</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">$urlRouterProvider</span>
+                <span class="p">.</span><span class="nx">otherwise</span><span class="p">(</span><span class="s1">'/app/home'</span><span class="p">);</span>
+            <span class="nx">$stateProvider</span>
+                <span class="p">.</span><span class="nx">state</span><span class="p">(</span><span class="s1">'app'</span><span class="p">,</span> <span class="p">{</span>
+                    <span class="s1">'abstract'</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
                     <span class="s1">'url'</span><span class="p">:</span> <span class="s1">'/app'</span><span class="p">,</span>
                     <span class="s1">'templateUrl'</span><span class="p">:</span> <span class="s1">'/static/common/page/app.html'</span>
                 <span class="p">})</span>
-                <span class="p">.</span><span class="nf">state</span><span class="p">(</span><span class="s1">'app.home'</span><span class="p">,</span> <span class="p">{</span>
-                    <span class="ss">url: </span><span class="s1">'/home'</span><span class="p">,</span>
-                    <span class="ss">templateUrl: </span><span class="s1">'/static/home/page/home.html'</span><span class="p">,</span>
-                    <span class="ss">resolve: </span><span class="p">{</span>
-                        <span class="ss">deps: </span><span class="p">[</span><span class="s1">'$ocLazyLoad'</span><span class="p">,</span> <span class="n">function</span> <span class="p">(</span><span class="vg">$ocLazyLoad</span><span class="p">)</span> <span class="p">{</span>
-                            <span class="k">return</span> <span class="vg">$ocLazyLoad</span><span class="p">.</span><span class="nf">load</span><span class="p">([</span><span class="s1">'ui.grid'</span><span class="p">])</span>
-                            <span class="p">.</span><span class="nf">then</span><span class="p">(</span><span class="n">function</span> <span class="p">()</span> <span class="p">{</span>
-                                      <span class="k">return</span> <span class="vg">$ocLazyLoad</span><span class="p">.</span><span class="nf">load</span><span class="p">(</span>
-                                          <span class="s1">'/static/home/homeController.js'</span><span class="p">,</span> <span class="p">{</span><span class="ss">cache: </span><span class="kp">false</span><span class="p">});</span>
+                <span class="p">.</span><span class="nx">state</span><span class="p">(</span><span class="s1">'app.home'</span><span class="p">,</span> <span class="p">{</span>
+                    <span class="na">url</span><span class="p">:</span> <span class="s1">'/home'</span><span class="p">,</span>
+                    <span class="na">templateUrl</span><span class="p">:</span> <span class="s1">'/static/home/page/home.html'</span><span class="p">,</span>
+                    <span class="na">resolve</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="na">deps</span><span class="p">:</span> <span class="p">[</span><span class="s1">'$ocLazyLoad'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">$ocLazyLoad</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="k">return</span> <span class="nx">$ocLazyLoad</span><span class="p">.</span><span class="nx">load</span><span class="p">([</span><span class="s1">'ui.grid'</span><span class="p">])</span>
+                            <span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+                                      <span class="k">return</span> <span class="nx">$ocLazyLoad</span><span class="p">.</span><span class="nx">load</span><span class="p">(</span>
+                                          <span class="s1">'/static/home/homeController.js'</span><span class="p">,</span> <span class="p">{</span><span class="na">cache</span><span class="p">:</span> <span class="kc">false</span><span class="p">});</span>
                                   <span class="p">});</span>
                         <span class="p">}]</span>
                     <span class="p">}</span>
@@ -257,21 +257,24 @@ index.tpl除了加载各种公共静态资源外，会进行以下的配置行�
 我是使用了localStorage来缓存，在body的controller对应的$scope.setting中存储。
 核心代码很简单：</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">if</span> <span class="p">(</span><span class="n">angular</span><span class="p">.</span><span class="nf">isDefined</span><span class="p">(</span><span class="vg">$localStorage</span><span class="p">.</span><span class="nf">settings</span><span class="p">))</span> <span class="p">{</span>
-    <span class="vg">$scope</span><span class="p">.</span><span class="nf">app</span><span class="p">.</span><span class="nf">settings</span> <span class="o">=</span> <span class="vg">$localStorage</span><span class="p">.</span><span class="nf">settings</span><span class="p">;</span>
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="k">if</span> <span class="p">(</span><span class="nx">angular</span><span class="p">.</span><span class="nx">isDefined</span><span class="p">(</span><span class="nx">$localStorage</span><span class="p">.</span><span class="nx">settings</span><span class="p">))</span> <span class="p">{</span>
+    <span class="nx">$scope</span><span class="p">.</span><span class="nx">app</span><span class="p">.</span><span class="nx">settings</span> <span class="o">=</span> <span class="nx">$localStorage</span><span class="p">.</span><span class="nx">settings</span><span class="p">;</span>
 <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-    <span class="vg">$localStorage</span><span class="p">.</span><span class="nf">settings</span> <span class="o">=</span> <span class="vg">$scope</span><span class="p">.</span><span class="nf">app</span><span class="p">.</span><span class="nf">settings</span><span class="p">;</span>
+    <span class="nx">$localStorage</span><span class="p">.</span><span class="nx">settings</span> <span class="o">=</span> <span class="nx">$scope</span><span class="p">.</span><span class="nx">app</span><span class="p">.</span><span class="nx">settings</span><span class="p">;</span>
 <span class="p">}</span>
-<span class="vg">$scope</span><span class="o">.</span><span class="vg">$watch</span><span class="p">(</span><span class="s1">'app.settings'</span><span class="p">,</span> <span class="n">function</span> <span class="p">()</span> <span class="p">{</span>
-    <span class="vg">$localStorage</span><span class="p">.</span><span class="nf">settings</span> <span class="o">=</span> <span class="vg">$scope</span><span class="p">.</span><span class="nf">app</span><span class="p">.</span><span class="nf">settings</span><span class="p">;</span>
-<span class="p">},</span> <span class="kp">true</span><span class="p">);</span></code></pre></figure>
+<span class="nx">$scope</span><span class="p">.</span><span class="nx">$watch</span><span class="p">(</span><span class="s1">'app.settings'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="nx">$localStorage</span><span class="p">.</span><span class="nx">settings</span> <span class="o">=</span> <span class="nx">$scope</span><span class="p">.</span><span class="nx">app</span><span class="p">.</span><span class="nx">settings</span><span class="p">;</span>
+<span class="p">},</span> <span class="kc">true</span><span class="p">);</span></code></pre></figure>
 
 <p>这样，在页面开发中如果要更改某些信息，修改app.settings即可。</p>
 
 <h3 id="section-7">静态资源的缓存</h3>
 <p>如果使用fisp的规范，每个页面是一个tpl, 经过服务器编译；而项目是个单页，一开始只向服务器请求index.tpl模板编译, 后续路由由前端来设定，每个view均是html。
-这样带来了一个问题：
-&gt; view中的静态资源无法使用fisp的规则来缓存。</p>
+这样带来了一个问题：</p>
+
+<blockquote>
+  <p>view中的静态资源无法使用fisp的规则来缓存。</p>
+</blockquote>
 
 <p>但是前面提到了oclazyload是可以设定缓存资源策略的。所以我们最终采用的方式是：</p>
 
@@ -305,18 +308,18 @@ index.tpl除了加载各种公共静态资源外，会进行以下的配置行�
 <p>如上所述，我们只有入口点index.tpl去请求服务器编译。
 fisp的规范下，原来设想应该这么写：</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="sr">//</span> <span class="n">tag</span><span class="err">前我没加</span><span class="o">%</span><span class="p">,</span> <span class="err">意会就行了</span><span class="p">.</span><span class="nf">.</span><span class="o">.</span>
-<span class="p">{</span><span class="n">html</span> <span class="n">framework</span><span class="o">=</span><span class="s2">"common:static/script/vendor/libs/mod.js"</span> <span class="n">ng</span><span class="o">-</span><span class="n">app</span><span class="o">=</span><span class="s2">"app"</span><span class="p">}</span>
-  <span class="p">{</span><span class="n">body</span> <span class="n">ng</span><span class="o">-</span><span class="n">controller</span><span class="o">=</span><span class="s2">"appCtrl"</span><span class="p">}</span>
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// tag前我没加%, 意会就行了...</span>
+<span class="p">{</span><span class="nx">html</span> <span class="nx">framework</span><span class="o">=</span><span class="s2">"common:static/script/vendor/libs/mod.js"</span> <span class="nx">ng</span><span class="o">-</span><span class="nx">app</span><span class="o">=</span><span class="s2">"app"</span><span class="p">}</span>
+  <span class="p">{</span><span class="nx">body</span> <span class="nx">ng</span><span class="o">-</span><span class="nx">controller</span><span class="o">=</span><span class="s2">"appCtrl"</span><span class="p">}</span>
 <span class="p">{</span><span class="sr">/html%}</span></code></pre></figure>
 
 <p>结果，卧槽，返回的html中格式正确，但是似乎angular没有parse到ng-app,整个页面一片空白（当然了，ng-app都没有你还想干啥…）</p>
 
 <p>最后用了个很土气的方法解决了这个问题：</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="o">&lt;</span><span class="n">script</span><span class="o">&gt;</span>
-    <span class="n">document</span><span class="p">.</span><span class="nf">querySelector</span><span class="p">(</span><span class="s1">'html'</span><span class="p">).</span><span class="nf">setAttribute</span><span class="p">(</span><span class="s1">'data-ng-app'</span><span class="p">,</span> <span class="s1">'app'</span><span class="p">);</span>
-    <span class="n">document</span><span class="p">.</span><span class="nf">body</span><span class="p">.</span><span class="nf">setAttribute</span><span class="p">(</span><span class="s1">'ng-controller'</span><span class="p">,</span> <span class="s1">'AppCtrl'</span><span class="p">);</span>
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="o">&lt;</span><span class="nx">script</span><span class="o">&gt;</span>
+    <span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="s1">'html'</span><span class="p">).</span><span class="nx">setAttribute</span><span class="p">(</span><span class="s1">'data-ng-app'</span><span class="p">,</span> <span class="s1">'app'</span><span class="p">);</span>
+    <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">setAttribute</span><span class="p">(</span><span class="s1">'ng-controller'</span><span class="p">,</span> <span class="s1">'AppCtrl'</span><span class="p">);</span>
 <span class="o">&lt;</span><span class="sr">/script&gt;</span></code></pre></figure>
 
 <h3 id="section-11">使用包管理工具安装依赖</h3>
@@ -329,8 +332,8 @@ fisp的规范下，原来设想应该这么写：</p>
 
 <h3 id="section-12">避免头咬尾巴的行为</h3>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="vg">$scope</span><span class="o">.</span><span class="vg">$watch</span><span class="p">(</span><span class="s1">'users'</span><span class="p">,</span> <span class="n">function</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="p">{</span>
-  <span class="vg">$scope</span><span class="p">.</span><span class="nf">users</span> <span class="o">=</span> <span class="p">[];</span>
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">$scope</span><span class="p">.</span><span class="nx">$watch</span><span class="p">(</span><span class="s1">'users'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">$scope</span><span class="p">.</span><span class="nx">users</span> <span class="o">=</span> <span class="p">[];</span>
 <span class="p">});</span></code></pre></figure>
 
 <p>有时就会写出这样的循环代码，new Error</p>
@@ -342,12 +345,12 @@ fisp的规范下，原来设想应该这么写：</p>
 <h3 id="use-angular-post-in-jquery-way">Use angular post in “jQuery way”</h3>
 <p>angular中的post api乍一看跟jQuery区别不大，实际上post的是json, 不是parameter。</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="vg">$http</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span><span class="s2">"/foo/bar"</span><span class="p">,</span> <span class="p">{</span>
-  <span class="ss">param1: </span><span class="n">value1</span><span class="p">,</span>
-  <span class="ss">param2: </span><span class="n">value2</span>
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">$http</span><span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="s2">"/foo/bar"</span><span class="p">,</span> <span class="p">{</span>
+  <span class="na">param1</span><span class="p">:</span> <span class="nx">value1</span><span class="p">,</span>
+  <span class="na">param2</span><span class="p">:</span> <span class="nx">value2</span>
 <span class="p">})</span>
-  <span class="p">.</span><span class="nf">success</span><span class="p">(</span><span class="n">function</span><span class="p">(</span><span class="n">responseData</span><span class="p">){</span>
-    <span class="sr">//</span><span class="k">do</span> <span class="n">something</span>
+  <span class="p">.</span><span class="nx">success</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">responseData</span><span class="p">){</span>
+    <span class="c1">//do something</span>
   <span class="p">}});</span></code></pre></figure>
 
 <p>要直接这么用, 骚年，一般来说一个5xx Server Response error等着你～</p>
@@ -372,53 +375,53 @@ fisp的规范下，原来设想应该这么写：</p>
 
 <p>一个完整的解决方案如下：</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">var</span> <span class="n">app</span> <span class="o">=</span> <span class="n">angular</span><span class="p">.</span><span class="nf">module</span><span class="p">(</span><span class="s1">'app'</span><span class="p">);</span>
-<span class="n">app</span><span class="p">.</span><span class="nf">config</span><span class="p">(</span>
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s1">'app'</span><span class="p">);</span>
+<span class="nx">app</span><span class="p">.</span><span class="nx">config</span><span class="p">(</span>
     <span class="p">[</span><span class="s1">'$httpProvider'</span><span class="p">,</span>
-        <span class="n">function</span> <span class="p">(</span><span class="vg">$httpProvider</span><span class="p">)</span> <span class="p">{</span>
-            <span class="vg">$httpProvider</span><span class="p">.</span><span class="nf">defaults</span><span class="p">.</span><span class="nf">headers</span><span class="p">.</span><span class="nf">post</span><span class="p">[</span><span class="s1">'Content-Type'</span><span class="p">]</span>
+        <span class="kd">function</span> <span class="p">(</span><span class="nx">$httpProvider</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">$httpProvider</span><span class="p">.</span><span class="nx">defaults</span><span class="p">.</span><span class="nx">headers</span><span class="p">.</span><span class="nx">post</span><span class="p">[</span><span class="s1">'Content-Type'</span><span class="p">]</span>
                 <span class="o">=</span> <span class="s1">'application/x-www-form-urlencoded;charset=utf-8'</span><span class="p">;</span>
 
-            <span class="n">var</span> <span class="n">param</span> <span class="o">=</span> <span class="n">function</span> <span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="p">{</span>
-                <span class="n">var</span> <span class="n">query</span> <span class="o">=</span> <span class="s1">''</span><span class="p">;</span>
-                <span class="n">var</span> <span class="nb">name</span><span class="p">;</span>
-                <span class="n">var</span> <span class="n">value</span><span class="p">;</span>
-                <span class="n">var</span> <span class="n">fullSubName</span><span class="p">;</span>
-                <span class="n">var</span> <span class="n">subName</span><span class="p">;</span>
-                <span class="n">var</span> <span class="n">subValue</span><span class="p">;</span>
-                <span class="n">var</span> <span class="n">innerObj</span><span class="p">;</span>
-                <span class="n">var</span> <span class="n">i</span><span class="p">;</span>
+            <span class="kd">var</span> <span class="nx">param</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
+                <span class="kd">var</span> <span class="nx">query</span> <span class="o">=</span> <span class="s1">''</span><span class="p">;</span>
+                <span class="kd">var</span> <span class="nx">name</span><span class="p">;</span>
+                <span class="kd">var</span> <span class="nx">value</span><span class="p">;</span>
+                <span class="kd">var</span> <span class="nx">fullSubName</span><span class="p">;</span>
+                <span class="kd">var</span> <span class="nx">subName</span><span class="p">;</span>
+                <span class="kd">var</span> <span class="nx">subValue</span><span class="p">;</span>
+                <span class="kd">var</span> <span class="nx">innerObj</span><span class="p">;</span>
+                <span class="kd">var</span> <span class="nx">i</span><span class="p">;</span>
 
-                <span class="k">for</span> <span class="p">(</span><span class="nb">name</span> <span class="k">in</span> <span class="n">obj</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="n">value</span> <span class="o">=</span> <span class="n">obj</span><span class="p">[</span><span class="nb">name</span><span class="p">];</span>
+                <span class="k">for</span> <span class="p">(</span><span class="nx">name</span> <span class="k">in</span> <span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">value</span> <span class="o">=</span> <span class="nx">obj</span><span class="p">[</span><span class="nx">name</span><span class="p">];</span>
 
-                    <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="n">instanceof</span> <span class="no">Array</span><span class="p">)</span> <span class="p">{</span>
-                        <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">value</span><span class="p">.</span><span class="nf">length</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
-                            <span class="n">subValue</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
-                            <span class="n">fullSubName</span> <span class="o">=</span> <span class="nb">name</span> <span class="o">+</span> <span class="s1">'['</span> <span class="o">+</span> <span class="n">i</span> <span class="o">+</span> <span class="s1">']'</span><span class="p">;</span>
-                            <span class="n">innerObj</span> <span class="o">=</span> <span class="p">{};</span>
-                            <span class="n">innerObj</span><span class="p">[</span><span class="n">fullSubName</span><span class="p">]</span> <span class="o">=</span> <span class="n">subValue</span><span class="p">;</span>
-                            <span class="n">query</span> <span class="o">+=</span> <span class="n">param</span><span class="p">(</span><span class="n">innerObj</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'&amp;'</span><span class="p">;</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">value</span> <span class="k">instanceof</span> <span class="nb">Array</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">for</span> <span class="p">(</span><span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">value</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="o">++</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="nx">subValue</span> <span class="o">=</span> <span class="nx">value</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+                            <span class="nx">fullSubName</span> <span class="o">=</span> <span class="nx">name</span> <span class="o">+</span> <span class="s1">'['</span> <span class="o">+</span> <span class="nx">i</span> <span class="o">+</span> <span class="s1">']'</span><span class="p">;</span>
+                            <span class="nx">innerObj</span> <span class="o">=</span> <span class="p">{};</span>
+                            <span class="nx">innerObj</span><span class="p">[</span><span class="nx">fullSubName</span><span class="p">]</span> <span class="o">=</span> <span class="nx">subValue</span><span class="p">;</span>
+                            <span class="nx">query</span> <span class="o">+=</span> <span class="nx">param</span><span class="p">(</span><span class="nx">innerObj</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'&amp;'</span><span class="p">;</span>
                         <span class="p">}</span>
-                    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="n">instanceof</span> <span class="no">Object</span><span class="p">)</span> <span class="p">{</span>
-                        <span class="k">for</span> <span class="p">(</span><span class="n">subName</span> <span class="k">in</span> <span class="n">value</span><span class="p">)</span> <span class="p">{</span>
-                            <span class="n">subValue</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="n">subName</span><span class="p">];</span>
-                            <span class="n">fullSubName</span> <span class="o">=</span> <span class="nb">name</span> <span class="o">+</span> <span class="s1">'['</span> <span class="o">+</span> <span class="n">subName</span> <span class="o">+</span> <span class="s1">']'</span><span class="p">;</span>
-                            <span class="n">innerObj</span> <span class="o">=</span> <span class="p">{};</span>
-                            <span class="n">innerObj</span><span class="p">[</span><span class="n">fullSubName</span><span class="p">]</span> <span class="o">=</span> <span class="n">subValue</span><span class="p">;</span>
-                            <span class="n">query</span> <span class="o">+=</span> <span class="n">param</span><span class="p">(</span><span class="n">innerObj</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'&amp;'</span><span class="p">;</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">value</span> <span class="k">instanceof</span> <span class="nb">Object</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">for</span> <span class="p">(</span><span class="nx">subName</span> <span class="k">in</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="nx">subValue</span> <span class="o">=</span> <span class="nx">value</span><span class="p">[</span><span class="nx">subName</span><span class="p">];</span>
+                            <span class="nx">fullSubName</span> <span class="o">=</span> <span class="nx">name</span> <span class="o">+</span> <span class="s1">'['</span> <span class="o">+</span> <span class="nx">subName</span> <span class="o">+</span> <span class="s1">']'</span><span class="p">;</span>
+                            <span class="nx">innerObj</span> <span class="o">=</span> <span class="p">{};</span>
+                            <span class="nx">innerObj</span><span class="p">[</span><span class="nx">fullSubName</span><span class="p">]</span> <span class="o">=</span> <span class="nx">subValue</span><span class="p">;</span>
+                            <span class="nx">query</span> <span class="o">+=</span> <span class="nx">param</span><span class="p">(</span><span class="nx">innerObj</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'&amp;'</span><span class="p">;</span>
                         <span class="p">}</span>
-                    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">!==</span> <span class="n">undefined</span> <span class="o">&amp;&amp;</span> <span class="n">value</span> <span class="o">!==</span> <span class="n">null</span><span class="p">)</span> <span class="p">{</span>
-                        <span class="n">query</span> <span class="o">+=</span> <span class="n">encodeURIComponent</span><span class="p">(</span><span class="nb">name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'='</span> <span class="o">+</span> <span class="n">encodeURIComponent</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'&amp;'</span><span class="p">;</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">value</span> <span class="o">!==</span> <span class="kc">undefined</span> <span class="o">&amp;&amp;</span> <span class="nx">value</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">query</span> <span class="o">+=</span> <span class="nb">encodeURIComponent</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'='</span> <span class="o">+</span> <span class="nb">encodeURIComponent</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'&amp;'</span><span class="p">;</span>
                     <span class="p">}</span>
                 <span class="p">}</span>
 
-                <span class="k">return</span> <span class="n">query</span><span class="p">.</span><span class="nf">length</span> <span class="p">?</span> <span class="n">query</span><span class="p">.</span><span class="nf">substr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">query</span><span class="p">.</span><span class="nf">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="p">:</span> <span class="n">query</span><span class="p">;</span>
+                <span class="k">return</span> <span class="nx">query</span><span class="p">.</span><span class="nx">length</span> <span class="p">?</span> <span class="nx">query</span><span class="p">.</span><span class="nx">substr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nx">query</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="p">:</span> <span class="nx">query</span><span class="p">;</span>
             <span class="p">};</span>
 
-            <span class="vg">$httpProvider</span><span class="p">.</span><span class="nf">defaults</span><span class="p">.</span><span class="nf">transformRequest</span> <span class="o">=</span> <span class="p">[</span><span class="n">function</span> <span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="p">{</span>
-                <span class="k">return</span> <span class="n">angular</span><span class="p">.</span><span class="nf">isObject</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="no">String</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">!==</span> <span class="s1">'[object File]'</span> <span class="p">?</span> <span class="n">param</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="p">:</span>
-                    <span class="n">data</span><span class="p">;</span>
+            <span class="nx">$httpProvider</span><span class="p">.</span><span class="nx">defaults</span><span class="p">.</span><span class="nx">transformRequest</span> <span class="o">=</span> <span class="p">[</span><span class="kd">function</span> <span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">isObject</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nb">String</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="o">!==</span> <span class="s1">'[object File]'</span> <span class="p">?</span> <span class="nx">param</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">:</span>
+                    <span class="nx">data</span><span class="p">;</span>
             <span class="p">}];</span>
         <span class="p">}</span>
     <span class="p">]);</span></code></pre></figure>
