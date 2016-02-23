@@ -29,6 +29,7 @@ categories: blog
 工程化方面，后端同学是搞PHP的，以前配合的时候都是使用fis-plus, 所以继续采用。
 
 ##项目架构
+
 ![image](/assets/images/5.png)
 
 逐项说明。
