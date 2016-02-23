@@ -9,7 +9,7 @@ categories: blog
 ---
 
 
-##项目背景
+## 项目背景
 
 此项目前端为一个单页（Single Page Application），header和footer固定，中间视图页随导航点击而变化。后端为百度内部的PHP框架ODP。
 使用的主要框架和类库有：
@@ -22,17 +22,17 @@ categories: blog
 > - echarts
 > - d3
 
-##框架选型的考虑
+## 框架选型的考虑
 
 当时angular的最新版本是1.4.7，俺学习angular的时候版本为1.2。选新不选旧的原则，就上了最新版本。
 前端ui框架方面选择了angular-bootstrap, 因为组内对bs还是比较熟的。
 工程化方面，后端同学是搞PHP的，以前配合的时候都是使用fis-plus, 所以继续采用。
 
-##项目架构
+## 项目架构
 
 ![image](/assets/images/5.png)
 
-逐项说明。
+下面逐项说明。
 
 > - build_offline.sh: 线下部署脚本
 > - build_online.sh: 线上部署脚本
