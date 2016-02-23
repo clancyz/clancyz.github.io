@@ -226,6 +226,15 @@ code {
   color: #7a7a7a;
 }
 
+code.highlighter-rouge {
+    padding: 2px 4px;
+    font-size: 90%;
+    color: #3f3f3f;
+    background-color: rgba(128,128,128,0.075);
+    white-space: nowrap;
+    border-radius: 4px;
+}
+
 pre {
   padding: 1.125em;
   font-size: 1.125rem;
