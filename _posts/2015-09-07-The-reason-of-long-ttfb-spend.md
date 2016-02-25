@@ -14,7 +14,7 @@ categories: blog
 
 ### 问题发生的背景
 
-这篇文章部分来源于我做的一次性能优化，具体的背景可看我的[这篇文章](https://clancyz.github.io/blog/2015/08/21/A-Project-refactor-notes/)。
+这篇文章部分来源于我做的一次性能优化，具体的背景可看我的[这篇文章](http://clancyz.github.io/blog/2015/08/21/A-Project-refactor-notes/)。
 
 当时，我在我自己的机器（thinkpad x240）上测试，发现页面的平均加载速度为 `3.92s`　。
 

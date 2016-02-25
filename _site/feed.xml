@@ -420,7 +420,7 @@ fisp的规范下，原来设想应该这么写：&lt;/p&gt;
         <title>TTFB响应时间缓慢，到底是谁的问题？</title>
         <description>&lt;h3 id=&quot;section&quot;&gt;问题发生的背景&lt;/h3&gt;
 
-&lt;p&gt;这篇文章部分来源于我做的一次性能优化，具体的背景可看我的&lt;a href=&quot;https://clancyz.github.io/blog/2015/08/21/A-Project-refactor-notes/&quot;&gt;这篇文章&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;这篇文章部分来源于我做的一次性能优化，具体的背景可看我的&lt;a href=&quot;http://clancyz.github.io/blog/2015/08/21/A-Project-refactor-notes/&quot;&gt;这篇文章&lt;/a&gt;。&lt;/p&gt;
 
 &lt;p&gt;当时，我在我自己的机器（thinkpad x240）上测试，发现页面的平均加载速度为 &lt;code class=&quot;highlighter-rouge&quot;&gt;3.92s&lt;/code&gt;　。&lt;/p&gt;
 
@@ -632,7 +632,7 @@ fisp的规范下，原来设想应该这么写：&lt;/p&gt;
   &lt;p&gt;卧槽，这也太慢了吧！&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;当时我经过分析，应该是 &lt;code class=&quot;highlighter-rouge&quot;&gt;服务端&lt;/code&gt; 的问题，不是前端问题。还给后端同学提了建议让他们去优化。结果证明，完全是我自己的问题，我也感到很羞愧。关于这个问题我也专门总结了一番，可以看我的 &lt;a href=&quot;https://clancyz.github.io/blog/2015/09/08/The-reason-of-long-ttfb-spend/&quot;&gt;这篇文章&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;当时我经过分析，应该是 &lt;code class=&quot;highlighter-rouge&quot;&gt;服务端&lt;/code&gt; 的问题，不是前端问题。还给后端同学提了建议让他们去优化。结果证明，完全是我自己的问题，我也感到很羞愧。关于这个问题我也专门总结了一番，可以看我的 &lt;a href=&quot;http://clancyz.github.io/blog/2015/09/08/The-reason-of-long-ttfb-spend/&quot;&gt;这篇文章&lt;/a&gt;。&lt;/p&gt;
 
 &lt;h2 id=&quot;section-4&quot;&gt;优化过程&lt;/h2&gt;
 
