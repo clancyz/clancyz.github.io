@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>某前端项目重构及性能优化记录 &#8211; Clancy Zhu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="我的一次前端“推倒式重构”的经历。由我总结的一篇项目文档修改而来，因为是内部项目，隐去了具体项目内容。经过重构和优化后，项目代码的结构更加清晰，易于部署，可维护性更好；页面普遍的加载速度快了1s以上。">
+    <meta name="author" content="Clancy Zhu">
+    <meta name="keywords" content="blog">
+    <link rel="canonical" href="http://clancyz.github.io/blog/2015/08/21/A-Project-refactor-notes/">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css" type="text/css">
+
+    <!-- Fonts -->
+    <link href='//fonts.useso.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.useso.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+      <link href="//libs.baidu.com/fontawesome/4.2.0/css/font-awesome.css" rel="stylesheet">
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="某前端项目重构及性能优化记录">
+    <meta property="og:description" content="Clancy Zhu's blog">
+    <meta property="og:url" content="http://clancyz.github.io/blog/2015/08/21/A-Project-refactor-notes/">
+    <meta property="og:site_name" content="Clancy Zhu">
+    
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?552e4c4f02c7d240bdb63847dd7ea798";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</head>
+
+<body class="">
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="http://clancyz.github.io" class="site-title">Clancy Zhu</a>
+      <nav class="site-nav right">
+        <a href="/about/">About</a>
+<a href="/contact/">Contact</a>
+
+      </nav>
+      <div class="clearfix"></div>
+      
+        <div class="social-icons">
+  <div class="left">
+    
+      <a class="fa fa-github" href="https://github.com/clancyz"></a>
+    
+    <a class="fa fa-rss" href="/feed.xml"></a>
+    
+    
+    
+      <a class="fa fa-envelope" href="mailto:clancyzhu@me.com"></a>
+    
+    
+  </div>
+  <div class="right">
+    
+    
+    
+  </div>
+</div>
+<div class="clearfix"></div>
+
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        
+
+
+<div class="post-header mb2">
+  
+  <h1 class="py2">某前端项目重构及性能优化记录</h1>
+  
+  <span class="post-meta">08月 21日, 2015</span><br>
+  
+  <!-- <span class="post-meta small">1 minute read</span> -->
+</div>
+
+<article class="post-content">
+  <h2 id="section">项目背景</h2>
+
+<p>我还是从前端的技术角度来阐述。</p>
+
+<p>首先，在框架选择上，这个项目的使用的主要技术是：</p>
+
+<blockquote>
+  <ul>
+    <li>fis-plus，用于工程化</li>
+    <li>jQuery + 各种自定义plugin，开源的不太满足需求，自己写</li>
+    <li>D3，需要的图形化结果没有任何一个D3的demo可以满足的，基本是自己做二次开发的</li>
+  </ul>
+</blockquote>
+
+<p>项目在我加入时，已经由一个FE同学开发了2个月。然而，当项目需求井喷的时候，哥们说要创业，走了…</p>
+
+<p>后来我就在 <code class="highlighter-rouge">1个前端，9个后端</code> 的情况下死撑… 一个月码4w多行js+html+css，最多的一天有checkin近2000行js… 当然，那次2000行主要是用jQuery写业务代码，可能跟大牛比起来微不足道，但是我之前没经历过这样的压力，现在回想起来，也是段难得的经历。</p>
+
+<p>好了有点跑偏，这个项目后来在 <code class="highlighter-rouge">需求相对稳定</code> 的时候，相对得闲了，就想做些优化了…</p>
+
+<h2 id="section-1">项目结构的问题</h2>
+
+<p>当时的我接手后的项目结构是这样的：</p>
+
+<p><img src="/assets/images/6.png" alt="6.png" /></p>
+
+<p>如上图的项目目录，实际上并没有遵循 <code class="highlighter-rouge">fis-plus</code> 的 <code class="highlighter-rouge">模块规范</code>。　带来的问题是：</p>
+
+<ol>
+  <li>
+    <p>没有抽离公共模块和页面模块，页面和母版、插件等混杂在一起；</p>
+  </li>
+  <li>
+    <p>整个项目只有一个fis-conf.js配置文件（用于fis编译），每次改动要发布整个项目；如果项目加入optimize压缩静态资源等策略，则会特别耗时。就当时项目规模而言，采用md5/optimize压缩后，一次编译耗时接近3分钟。</p>
+  </li>
+  <li>
+    <p>没有使用组件化思想。具体如下：</p>
+
+    <ul>
+      <li>平台的前端母版页没有进行组件分离，header/footer的行为都集成在一个文件中，且未模块化，代码混乱；</li>
+      <li>有两个页面使用了左导航栏，但未进行组件化复用，造成效果不一；</li>
+    </ul>
+  </li>
+  <li>
+    <p>未进行模块化改造。具体如下：</p>
+
+    <ul>
+      <li>前端与后端交互的接口地址列表应该模块化并统一维护；</li>
+      <li>前端的各页面的预处理中，将产品线等urlParam的处理为一个全局变量window.util且与header/footer的行为混杂，难以解耦和维护；</li>
+      <li>前端的模块加载器采用fisp默认的mod.js, 不利于amd标准（一种通用的前端模块化标准）的模块化加载（如echart）。</li>
+      <li>前端现在所有插件基本均为一次加载全部，影响页面性能。</li>
+    </ul>
+  </li>
+</ol>
+
+<h2 id="section-2">具体的代码问题</h2>
+
+<p>页面代码问题，主要问题有以下几点：(涉及业务的已经略去)</p>
+
+<ol>
+  <li>代码没有结构化，UI、事件绑定和数据请求混杂在一起，代码注释少，维护难度大。</li>
+  <li>存在部分无用逻辑。</li>
+  <li>某些页面注册了多个domReady事件。</li>
+  <li>选择器存在多次重复使用的问题。</li>
+  <li>函数重复定义，如timeFormat。</li>
+  <li>某页面的 <code class="highlighter-rouge">树状表格</code> 重复N次DOM操作，渲染性能低下。如遇到稍大的表格，其渲染时间可超过5s，严重影响体验。</li>
+</ol>
+
+<h2 id="section-3">当时自己的一个失误</h2>
+
+<p>当时自己在写这篇重构文档时提到了一个问题，即页面加载速度缓慢。</p>
+
+<p>当时使用 <code class="highlighter-rouge">DevTool</code> 来观察页面加载时间时，发现：</p>
+
+<blockquote>
+  <p>所有页面的DomContentLoaded在4s左右，Load在5~6s之间。</p>
+
+  <p>卧槽，这也太慢了吧！</p>
+</blockquote>
+
+<p>当时我经过分析，应该是 <code class="highlighter-rouge">服务端</code> 的问题，不是前端问题。还给后端同学提了建议让他们去优化。结果证明，完全是我自己的问题，我也感到很羞愧。关于这个问题我也专门总结了一番，可以看我的 <a href="https://clancyz.github.io/blog/2015/09/08/The-reason-of-long-ttfb-spend/">这篇文章</a>。</p>
+
+<h2 id="section-4">优化过程</h2>
+
+<h3 id="section-5">组件化：</h3>
+
+<ol>
+  <li>抽离项目代码为common公共部分和页面部分；</li>
+  <li>抽离页面header和footer成为组件；</li>
+  <li>抽离可多页面共用的页面组件，如左导航成为组件；</li>
+  <li>表格组件优化，暴露出refresh接口，在新的ajax请求完成渲染表格后或翻页后触发refresh事件。</li>
+</ol>
+
+<h3 id="section-6">模块化：</h3>
+
+<ol>
+  <li>
+    <p>将预处理的js、需要在多个页面中使用中的函数进行模块化。
+如通用功能函数util； 时间函数timeformat；获取urlParam函数getUrlParam等。</p>
+  </li>
+  <li>
+    <p>页面js处理，将可以按需加载（用户点击时才加载）的js资源（如复制插件，绘图插件等）使用require.async异步加载。</p>
+  </li>
+</ol>
+
+<h3 id="section-7">工程化：</h3>
+
+<ol>
+  <li>
+    <p>打包策略：将资源打包，减少http请求。在打包的考虑中要同时考虑 <code class="highlighter-rouge">同类模块</code> ， <code class="highlighter-rouge">打包后的大小</code>　， <code class="highlighter-rouge">浏览器并发</code>　这三要素；目前的css可以全部进行打包；js文件如果全部打包会把不需要的js都加载，造成单页加载速度较慢，故将js打包策略集中于模块化的js。</p>
+  </li>
+  <li>
+    <p>时间戳缓存策略：页面资源打时间戳（天为单位）；这里不打md5戳的原因主要是上线比较频繁，如果打md5戳会造成源代码量增加过快。调整fis的roadmap.path中的query即可。</p>
+  </li>
+  <li>
+    <p>压缩策略（可选）：压缩代码，减少下载量。由于在局域网环境下资源加载速度较快，压缩后带来的优化并不大；而压缩混淆代码后如有线上问题，将不方便调试。现在没有线下黑盒环境，后续可考虑此措施。</p>
+  </li>
+  <li>
+    <p>改造fisp原生mod.js为amd模块加载器：</p>
+
+    <ul>
+      <li>改造为 <code class="highlighter-rouge">esl.js</code>　方便使用amd规范的插件如 <code class="highlighter-rouge">echarts</code></li>
+      <li>改造fis.conf中modules.postprocessor / settings.postprocessor</li>
+      <li>修改fis smarty插件中的FISResource.class.php为支持amd标准的模块加载</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="section-8">业务代码优化</h3>
+
+<h4 id="section-9">这里我主要是提出了一些　<code class="highlighter-rouge">代码规范</code>,　评审通过后要求大家遵循。</h4>
+
+<ol>
+  <li>首先，对页面代码（每个页面对应的jquery代码，不包含插件组件）做如下规范：
+    <ul>
+      <li>页面代码目录中static/* 中只允许有页面代码，不允许有公共组件。</li>
+      <li>与后端交互的接口路径统一放到config文件中。</li>
+      <li>页面代码使用require引入所需资源，页面tpl中不使用模板require引入资源；</li>
+      <li>页面代码需要使用自执行函数以防变量污染；</li>
+      <li>页面代码中第一行需要声明严格模式（use strict）；</li>
+      <li>代码中需要使用的jquery选择器统一定义在页面最上方；</li>
+      <li>代码中需要使用的页面级全局变量定义在页面最上方，选择器下部；</li>
+      <li>定义一个页面object变量，定义initUI()和bind()函数，执行加载UI与绑定事件两种功能；</li>
+      <li>定义一个fn的object用于写页面功能函数；</li>
+      <li>所有function均需要加入业务功能注释。</li>
+    </ul>
+  </li>
+  <li>
+    <p>对于某页面A：</p>
+
+    <ul>
+      <li>代码重构，优化代码逻辑，去掉无用逻辑。</li>
+      <li>页码计算的c方法去掉（可调用组件）。</li>
+      <li>函数整合。</li>
+    </ul>
+  </li>
+  <li>
+    <p>对于某页面B：</p>
+
+    <ul>
+      <li>代码重构，优化代码逻辑，去掉无用逻辑。</li>
+      <li>优化页面表格加载方式，使用模板引擎减少dom操作，加载完后再考虑二次处理。</li>
+    </ul>
+  </li>
+</ol>
+
+<h2 id="section-10">总结</h2>
+
+<p>以上便是整个重构优化的过程，可能没有结合具体的例子来讲，有些笼统；但是，经过这次重构和优化后，项目代码的结构更加清晰，易于部署，可维护性更好；页面普遍的加载速度快了1s以上。对自己也算是一次完整的重构经历，也有一定的成长。</p>
+
+
+</article>
+
+
+
+
+
+    
+  
+<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="某前端项目重构及性能优化记录" data-title="某前端项目重构及性能优化记录" data-url="http://clancyz.github.io/blog/2015/08/21/A-Project-refactor-notes/"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"clancyz"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end -->
+
+
+        
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+  <div class="p2 wrap">
+    <div class="measure mt1 center">
+      <small>
+        2016 Clancy Zhu
+      </small>
+    </div>
+  </div>
+</footer>
+
+
+
+</body>
+</html>
