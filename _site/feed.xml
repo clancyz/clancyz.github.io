@@ -417,6 +417,198 @@ fisp的规范下，原来设想应该这么写：&lt;/p&gt;
       </item>
     
       <item>
+        <title>大白话Javascript设计模式之单例模式(Singleton)</title>
+        <description>&lt;p&gt;传统上对单例模式的解释，就一句话：&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;一个类只能被实例化一次，且这个实例易于被外界访问。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;当然，我想写的这个系列叫 &lt;code class=&quot;highlighter-rouge&quot;&gt;大白话Javascript设计模式&lt;/code&gt; ，如果像以上这么写，我还不如直接上网上copy一堆来。&lt;/p&gt;
+
+&lt;p&gt;假如你是个玩过类似wow (魔兽世界)之类的玩家，下面这个例子就很好理解：&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;ul&gt;
+    &lt;li&gt;你建了个角色是个侏儒术士，　这个职业有个技能就是召唤一只宠物叫 &lt;code class=&quot;highlighter-rouge&quot;&gt;恶魔猎手&lt;/code&gt;。&lt;/li&gt;
+    &lt;li&gt;当你想召唤这只宠物出来的时候，你要使用你的技能&lt;code class=&quot;highlighter-rouge&quot;&gt;召唤恶魔&lt;/code&gt;。第一次使用这个技能时，你得耗费2s的 &lt;code class=&quot;highlighter-rouge&quot;&gt;施法时间&lt;/code&gt;。&lt;/li&gt;
+    &lt;li&gt;一旦你召唤出来之后，你想: 我要再召唤几只出来！
+于是你再次使用 &lt;code class=&quot;highlighter-rouge&quot;&gt;召唤恶魔&lt;/code&gt; 这个技能，此时使用此技能都是&lt;code class=&quot;highlighter-rouge&quot;&gt;瞬发&lt;/code&gt;的，就是不用再耗费2s啦。但是并没有什么卵用，还是只有原先那一只在那傻楞着看你。
+很简单，系统还能让你召唤个100只让你毁天毁地毁银河系啊，最多只能让你带一只！&lt;/li&gt;
+    &lt;li&gt;如果敌人把它打死了，然后你再使用 &lt;code class=&quot;highlighter-rouge&quot;&gt;召唤恶魔&lt;/code&gt;　时，又得耗费2s的施法时间，重新召唤。&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;section&quot;&gt;最简单例模式：恶魔猎手&lt;/h2&gt;
+
+&lt;p&gt;最简单的单例模式代码, 就是一个{}表示的object对象，即&lt;strong&gt;对象字面量&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;例如，你定义了一个&lt;code class=&quot;highlighter-rouge&quot;&gt;恶魔猎手&lt;/code&gt; 的对象字面量：&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;&lt;span class=&quot;c1&quot;&gt;// 代码1.1&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;DevilHunter&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;// 这货有100滴血。&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;hp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;// 这货只会一招，咬人&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;bite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// 验证之&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;nima&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;DevilHunter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;nidaye&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;DevilHunter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;consoel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;nima&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;===&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;nidaye&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// =&amp;gt; true&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;在这个例子中，比如你有只恶魔猎手宠物，你现在想叫它 &lt;code class=&quot;highlighter-rouge&quot;&gt;尼玛&lt;/code&gt; ，过了一会你觉得这名字不够霸气，又叫它 &lt;code class=&quot;highlighter-rouge&quot;&gt;尼大爷&lt;/code&gt;　，这也就是你一时爽，它还是那只傻楞的它…&lt;/p&gt;
+
+&lt;p&gt;术语上的解释：&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;非常明显，&lt;code class=&quot;highlighter-rouge&quot;&gt;尼玛&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;尼大爷&lt;/code&gt;都是DevilHunter的副本，对象字面量为javascript里面的 &lt;code class=&quot;highlighter-rouge&quot;&gt;引用类型&lt;/code&gt; ，它们都是个指向DevilHunter的指针。所以它们必然全等。
+（是不是感觉枯燥多了。。）&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;strong&gt;好，那上面的DevilHunter例子，有什么问题么？（话外音：同学们，这是送分题啊~）&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;很显然，DevilHunter中的所有属性和方法，都能被外界直接访问到。&lt;/p&gt;
+
+&lt;p&gt;换句话说，DevilHunter.bite()是调用它的&lt;code class=&quot;highlighter-rouge&quot;&gt;咬人&lt;/code&gt;方法，那问题是，我也希望它注意素质，不能乱咬人啊，我让它咬时它再咬。&lt;/p&gt;
+
+&lt;p&gt;要使用js从根本上解决这个问题，只能拿个东西把这些不想暴露在外面的属性或方法包起来，那么就是使用 &lt;code class=&quot;highlighter-rouge&quot;&gt;闭包&lt;/code&gt; 啦。&lt;/p&gt;
+
+&lt;h2 id=&quot;section-1&quot;&gt;使用闭包的单例模式&lt;/h2&gt;
+
+&lt;p&gt;这种方法使用了一个&lt;strong&gt;自执行函数&lt;/strong&gt;,在函数体内就可以定义私有变量了。
+因为js的执行作用域是&lt;strong&gt;函数级作用域&lt;/strong&gt;，说白了就是：&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;ul&gt;
+    &lt;li&gt;函数内部作用域可以访问外部作用域&lt;/li&gt;
+    &lt;li&gt;函数外部作用域访问不了内部作用域&lt;/li&gt;
+    &lt;li&gt;向上搜索作用域链，直到window&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;所以，在函数体内定义的变量才是真正的私有变量。
+代码如下：&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt; 
+&lt;span class=&quot;c1&quot;&gt;// 代码1.3&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;DevilHunter&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;hp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;bite&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// 只有我下令攻击的时候，再去咬人~&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;attackCall&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;bite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;})();&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;在这里，DevilHunter是一个立即执行的函数，最终的结果也是返回一个对象字面量。与之前的不同是，可以自由定义私有变量了。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;1.3的例子其实实用性已经不错了。那，还有什么可以改进的地方？&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;代码1.2和1.3的共有问题：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;有可能引起性能问题。&lt;/li&gt;
+  &lt;li&gt;仍然不是严格可实例化的类。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;为什么可能会有性能问题捏？&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;设想一个这样的场景，需要设计一个术士 &lt;code class=&quot;highlighter-rouge&quot;&gt;Warlock&lt;/code&gt; 类，它的作用是：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;可以通过&lt;code class=&quot;highlighter-rouge&quot;&gt;召唤恶魔&lt;/code&gt; 这个技能，召唤一只 &lt;code class=&quot;highlighter-rouge&quot;&gt;恶魔猎手&lt;/code&gt;。&lt;/li&gt;
+  &lt;li&gt;对外只暴露了一个&lt;code class=&quot;highlighter-rouge&quot;&gt;attack&lt;/code&gt; 方法，流程是：先召唤出来，再使用恶魔猎手去咬人。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;。那么，可以搞出以下一个版本的伪代码：&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt; 
+&lt;span class=&quot;c1&quot;&gt;// 代码1.4&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Warlock&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;//　先做一个初始化，即召唤它&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;devilHunter&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;callDevil&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+  &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;callDevil&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// 要2s时间才能召唤出来，这期间都在blablabla&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;blablabla&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;DevilHunter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;attack&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;devilHunter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;bite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;})();&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;可以明显地看出，1.4中的这个Warlock, 做了一些初始化步骤，产生了&lt;code class=&quot;highlighter-rouge&quot;&gt;devilHunter&lt;/code&gt;这只&lt;code class=&quot;highlighter-rouge&quot;&gt;恶魔猎手&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;在现实的开发过程中，使用singleton单例模式时，避免不了需要初始化一些步骤。&lt;/p&gt;
+
+&lt;p&gt;如果这个初始化步骤耗时比较长（举上面的例子为例，如果blablabla的过程中掉链子花了20秒呢？），就会引起一定性能问题。&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;这个性能问题一般是在定义一个需要 &lt;code class=&quot;highlighter-rouge&quot;&gt;加载众多配置项&lt;/code&gt; 或者 &lt;code class=&quot;highlighter-rouge&quot;&gt;读取大量数据&lt;/code&gt; 的Singleton时会出现。&lt;/p&gt;
+
+  &lt;p&gt;一般情况下，1.3的例子已经够用拉。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;在这种情况下，在脚本加载时，我们其实有其他优先级更高的事情做，,即我们希望叫恶魔猎手攻击的时候，再给我去做那些初始化(花2s时间召唤)的工作, 即所谓的 &lt;code class=&quot;highlighter-rouge&quot;&gt;lazyload&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;所以我们现在的需求是：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;保持DevilHunter实例唯一性的情况下，按需加载，使用时才实例化。&lt;/li&gt;
+  &lt;li&gt;对外暴露一个获取实例 &lt;code class=&quot;highlighter-rouge&quot;&gt;getInstance&lt;/code&gt;方法。在我们的例子中，即是召唤一只&lt;code class=&quot;highlighter-rouge&quot;&gt;恶魔猎手&lt;/code&gt;，所以这个获取实例方法叫 &lt;code class=&quot;highlighter-rouge&quot;&gt;callDevil&lt;/code&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Warlock&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;// 构造函数，也是闭包中的一个“私有类”&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;DevilHunter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;hp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;blabla&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//耗费2s&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;hp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;hp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;bite&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+ 
+  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;instance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;callDevil&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;hp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;instance&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;===&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;undefined&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;instance&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;DevilHunter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;hp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;instance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;attack&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;devilHunter&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Warlock&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;callDevil&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;devilHunter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;bite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;})();&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// 测试之&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;Warlock&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;callDevil&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;hp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt; 
+&lt;span class=&quot;c1&quot;&gt;// =&amp;gt; DevilHunter {hp: 100}&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;Warlock&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;getInstance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;hp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;200&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// =&amp;gt; SingletonConstructor {hp: 100} 未改变&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;以上。&lt;/p&gt;
+
+</description>
+        <pubDate>Mon, 28 Sep 2015 07:00:09 +0800</pubDate>
+        <link>http://clancyz.github.io/blog/2015/09/28/Javascript-Design-pattern-Singleton/</link>
+        <guid isPermaLink="true">http://clancyz.github.io/blog/2015/09/28/Javascript-Design-pattern-Singleton/</guid>
+      </item>
+    
+      <item>
         <title>TTFB响应时间缓慢，到底是谁的问题？</title>
         <description>&lt;h3 id=&quot;section&quot;&gt;问题发生的背景&lt;/h3&gt;
 

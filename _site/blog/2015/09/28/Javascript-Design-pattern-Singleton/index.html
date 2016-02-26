@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>大白话Javascript设计模式之单例模式(Singleton) &#8211; Clancy Zhu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="单例模式是JS开发时常用的，也是最简单的模式。大白话系列的开篇。">
+    <meta name="author" content="Clancy Zhu">
+    <meta name="keywords" content="blog">
+    <link rel="canonical" href="http://clancyz.github.io/blog/2015/09/28/Javascript-Design-pattern-Singleton/">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css" type="text/css">
+
+    <!-- Fonts -->
+    <link href='//fonts.useso.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.useso.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+      <link href="//libs.baidu.com/fontawesome/4.2.0/css/font-awesome.css" rel="stylesheet">
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="大白话Javascript设计模式之单例模式(Singleton)">
+    <meta property="og:description" content="Clancy Zhu's blog">
+    <meta property="og:url" content="http://clancyz.github.io/blog/2015/09/28/Javascript-Design-pattern-Singleton/">
+    <meta property="og:site_name" content="Clancy Zhu">
+    
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?552e4c4f02c7d240bdb63847dd7ea798";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</head>
+
+<body class="">
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="http://clancyz.github.io" class="site-title">Clancy Zhu</a>
+      <nav class="site-nav right">
+        <a href="/about/">About</a>
+<a href="/contact/">Contact</a>
+
+      </nav>
+      <div class="clearfix"></div>
+      
+        <div class="social-icons">
+  <div class="left">
+    
+      <a class="fa fa-github" href="https://github.com/clancyz"></a>
+    
+    <a class="fa fa-rss" href="/feed.xml"></a>
+    
+    
+    
+      <a class="fa fa-envelope" href="mailto:clancyzhu@me.com"></a>
+    
+    
+  </div>
+  <div class="right">
+    
+    
+    
+  </div>
+</div>
+<div class="clearfix"></div>
+
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        
+
+
+<div class="post-header mb2">
+  
+  <h1 class="py2">大白话Javascript设计模式之单例模式(Singleton)</h1>
+  
+  <span class="post-meta">09月 28日, 2015</span><br>
+  
+  <!-- <span class="post-meta small">2 minute read</span> -->
+</div>
+
+<article class="post-content">
+  <p>传统上对单例模式的解释，就一句话：</p>
+
+<blockquote>
+  <p>一个类只能被实例化一次，且这个实例易于被外界访问。</p>
+</blockquote>
+
+<p>当然，我想写的这个系列叫 <code class="highlighter-rouge">大白话Javascript设计模式</code> ，如果像以上这么写，我还不如直接上网上copy一堆来。</p>
+
+<p>假如你是个玩过类似wow (魔兽世界)之类的玩家，下面这个例子就很好理解：</p>
+
+<blockquote>
+  <ul>
+    <li>你建了个角色是个侏儒术士，　这个职业有个技能就是召唤一只宠物叫 <code class="highlighter-rouge">恶魔猎手</code>。</li>
+    <li>当你想召唤这只宠物出来的时候，你要使用你的技能<code class="highlighter-rouge">召唤恶魔</code>。第一次使用这个技能时，你得耗费2s的 <code class="highlighter-rouge">施法时间</code>。</li>
+    <li>一旦你召唤出来之后，你想: 我要再召唤几只出来！
+于是你再次使用 <code class="highlighter-rouge">召唤恶魔</code> 这个技能，此时使用此技能都是<code class="highlighter-rouge">瞬发</code>的，就是不用再耗费2s啦。但是并没有什么卵用，还是只有原先那一只在那傻楞着看你。
+很简单，系统还能让你召唤个100只让你毁天毁地毁银河系啊，最多只能让你带一只！</li>
+    <li>如果敌人把它打死了，然后你再使用 <code class="highlighter-rouge">召唤恶魔</code>　时，又得耗费2s的施法时间，重新召唤。</li>
+  </ul>
+</blockquote>
+
+<h2 id="section">最简单例模式：恶魔猎手</h2>
+
+<p>最简单的单例模式代码, 就是一个{}表示的object对象，即<strong>对象字面量</strong>。</p>
+
+<p>例如，你定义了一个<code class="highlighter-rouge">恶魔猎手</code> 的对象字面量：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// 代码1.1</span>
+<span class="kd">var</span> <span class="nx">DevilHunter</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="c1">// 这货有100滴血。</span>
+  <span class="na">hp</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+  <span class="c1">// 这货只会一招，咬人</span>
+  <span class="na">bite</span><span class="p">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+<span class="c1">// 验证之</span>
+<span class="kd">var</span> <span class="nx">nima</span> <span class="o">=</span> <span class="nx">DevilHunter</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">nidaye</span> <span class="o">=</span> <span class="nx">DevilHunter</span><span class="p">;</span>
+<span class="nx">consoel</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">nima</span> <span class="o">===</span> <span class="nx">nidaye</span><span class="p">)</span> <span class="c1">// =&gt; true</span></code></pre></figure>
+
+<p>在这个例子中，比如你有只恶魔猎手宠物，你现在想叫它 <code class="highlighter-rouge">尼玛</code> ，过了一会你觉得这名字不够霸气，又叫它 <code class="highlighter-rouge">尼大爷</code>　，这也就是你一时爽，它还是那只傻楞的它…</p>
+
+<p>术语上的解释：</p>
+
+<blockquote>
+  <p>非常明显，<code class="highlighter-rouge">尼玛</code>和<code class="highlighter-rouge">尼大爷</code>都是DevilHunter的副本，对象字面量为javascript里面的 <code class="highlighter-rouge">引用类型</code> ，它们都是个指向DevilHunter的指针。所以它们必然全等。
+（是不是感觉枯燥多了。。）</p>
+</blockquote>
+
+<p><strong>好，那上面的DevilHunter例子，有什么问题么？（话外音：同学们，这是送分题啊~）</strong></p>
+
+<p>很显然，DevilHunter中的所有属性和方法，都能被外界直接访问到。</p>
+
+<p>换句话说，DevilHunter.bite()是调用它的<code class="highlighter-rouge">咬人</code>方法，那问题是，我也希望它注意素质，不能乱咬人啊，我让它咬时它再咬。</p>
+
+<p>要使用js从根本上解决这个问题，只能拿个东西把这些不想暴露在外面的属性或方法包起来，那么就是使用 <code class="highlighter-rouge">闭包</code> 啦。</p>
+
+<h2 id="section-1">使用闭包的单例模式</h2>
+
+<p>这种方法使用了一个<strong>自执行函数</strong>,在函数体内就可以定义私有变量了。
+因为js的执行作用域是<strong>函数级作用域</strong>，说白了就是：</p>
+
+<blockquote>
+  <ul>
+    <li>函数内部作用域可以访问外部作用域</li>
+    <li>函数外部作用域访问不了内部作用域</li>
+    <li>向上搜索作用域链，直到window</li>
+  </ul>
+</blockquote>
+
+<p>所以，在函数体内定义的变量才是真正的私有变量。
+代码如下：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"> 
+<span class="c1">// 代码1.3</span>
+<span class="kd">var</span> <span class="nx">DevilHunter</span> <span class="o">=</span> <span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">hp</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
+  <span class="kd">var</span> <span class="nx">bite</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="p">};</span>
+  <span class="k">return</span> <span class="p">{</span>
+    <span class="c1">// 只有我下令攻击的时候，再去咬人~</span>
+    <span class="na">attackCall</span><span class="p">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+      <span class="nx">bite</span><span class="p">();</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">})();</span></code></pre></figure>
+
+<p>在这里，DevilHunter是一个立即执行的函数，最终的结果也是返回一个对象字面量。与之前的不同是，可以自由定义私有变量了。</p>
+
+<p><strong>1.3的例子其实实用性已经不错了。那，还有什么可以改进的地方？</strong></p>
+
+<p>代码1.2和1.3的共有问题：</p>
+
+<ul>
+  <li>有可能引起性能问题。</li>
+  <li>仍然不是严格可实例化的类。</li>
+</ul>
+
+<blockquote>
+  <p>为什么可能会有性能问题捏？</p>
+</blockquote>
+
+<p>设想一个这样的场景，需要设计一个术士 <code class="highlighter-rouge">Warlock</code> 类，它的作用是：</p>
+
+<ul>
+  <li>可以通过<code class="highlighter-rouge">召唤恶魔</code> 这个技能，召唤一只 <code class="highlighter-rouge">恶魔猎手</code>。</li>
+  <li>对外只暴露了一个<code class="highlighter-rouge">attack</code> 方法，流程是：先召唤出来，再使用恶魔猎手去咬人。</li>
+</ul>
+
+<p>。那么，可以搞出以下一个版本的伪代码：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"> 
+<span class="c1">// 代码1.4</span>
+<span class="kd">var</span> <span class="nx">Warlock</span> <span class="o">=</span> <span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="c1">//　先做一个初始化，即召唤它</span>
+  <span class="kd">var</span> <span class="nx">devilHunter</span> <span class="o">=</span> <span class="nx">callDevil</span><span class="p">();</span>
+
+  <span class="kd">function</span> <span class="nx">callDevil</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// 要2s时间才能召唤出来，这期间都在blablabla</span>
+    <span class="nx">blablabla</span><span class="p">();</span>
+    <span class="k">return</span> <span class="nx">DevilHunter</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="p">{</span>
+    <span class="na">attack</span><span class="p">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+      <span class="nx">devilHunter</span><span class="p">.</span><span class="nx">bite</span><span class="p">();</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">})();</span></code></pre></figure>
+
+<p>可以明显地看出，1.4中的这个Warlock, 做了一些初始化步骤，产生了<code class="highlighter-rouge">devilHunter</code>这只<code class="highlighter-rouge">恶魔猎手</code>。</p>
+
+<p>在现实的开发过程中，使用singleton单例模式时，避免不了需要初始化一些步骤。</p>
+
+<p>如果这个初始化步骤耗时比较长（举上面的例子为例，如果blablabla的过程中掉链子花了20秒呢？），就会引起一定性能问题。</p>
+
+<blockquote>
+  <p>这个性能问题一般是在定义一个需要 <code class="highlighter-rouge">加载众多配置项</code> 或者 <code class="highlighter-rouge">读取大量数据</code> 的Singleton时会出现。</p>
+
+  <p>一般情况下，1.3的例子已经够用拉。</p>
+</blockquote>
+
+<p>在这种情况下，在脚本加载时，我们其实有其他优先级更高的事情做，,即我们希望叫恶魔猎手攻击的时候，再给我去做那些初始化(花2s时间召唤)的工作, 即所谓的 <code class="highlighter-rouge">lazyload</code>。</p>
+
+<p>所以我们现在的需求是：</p>
+
+<ul>
+  <li>保持DevilHunter实例唯一性的情况下，按需加载，使用时才实例化。</li>
+  <li>对外暴露一个获取实例 <code class="highlighter-rouge">getInstance</code>方法。在我们的例子中，即是召唤一只<code class="highlighter-rouge">恶魔猎手</code>，所以这个获取实例方法叫 <code class="highlighter-rouge">callDevil</code>。</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">Warlock</span> <span class="o">=</span> <span class="p">(</span><span class="kd">function</span> <span class="p">(){</span>
+  <span class="c1">// 构造函数，也是闭包中的一个“私有类”</span>
+  <span class="kd">function</span> <span class="nx">DevilHunter</span><span class="p">(</span><span class="nx">hp</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">blabla</span><span class="p">();</span> <span class="c1">//耗费2s</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">hp</span> <span class="o">=</span> <span class="nx">hp</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">bite</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(){</span>
+    <span class="p">};</span>
+  <span class="p">}</span>
+ 
+  <span class="kd">var</span> <span class="nx">instance</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="p">{</span>
+    <span class="na">callDevil</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">hp</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span><span class="p">(</span> <span class="nx">instance</span> <span class="o">===</span> <span class="kc">undefined</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="nx">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">DevilHunter</span><span class="p">(</span><span class="nx">hp</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="k">return</span> <span class="nx">instance</span><span class="p">;</span>
+    <span class="p">},</span>
+    <span class="na">attack</span><span class="p">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">devilHunter</span> <span class="o">=</span> <span class="nx">Warlock</span><span class="p">.</span><span class="nx">callDevil</span><span class="p">();</span>
+      <span class="nx">devilHunter</span><span class="p">.</span><span class="nx">bite</span><span class="p">();</span>
+    <span class="p">}</span>
+  <span class="p">};</span>
+<span class="p">})();</span>
+
+<span class="c1">// 测试之</span>
+<span class="nx">Warlock</span><span class="p">.</span><span class="nx">callDevil</span><span class="p">({</span><span class="na">hp</span><span class="p">:</span> <span class="mi">100</span><span class="p">})</span> 
+<span class="c1">// =&gt; DevilHunter {hp: 100}</span>
+<span class="nx">Warlock</span><span class="p">.</span><span class="nx">getInstance</span><span class="p">({</span><span class="na">hp</span><span class="p">:</span> <span class="mi">200</span><span class="p">})</span>
+<span class="c1">// =&gt; SingletonConstructor {hp: 100} 未改变</span></code></pre></figure>
+
+<p>以上。</p>
+
+
+</article>
+
+
+
+
+
+    
+  
+<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="大白话Javascript设计模式之单例模式(Singleton)" data-title="大白话Javascript设计模式之单例模式(Singleton)" data-url="http://clancyz.github.io/blog/2015/09/28/Javascript-Design-pattern-Singleton/"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"clancyz"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end -->
+
+
+        
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+  <div class="p2 wrap">
+    <div class="measure mt1 center">
+      <small>
+        2016 Clancy Zhu
+      </small>
+    </div>
+  </div>
+</footer>
+
+
+
+</body>
+</html>
