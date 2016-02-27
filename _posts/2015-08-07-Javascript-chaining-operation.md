@@ -2,7 +2,7 @@
 layout:     post
 title:      Javascript链式操作的实现
 date:       2015-08-07 15:16:23
-summary:    我面试时问过候选人的问题：怎么实现链式操作？
+summary:    链式操作想必很多人都熟悉，但是怎么自己去实现呢？很简单。
 categories: blog
 ---
 

@@ -6,7 +6,7 @@ title: 简明深入Function.prototype.bind
 
 date: 2015-08-12 22:25:11
 
-summary: Function.prototype.bind也是我面试是常常问候选人的问题之一。因为这个问题可以“一直问下去”。
+summary: 深入理解了Function.prototype.bind，你的js就不再是「小白」水平了。
 
 categories: blog
 
