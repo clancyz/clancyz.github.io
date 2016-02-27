@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>简明深入Function.prototype.bind &#8211; Clancy Zhu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Function.prototype.bind也是我面试是常常问候选人的问题之一。因为这个问题可以“一直问下去”。">
+    <meta name="author" content="Clancy Zhu">
+    <meta name="keywords" content="blog">
+    <link rel="canonical" href="http://clancyz.github.io/blog/2015/08/13/function-prototype-bind/">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css" type="text/css">
+
+    <!-- Fonts -->
+    <link href='//fonts.useso.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.useso.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+      <link href="//libs.baidu.com/fontawesome/4.2.0/css/font-awesome.css" rel="stylesheet">
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="简明深入Function.prototype.bind">
+    <meta property="og:description" content="Clancy Zhu's blog">
+    <meta property="og:url" content="http://clancyz.github.io/blog/2015/08/13/function-prototype-bind/">
+    <meta property="og:site_name" content="Clancy Zhu">
+    
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?552e4c4f02c7d240bdb63847dd7ea798";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</head>
+
+<body class="">
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="http://clancyz.github.io" class="site-title">Clancy Zhu</a>
+      <nav class="site-nav right">
+        <a href="/about/">About</a>
+<a href="/contact/">Contact</a>
+
+      </nav>
+      <div class="clearfix"></div>
+      
+        <div class="social-icons">
+  <div class="left">
+    
+      <a class="fa fa-github" href="https://github.com/clancyz"></a>
+    
+    <a class="fa fa-rss" href="/feed.xml"></a>
+    
+    
+    
+      <a class="fa fa-envelope" href="mailto:clancyzhu@me.com"></a>
+    
+    
+  </div>
+  <div class="right">
+    
+    
+    
+  </div>
+</div>
+<div class="clearfix"></div>
+
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        
+
+
+<div class="post-header mb2">
+  
+  <h1 class="py2">简明深入Function.prototype.bind</h1>
+  
+  <span class="post-meta">08月 13日, 2015</span><br>
+  
+  <!-- <span class="post-meta small">8 minute read</span> -->
+</div>
+
+<article class="post-content">
+  <h2 id="section">面试场景</h2>
+
+<p>对于这个话题，我面试时常会按照以下的顺序来对候选人进行提问：</p>
+
+<blockquote>
+  <ul>
+    <li>说一下对Javascript中的 <code class="highlighter-rouge">this</code> 关键字的理解。– 答对，30分</li>
+    <li>如果能说出来 <code class="highlighter-rouge">this</code> 的作用，那么，手写两段程序，说明 <code class="highlighter-rouge">this</code> 啥时候指向原对象，啥时候指向 <code class="highlighter-rouge">window</code> 。– 答对，50分</li>
+    <li>有什么方式可以改变 <code class="highlighter-rouge">this</code> 的指向？ –　答对，70分</li>
+    <li>引出 <code class="highlighter-rouge">Function.prototype.bind</code> , 是否有用过，怎么用　–　答对，80分</li>
+    <li>写一个 <code class="highlighter-rouge">Function.prototype.bind</code> 的 <code class="highlighter-rouge">polyfill</code> (浏览器兼容方案)。 – 写得基本正确能运行，100分</li>
+    <li>能考虑到constructor模式调用 – 120分!</li>
+  </ul>
+</blockquote>
+
+<p>下面是我的一些理解。</p>
+
+<h2 id="this">this关键字</h2>
+
+<p><code class="highlighter-rouge">this</code> 关键字表示当前调用函数或方法的所有者。this的值取决于它的 <code class="highlighter-rouge">调用模式</code> 。</p>
+
+<blockquote>
+  <ul>
+    <li>对于一个全局函数，表示的就是 <code class="highlighter-rouge">window</code> 对象；</li>
+    <li>对于一个对象的方法，表示的是该对象的实例；</li>
+    <li>在一个事件句柄中，表示的是接收到该事件的元素。</li>
+    <li>对于一个类的实例，表示的是该类的对象。</li>
+  </ul>
+</blockquote>
+
+<p>举例说明。</p>
+
+<h3 id="section-1">函数调用模式</h3>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">cat</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="s1">'miaomiao'</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// =&gt; window</span></code></pre></figure>
+
+<p>即上面的第1条规则。</p>
+
+<h3 id="section-2">方法调用模式</h3>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">cat</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">name</span><span class="p">:</span> <span class="s1">'miaomiao'</span><span class="p">,</span>
+  <span class="na">sleep</span><span class="p">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+    <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">name</span> <span class="o">+</span> <span class="s1">'is sleeping'</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="nx">cat</span><span class="p">.</span><span class="nx">sleep</span><span class="p">();</span>
+<span class="c1">// =&gt; cat</span></code></pre></figure>
+
+<p>即上面的第2条规则。</p>
+
+<h3 id="section-3">事件句柄模式</h3>
+
+<figure class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;a</span> <span class="na">id=</span><span class="s">"lk"</span> <span class="na">href=</span><span class="s">"https://www.baidu.com"</span><span class="nt">&gt;</span>click me<span class="nt">&lt;/a&gt;</span></code></pre></figure>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">link</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">'lk'</span><span class="p">);</span>
+        <span class="nx">link</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">'click'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">e</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">href</span><span class="p">);</span>
+        <span class="p">})</span>
+<span class="c1">//=&gt; &lt;a id="lk" href="https://www.baidu.com"&gt;click me&lt;/a&gt;</span>
+<span class="c1">//=&gt; https://www.baidu.com</span></code></pre></figure>
+
+<p>即上面的第3条规则。</p>
+
+<h3 id="section-4">构造器调用模式</h3>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">cat</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="s1">'miaomiao'</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">var</span> <span class="nx">myCat</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">cat</span><span class="p">();</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">myCat</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span>
+<span class="c1">// =&gt; miaomiao, 这里this指向了cat</span>
+<span class="c1">// =&gt; undefined, 说明没指向window.</span></code></pre></figure>
+
+<p>即上面的第4条规则。</p>
+
+<h3 id="thisapplycall">改变this的指向：apply/call</h3>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">getName</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="nx">name</span><span class="p">;</span>
+<span class="err">　</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="kd">var</span> <span class="nx">foo</span> <span class="o">=</span> <span class="p">{</span><span class="na">name</span><span class="p">:</span> <span class="s1">'hehe'</span><span class="p">};</span> 
+<span class="nx">getName</span><span class="p">(</span><span class="s1">'xixi'</span><span class="p">);</span>
+<span class="c1">// =&gt; Window</span>
+<span class="c1">// =&gt; Window</span>
+
+<span class="nx">getName</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">foo</span><span class="p">,</span> <span class="s1">'xixi'</span><span class="p">);</span>
+
+<span class="c1">// =&gt; Object {name: "hehe"}</span>
+<span class="c1">// =&gt; Object {name: "xixi"}</span></code></pre></figure>
+
+<p>上面这个例子中，调用 <code class="highlighter-rouge">getName.call(foo, 'xixi')</code> 时，在getName函数中的<code class="highlighter-rouge">this</code>就指向了<code class="highlighter-rouge">foo</code>; 所以再执行<code class="highlighter-rouge">this.name = name</code> 后，<code class="highlighter-rouge">foo</code> 对象的 <code class="highlighter-rouge">name</code> 相应地做出改变。</p>
+
+<h3 id="thisbind">改变this的指向：bind</h3>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">getName</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="nx">name</span><span class="p">;</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kd">var</span> <span class="nx">foo</span> <span class="o">=</span> <span class="p">{</span><span class="na">name</span><span class="p">:</span> <span class="s1">'hehe'</span><span class="p">};</span>
+
+<span class="kd">var</span> <span class="nx">bar</span> <span class="o">=</span> <span class="nx">getName</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="nx">foo</span><span class="p">);</span>
+<span class="nx">bar</span><span class="p">(</span><span class="s1">'xixi'</span><span class="p">);</span>
+
+<span class="c1">// =&gt; Object {name: "hehe"}</span>
+<span class="c1">// =&gt; Object {name: "xixi"}</span></code></pre></figure>
+
+<p>上面这个例子中，调用 <code class="highlighter-rouge">getName.bind</code> 后，就把<code class="highlighter-rouge">this</code> 绑定到了 <code class="highlighter-rouge">foo</code> 上。产生的结果和apply/call是一样的。</p>
+
+<p>当然，上面这个例子是在 最新版的<code class="highlighter-rouge">chrome</code>下测试的。IE9以下的浏览器是不兼容的。</p>
+
+<p><code class="highlighter-rouge">Function.prototype.bind</code> 的具体浏览器兼容性请见<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind">这里</a>。</p>
+
+<h2 id="polyfill-functionprototypebind">Polyfill: Function.prototype.bind</h2>
+
+<p>你要写一个兼容旧浏览器的Function.prototype.bind，总得知道它怎么调用吧！</p>
+
+<p>调用如下：</p>
+
+<blockquote>
+  <p>fun.bind(thisArg[, arg1[, arg2[, …]]])</p>
+</blockquote>
+
+<p><code class="highlighter-rouge">thisArg</code> 表示要把<code class="highlighter-rouge">this</code>绑定到 <code class="highlighter-rouge">thisArg</code>；第二个以及以后的参数<code class="highlighter-rouge">arg1, arg2, ... </code>加上绑定函数运行时本身的参数按照顺序作为原函数的参数来调用原函数。</p>
+
+<p>那么这个顺序具体是什么样的呢？</p>
+
+<blockquote>
+  <p>arg1, arg2…argN 在前，绑定函数运行时本身的参数在后。</p>
+</blockquote>
+
+<p>看一个具体例子来验证：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">getName</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">arguments</span><span class="p">);</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="nx">name</span><span class="p">;</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kd">var</span> <span class="nx">foo</span> <span class="o">=</span> <span class="p">{</span><span class="na">name</span><span class="p">:</span> <span class="s1">'hehe'</span><span class="p">};</span>
+
+<span class="kd">var</span> <span class="nx">bar</span> <span class="o">=</span> <span class="nx">getName</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="nx">foo</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+<span class="nx">bar</span><span class="p">(</span><span class="s1">'xixi'</span><span class="p">);</span>
+
+<span class="c1">// =&gt; Object {name: "hehe"}</span>
+<span class="c1">// =&gt; [1, 2, 3, "xixi"]</span>
+<span class="c1">// =&gt; Object {name: 1}</span></code></pre></figure>
+
+<p>输出了<code class="highlighter-rouge">[1, 2, 3, "xixi"]</code>。验证了这个结论。</p>
+
+<h3 id="mdnpolyfill">MDN的polyfill解释</h3>
+
+<p>下面是MDN的polyfill，咱们有了上面的例子，就比较好理解了：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nb">Function</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">bind</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nb">Function</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">bind</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">oThis</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="k">this</span> <span class="o">!==</span> <span class="s2">"function"</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// closest thing possible to the ECMAScript 5</span>
+      <span class="c1">// internal IsCallable function</span>
+      <span class="k">throw</span> <span class="k">new</span> <span class="nx">TypeError</span><span class="p">(</span><span class="s2">"Function.prototype.bind - what is trying to be bound is not callable"</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">var</span> <span class="nx">aArgs</span> <span class="o">=</span> <span class="nb">Array</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">arguments</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> 
+        <span class="nx">fToBind</span> <span class="o">=</span> <span class="k">this</span><span class="p">,</span> 
+        <span class="nx">fNOP</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{},</span>
+        <span class="nx">fBound</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+          <span class="k">return</span> <span class="nx">fToBind</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="k">this</span> <span class="k">instanceof</span> <span class="nx">fNOP</span>
+                                 <span class="p">?</span> <span class="k">this</span>
+                                 <span class="p">:</span> <span class="nx">oThis</span> <span class="o">||</span> <span class="k">this</span><span class="p">,</span>
+                               <span class="nx">aArgs</span><span class="p">.</span><span class="nx">concat</span><span class="p">(</span><span class="nb">Array</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">arguments</span><span class="p">)));</span>
+        <span class="p">};</span>
+
+    <span class="nx">fNOP</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">prototype</span><span class="p">;</span>
+    <span class="nx">fBound</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">fNOP</span><span class="p">();</span>
+
+    <span class="k">return</span> <span class="nx">fBound</span><span class="p">;</span>
+  <span class="p">};</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>里面有几个重要的点，我逐条说明：</p>
+
+<ol>
+  <li>首先判断是否原生支持，判断调用 <code class="highlighter-rouge">bind</code> 的是不是一个<code class="highlighter-rouge">function</code>类型等，略</li>
+  <li><code class="highlighter-rouge">Array.prototype.slice.call(arguments,1)</code> 这一句：
+    <ul>
+      <li>把 <code class="highlighter-rouge">arguments</code> 这个伪数组，除了第1个参数后的所有参数取出为一个数组。
+        <ul>
+          <li><code class="highlighter-rouge">aArgs</code>有啥用，留着后面合并啊，看上面的[1,2,3,”xixi”]的例子~</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><code class="highlighter-rouge">fToBind = this</code> : 当前这个待bind的对象；</li>
+  <li><code class="highlighter-rouge">fNOP</code> 我不知道它为啥要起这个名，是啥的缩写？这个东东要和下面的两句 <code class="highlighter-rouge">fNOP = prototype = this.prototype</code> , <code class="highlighter-rouge">fBound.prototype = new fNOP()</code> 一起看，这一看就明白，<code class="highlighter-rouge">fNOP</code>是当前待bind函数的一个原型副本， <code class="highlighter-rouge">fBound</code> 继承了 <code class="highlighter-rouge">fNOP</code>。　最后把 <code class="highlighter-rouge">fBound</code> 返回。<code class="highlighter-rouge">fBound</code>是个函数，因为<code class="highlighter-rouge">bind</code>的结果还是个函数嘛！</li>
+  <li>好了，中间这一句，总体看是这样：<code class="highlighter-rouge">return fToBind.apply(this, arguments)</code>; 这个arguments就是用<code class="highlighter-rouge">aArgs</code>和绑定函数运行时的函数给<code class="highlighter-rouge">concat</code>组合起来了。</li>
+</ol>
+
+<p>看了上面的分析可能有些童鞋会有疑问：</p>
+
+<blockquote>
+  <p>　为啥要搞个<code class="highlighter-rouge">fNOP</code>出来，然后 <code class="highlighter-rouge">fBound</code>去继承它？</p>
+
+  <p>　为什么不能直接 <code class="highlighter-rouge">fBound.prototype = this.prototype</code>　， 然后返回<code class="highlighter-rouge">fBound</code>？</p>
+</blockquote>
+
+<p>哎，童鞋，你还是太单纯呐。</p>
+
+<p>要是按你那么搞，因为<code class="highlighter-rouge">prototype</code>是个<code class="highlighter-rouge">引用类型</code>，<code class="highlighter-rouge">fBound</code>又能被外界访问到的话，如果我来个<code class="highlighter-rouge">fBound.prototype = shit</code> 之类的，你让 <code class="highlighter-rouge">this.prototype</code> 情何以堪呐。</p>
+
+<blockquote>
+  <p>这里<code class="highlighter-rouge">fNOP</code>作为私有变量，就杜绝了改变<code class="highlighter-rouge">this.prototype</code>的可能性。</p>
+</blockquote>
+
+<h4 id="polyfill">polyfill中的主要难点</h4>
+
+<p>好，那这里的一个__<em>主要的难点</em>__是：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="k">this</span> <span class="k">instanceof</span> <span class="nx">fNOP</span>
+    <span class="p">?</span> <span class="k">this</span>
+    <span class="p">:</span> <span class="nx">oThis</span> <span class="o">||</span> <span class="k">this</span></code></pre></figure>
+
+<p>此时<code class="highlighter-rouge">fNOP</code> 它是一个<code class="highlighter-rouge">空函数</code>。</p>
+
+<ul>
+  <li>解读上面这一句的用意：</li>
+</ul>
+
+<ol>
+  <li>如果 <code class="highlighter-rouge">this</code>　是 <code class="highlighter-rouge">fNOP</code> 的实例，那么就是<code class="highlighter-rouge">this</code></li>
+  <li>否则就是 <code class="highlighter-rouge">oThis</code> ,如果<code class="highlighter-rouge">oThis</code>为<code class="highlighter-rouge">null</code>或者<code class="highlighter-rouge">undefined</code>,　那么就是<code class="highlighter-rouge">this</code></li>
+</ol>
+
+<p>那么问题来了：</p>
+
+<blockquote>
+  <p><code class="highlighter-rouge">this instanceof fNOP</code>  这是在干毛？</p>
+
+  <p>为什么我要去判断<code class="highlighter-rouge">this</code>是不是一个<code class="highlighter-rouge">空函数</code>的实例？</p>
+
+  <p>这判断有啥用？</p>
+
+  <p>我为啥不直接写成oThis || this ?</p>
+</blockquote>
+
+<p>好，那我们就把MDN上polyfill的这段去掉。为了便于测试，我们把<code class="highlighter-rouge">bind</code> 改成 <code class="highlighter-rouge">myBind</code>　：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="nb">Function</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">myBind</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">oThis</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="k">this</span> <span class="o">!==</span> <span class="s2">"function"</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">throw</span> <span class="k">new</span> <span class="nx">TypeError</span><span class="p">(</span><span class="s2">"Function.prototype.bind - what is trying to be bound is not callable"</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">var</span> <span class="nx">aArgs</span> <span class="o">=</span> <span class="nb">Array</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">arguments</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> 
+        <span class="nx">fToBind</span> <span class="o">=</span> <span class="k">this</span><span class="p">,</span> 
+        <span class="nx">fNOP</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{},</span>
+        <span class="nx">fBound</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+          <span class="c1">//　把那个instanceof判断去掉</span>
+          <span class="k">return</span> <span class="nx">fToBind</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">oThis</span> <span class="o">||</span> <span class="k">this</span><span class="p">,</span>
+            <span class="nx">aArgs</span><span class="p">.</span><span class="nx">concat</span><span class="p">(</span><span class="nb">Array</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">arguments</span><span class="p">)));</span>
+        <span class="p">};</span>
+
+    <span class="nx">fNOP</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">prototype</span><span class="p">;</span>
+    <span class="nx">fBound</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">fNOP</span><span class="p">();</span>
+
+    <span class="k">return</span> <span class="nx">fBound</span><span class="p">;</span>
+  <span class="p">};</span></code></pre></figure>
+
+<p>好了看下面的例子：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">getName</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="nx">name</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="kd">var</span> <span class="nx">foo</span> <span class="o">=</span> <span class="p">{};</span>
+
+<span class="kd">var</span> <span class="nx">bar</span> <span class="o">=</span> <span class="nx">getName</span><span class="p">.</span><span class="nx">myBind</span><span class="p">(</span><span class="nx">foo</span><span class="p">);</span>
+
+<span class="nx">bar</span><span class="p">(</span><span class="s1">'hehe'</span><span class="p">);</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">foo</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span>
+<span class="c1">// =&gt; hehe</span></code></pre></figure>
+
+<p>这是显然的嘛。<code class="highlighter-rouge">myBind</code>函数也工作得很好。</p>
+
+<blockquote>
+  <p>那么，我们使用<code class="highlighter-rouge">new</code> 构造器来调用绑定后的函数<code class="highlighter-rouge">bar</code>，会发生啥呢？</p>
+</blockquote>
+
+<p>在上面的程序下面继续：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">xixi</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">bar</span><span class="p">(</span><span class="s1">'xixi'</span><span class="p">);</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">foo</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span>
+<span class="c1">// =&gt; xixi, foo的name变成了xixi!</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">xixi</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span>
+<span class="c1">// =&gt; undefined</span></code></pre></figure>
+
+<p>上面的例子显而易见，我们当然希望<code class="highlighter-rouge">foo.name</code>仍然是<code class="highlighter-rouge">hehe</code>, 而<code class="highlighter-rouge">xixi.name</code>是<code class="highlighter-rouge">xixi</code>。
+说明我们的<code class="highlighter-rouge">myBind</code>函数在这种情况下不好使了。</p>
+
+<blockquote>
+  <p>这说明啥？说明咱们用<code class="highlighter-rouge">new</code>构造器来调用<code class="highlighter-rouge">bar</code>时，绑定的<code class="highlighter-rouge">this</code>还是<code class="highlighter-rouge">foo</code>。</p>
+</blockquote>
+
+<p>我们在<code class="highlighter-rouge">chrome</code>下用原生的<code class="highlighter-rouge">bind</code>函数试一次：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">getName</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="nx">name</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="kd">var</span> <span class="nx">foo</span> <span class="o">=</span> <span class="p">{};</span>
+
+<span class="kd">var</span> <span class="nx">bar</span> <span class="o">=</span> <span class="nx">getName</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="nx">foo</span><span class="p">);</span>
+
+<span class="nx">bar</span><span class="p">(</span><span class="s1">'hehe'</span><span class="p">);</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">foo</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span>
+<span class="c1">// =&gt; hehe</span>
+
+<span class="kd">var</span> <span class="nx">xixi</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">bar</span><span class="p">(</span><span class="s1">'xixi'</span><span class="p">);</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">foo</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span>
+<span class="c1">// =&gt; hehe   还是hehe</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">xixi</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span>
+<span class="c1">// =&gt; xixi</span></code></pre></figure>
+
+<p>可见，<code class="highlighter-rouge">bind</code> 函数正确绑定在了<code class="highlighter-rouge">xixi</code>上。</p>
+
+<p>这样，我们再回头来看<code class="highlighter-rouge">this instanceof fNOP</code> 在对绑定函数执行<code class="highlighter-rouge">new</code>下调用会是啥结果：</p>
+
+<p>那就相当于执行了这么一句：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="k">new</span> <span class="kd">function</span><span class="p">(</span><span class="nx">oThis</span><span class="p">){</span>
+  <span class="c1">//...</span>
+  <span class="k">return</span> <span class="nx">fBound</span><span class="p">;</span>
+<span class="p">}();</span></code></pre></figure>
+
+<p>显然，这时得到的是<code class="highlighter-rouge">fBound</code>。<code class="highlighter-rouge">fBound</code>是个啥呢？是个function(){…}。</p>
+
+<blockquote>
+  <p>那么执行<code class="highlighter-rouge">this instanceof fNOP</code> 相当于<code class="highlighter-rouge">fBound instaceof fNOP</code></p>
+
+  <p>是<code class="highlighter-rouge">true</code> !</p>
+</blockquote>
+
+<p>如果为<code class="highlighter-rouge">true</code> 那么就绑定在<code class="highlighter-rouge">oThis</code>或<code class="highlighter-rouge">this</code>上，优先<code class="highlighter-rouge">oThis</code>;</p>
+
+<p>即传进的参数，在我们的例子里面，就是<code class="highlighter-rouge">xixi</code>。</p>
+
+<p>所以可以得出结论：<code class="highlighter-rouge">this instanceof fNOP</code> 这个判断分支是为了在用<code class="highlighter-rouge">new</code>调用绑定函数的情况下而生的。</p>
+
+<h2 id="section-5">总结</h2>
+
+<p><code class="highlighter-rouge">Function.prototype.bind</code> 可以引申出很多的知识点， 甚至可以认为：</p>
+
+<blockquote>
+  <p>熟悉了这些知识点， 你的js就不再是 <code class="highlighter-rouge">小白</code> 水平了。</p>
+</blockquote>
+
+<p>写这篇文章前专门网上走了一圈，发现没有对MDN的polyfill的详细解释，所以才打算写~</p>
+
+<p>希望俺这篇文章能让你有所收获~</p>
+
+<p>以上。</p>
+
+
+</article>
+
+
+
+
+
+    
+  
+<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="简明深入Function.prototype.bind" data-title="简明深入Function.prototype.bind" data-url="http://clancyz.github.io/blog/2015/08/13/function-prototype-bind/"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"clancyz"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end -->
+
+
+        
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+  <div class="p2 wrap">
+    <div class="measure mt1 center">
+      <small>
+        2016 Clancy Zhu
+      </small>
+    </div>
+  </div>
+</footer>
+
+
+
+</body>
+</html>
