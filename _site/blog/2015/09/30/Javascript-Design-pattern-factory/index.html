@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>大白话Javascript设计模式之工厂模式(factory) &#8211; Clancy Zhu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="大白话Javascript设计模式系列之-- 工厂模式。 工厂模式是js开发中使用最广泛的模式之一。">
+    <meta name="author" content="Clancy Zhu">
+    <meta name="keywords" content="blog">
+    <link rel="canonical" href="http://clancyz.github.io/blog/2015/09/30/Javascript-Design-pattern-factory/">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css" type="text/css">
+
+    <!-- Fonts -->
+    <link href='//fonts.useso.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.useso.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+      <link href="//libs.baidu.com/fontawesome/4.2.0/css/font-awesome.css" rel="stylesheet">
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="大白话Javascript设计模式之工厂模式(factory)">
+    <meta property="og:description" content="Clancy Zhu's blog">
+    <meta property="og:url" content="http://clancyz.github.io/blog/2015/09/30/Javascript-Design-pattern-factory/">
+    <meta property="og:site_name" content="Clancy Zhu">
+    
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?552e4c4f02c7d240bdb63847dd7ea798";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</head>
+
+<body class="">
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="http://clancyz.github.io" class="site-title">Clancy Zhu</a>
+      <nav class="site-nav right">
+        <a href="/about/">About</a>
+<a href="/contact/">Contact</a>
+
+      </nav>
+      <div class="clearfix"></div>
+      
+        <div class="social-icons">
+  <div class="left">
+    
+      <a class="fa fa-github" href="https://github.com/clancyz"></a>
+    
+    <a class="fa fa-rss" href="/feed.xml"></a>
+    
+    
+    
+      <a class="fa fa-envelope" href="mailto:clancyzhu@me.com"></a>
+    
+    
+  </div>
+  <div class="right">
+    
+    
+    
+  </div>
+</div>
+<div class="clearfix"></div>
+
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        
+
+
+<div class="post-header mb2">
+  
+  <h1 class="py2">大白话Javascript设计模式之工厂模式(factory)</h1>
+  
+  <span class="post-meta">09月 30日, 2015</span><br>
+  
+  <!-- <span class="post-meta small">4 minute read</span> -->
+</div>
+
+<article class="post-content">
+  <h2 id="section">什么是工厂模式</h2>
+
+<blockquote>
+  <ul>
+    <li>简单工厂模式：就是用一个单例模式来生成实例</li>
+    <li>复杂工厂模式：使用子类来决定一个成员变量是哪个具体类的实例</li>
+  </ul>
+</blockquote>
+
+<p>你看了可能不太明白在bb什么，是的，上面这个我是抄书的，当初我学习的时候，也不知道它在bb什么。</p>
+
+<p>举具体的例子来说明吧：</p>
+
+<h2 id="section-1">那么，需求来了</h2>
+
+<blockquote>
+  <p>产品狗：给我实现一个功能，左边是一个select选择框，右边是一个按钮。
+select选择框的内容有三种：img(图片), link(链接), text(文本)。
+选择相应的选项后，点击按钮，就往body里面插入该标签。
+最后alert一下：<code class="highlighter-rouge">我插入了!</code></p>
+
+  <p>程序猿：这有蛋难度啊，秒出一个</p>
+</blockquote>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// 代码1.1</span>
+<span class="kd">var</span> <span class="nx">Tag</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(){};</span>
+<span class="nx">Tag</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">insert</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tagName</span><span class="p">){</span>
+    <span class="kd">var</span> <span class="nx">tag</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="nx">tagName</span><span class="p">);</span>
+    <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">tag</span><span class="p">);</span>
+    <span class="nx">alert</span><span class="p">(</span><span class="s1">'我插入了!'</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">var</span> <span class="nx">myAppendTag</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Tag</span><span class="p">();</span>
+<span class="nx">myAppendTag</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="s1">'img'</span><span class="p">);</span></code></pre></figure>
+
+<h2 id="section-2">产品狗为啥会被叫做产品狗</h2>
+
+<blockquote>
+  <p>需求变了：</p>
+
+  <p>产品狗：这怎么行啊，你这空标签插进去啥谁知道啊，我要的是这样的：</p>
+
+  <p>加一个input输入框：</p>
+
+  <ul>
+    <li>
+      <p>对于img标签，输入图片url;</p>
+    </li>
+    <li>
+      <p>对于link标签，输入链接；</p>
+    </li>
+    <li>
+      <p>对于文本，输入文本；</p>
+    </li>
+  </ul>
+
+  <p>程序猿：好吧，那只好修一下了：</p>
+</blockquote>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// 代码1.2</span>
+<span class="kd">var</span> <span class="nx">Tag</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(){};</span>
+<span class="nx">Tag</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">insert</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tagName</span><span class="p">,</span> <span class="nx">content</span><span class="p">){</span>
+    <span class="kd">var</span> <span class="nx">tag</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="nx">tagName</span><span class="p">);</span>
+    <span class="k">switch</span> <span class="p">(</span><span class="nx">tagName</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">case</span> <span class="s1">'img'</span><span class="p">:</span>
+        <span class="nx">tag</span><span class="p">.</span><span class="nx">src</span> <span class="o">=</span> <span class="nx">content</span><span class="p">;</span>
+        <span class="k">break</span><span class="p">;</span>
+      <span class="k">case</span> <span class="s1">'a'</span><span class="p">:</span>
+        <span class="nx">tag</span><span class="p">.</span><span class="nx">href</span> <span class="o">=</span> <span class="nx">content</span><span class="p">;</span>
+        <span class="k">break</span><span class="p">;</span>
+      <span class="k">case</span> <span class="s1">'text'</span><span class="p">:</span>
+        <span class="nx">tag</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">content</span><span class="p">;</span>
+        <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">tag</span><span class="p">);</span>
+    <span class="nx">alert</span><span class="p">(</span><span class="s1">'我插入了!'</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">var</span> <span class="nx">myAppendTag</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Tag</span><span class="p">();</span>
+<span class="nx">myAppendTag</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="s1">'img'</span><span class="p">,</span> <span class="s1">'/assets/img/1.png'</span><span class="p">);</span></code></pre></figure>
+
+<p>上面这个例子类似的功能相信很多FE同学都接触过。这就是 <code class="highlighter-rouge">简单工厂模式</code> 。</p>
+
+<h2 id="section-3">简单工厂模式</h2>
+
+<blockquote>
+  <p>把成员对象的创建工作交给一个外部对象，这个对象集成了所有实例的创建逻辑。</p>
+</blockquote>
+
+<p>程序猿认为，产品狗肯定后续又改需求，比如要我 <code class="highlighter-rouge">加个span标签</code> 啥的。在代码1.2中，如果需要加一个标签，我多写一个case就行了嘛。easy。</p>
+
+<h2 id="section-4">产品狗为啥会被叫做产品狗之系列2</h2>
+
+<blockquote>
+  <p>需求变了：</p>
+
+  <p>产品狗：那个，我现在要加入一个css link,要加到head里面，不是body。</p>
+
+  <p>程序猿：卧槽…</p>
+</blockquote>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// 代码1.3</span>
+<span class="kd">var</span> <span class="nx">Tag</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(){};</span>
+<span class="nx">Tag</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">insert</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tagName</span><span class="p">,</span> <span class="nx">content</span><span class="p">){</span>
+    <span class="kd">var</span> <span class="nx">tag</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="nx">tagName</span><span class="p">);</span>
+    <span class="k">switch</span> <span class="p">(</span><span class="nx">tagName</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">case</span> <span class="s1">'img'</span><span class="p">:</span>
+        <span class="nx">tag</span><span class="p">.</span><span class="nx">src</span> <span class="o">=</span> <span class="nx">content</span><span class="p">;</span>
+        <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">tag</span><span class="p">);</span>
+        <span class="k">break</span><span class="p">;</span>
+      <span class="k">case</span> <span class="s1">'a'</span><span class="p">:</span>
+        <span class="nx">tag</span><span class="p">.</span><span class="nx">href</span> <span class="o">=</span> <span class="nx">content</span><span class="p">;</span>
+        <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">tag</span><span class="p">);</span>
+        <span class="k">break</span><span class="p">;</span>
+      <span class="k">case</span> <span class="s1">'text'</span><span class="p">:</span>
+        <span class="nx">tag</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">content</span><span class="p">;</span>
+        <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">tag</span><span class="p">);</span>
+        <span class="k">break</span><span class="p">;</span>
+      <span class="k">case</span> <span class="s1">'link'</span><span class="p">:</span>
+        <span class="nx">tag</span><span class="p">.</span><span class="nx">type</span> <span class="o">=</span> <span class="s1">'text/css'</span><span class="p">;</span>
+        <span class="nx">tag</span><span class="p">.</span><span class="nx">rel</span> <span class="o">=</span> <span class="s1">'stylesheet'</span><span class="p">;</span>
+        <span class="nx">tag</span><span class="p">.</span><span class="nx">href</span> <span class="o">=</span> <span class="nx">content</span><span class="p">;</span>
+        <span class="nb">document</span><span class="p">.</span><span class="nx">head</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">tag</span><span class="p">);</span>
+        <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="nx">alert</span><span class="p">(</span><span class="s1">'我插入了!'</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">var</span> <span class="nx">myAppendTag</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Tag</span><span class="p">();</span>
+<span class="nx">myAppendTag</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="s1">'img'</span><span class="p">,</span> <span class="s1">'/assets/img/1.png'</span><span class="p">);</span></code></pre></figure>
+
+<p>写出上面这段代码之后，程序猿已经隐隐觉得有些 <code class="highlighter-rouge">不优雅</code> 了。</p>
+
+<h2 id="section-5">产品狗为啥会被叫做产品狗之系列3</h2>
+
+<blockquote>
+  <p>需求叕变了…</p>
+
+  <p>产品狗：哎呀，这个链接a的原生效果太不炫了，我们要当客户选择 <code class="highlighter-rouge">链接a</code> 这个选项时，再出现个下拉框，让用户选颜色的。</p>
+
+  <p>程序猿：卧槽槽…</p>
+</blockquote>
+
+<p>程序猿开始咬牙切齿了，这要在 <code class="highlighter-rouge">insert</code> 方法加个新的参数啊。
+加个参数也就罢了，但是这个碧池，不知道哪天说不定又说 <code class="highlighter-rouge">img</code> 要加 <code class="highlighter-rouge">width</code> 和 <code class="highlighter-rouge">height</code> ，<code class="highlighter-rouge">table</code> 还要顺带插入 <code class="highlighter-rouge">thead</code> <code class="highlighter-rouge">tbody</code> <code class="highlighter-rouge">tr</code> <code class="highlighter-rouge">td</code>  呢。这要是参数都加上去不就累积N个参数了？这特么的，没法搞啊！</p>
+
+<blockquote>
+  <p>这要怎么搞？</p>
+</blockquote>
+
+<p>程序猿开始分析了一下，发现了以下的规律：</p>
+
+<blockquote>
+  <ul>
+    <li>需求无非是要 <code class="highlighter-rouge">create</code> 一个标签然后 <code class="highlighter-rouge">appendchild</code> ，但是标签是不固定的，碧池不知道又会让加什么</li>
+    <li>不同的标签，要求的行为方式有可能不一样，不能把它都写到insert方法上</li>
+    <li>把所有的方法都写在一个对象里面比较臃肿，也违反了 <code class="highlighter-rouge">高内聚</code> 原则；所创建的类只能是 <code class="highlighter-rouge">事先考虑到</code> 的，如果需要添加新的类，就需要改变这个工厂类了。</li>
+  </ul>
+</blockquote>
+
+<p>于是，一个思路慢慢形成了：</p>
+
+<blockquote>
+  <ul>
+    <li>appendTag是父类，要继承这个父类，在子类里面去实现相应的逻辑</li>
+    <li>父类应该是 <code class="highlighter-rouge">固定</code> 的。</li>
+    <li>最后都要alert(‘我插入了!’)，这是公共的，可以提升到父类</li>
+  </ul>
+</blockquote>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// 代码1.4</span>
+<span class="c1">// 父类</span>
+<span class="kd">var</span> <span class="nx">appendTag</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(){};</span>
+<span class="nx">appendTag</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">insert</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tag</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">createAndAppend</span><span class="p">(</span><span class="nx">tag</span><span class="p">);</span>
+    <span class="nx">alert</span><span class="p">(</span><span class="s1">'我插入了!'</span><span class="p">);</span>
+  <span class="p">},</span>
+  <span class="na">createAndAppend</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">tag</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s1">'俺是父类的一个抽象方法，在子类里面再重载俺吧好伐'</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// 子类img</span>
+<span class="kd">var</span> <span class="nx">ImgTag</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(){};</span>
+<span class="c1">// 继承父类</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">ImgTag</span><span class="p">,</span> <span class="nx">Tag</span><span class="p">);</span> 
+<span class="c1">// overload掉父类的方法</span>
+<span class="nx">ImgTag</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">createAndAppend</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">imgUrl</span><span class="p">){</span>
+    <span class="kd">var</span> <span class="nx">me</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s1">'img'</span><span class="p">);</span>
+    <span class="nx">me</span><span class="p">.</span><span class="nx">src</span> <span class="o">=</span> <span class="nx">imgUrl</span><span class="p">;</span>
+    <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">me</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="c1">// 调用</span>
+<span class="kd">var</span> <span class="nx">imgTag</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ImgTag</span><span class="p">();</span>
+<span class="nx">imgTag</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="s1">'/assets/img/1.png'</span><span class="p">);</span>
+
+
+<span class="c1">// 子类链接a </span>
+<span class="kd">var</span> <span class="nx">ATag</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">ATag</span><span class="p">,</span> <span class="nx">Tag</span><span class="p">);</span>
+<span class="nx">ATag</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">createAndAppend</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">linkUrl</span><span class="p">,</span> <span class="nx">color</span><span class="p">){</span>
+    <span class="kd">var</span> <span class="nx">me</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s1">'a'</span><span class="p">);</span>
+    <span class="nx">me</span><span class="p">.</span><span class="nx">href</span> <span class="o">=</span> <span class="nx">linkUrl</span><span class="p">;</span>
+    <span class="nx">me</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">color</span> <span class="o">=</span> <span class="nx">color</span><span class="p">;</span>
+    <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">me</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// 调用</span>
+<span class="kd">var</span> <span class="nx">aTag</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ATag</span><span class="p">();</span>
+<span class="nx">aTag</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="s1">'https://www.github.com'</span><span class="p">,</span> <span class="s1">'red'</span><span class="p">);</span></code></pre></figure>
+
+<p>关于extend函数可以看我的<a href="http://clancyz.github.io/blog/2015/07/27/javascript-prototype-extend/">这篇文章</a>。</p>
+
+<p>上面的代码1.4即是 <code class="highlighter-rouge">复杂工厂模式</code>。</p>
+
+<h2 id="section-6">复杂工厂模式</h2>
+
+<blockquote>
+  <p>从代码1.4可以看出，工厂模式的具体实例化方法是 <code class="highlighter-rouge">动态实现</code> 的，可以随着需求的调整增加相应的逻辑代码。
+实现了 <code class="highlighter-rouge">对修改关闭，对拓展开放</code> 这一原则。
+同时，这也 <code class="highlighter-rouge">节省了性能开销</code> 。如果像代码1.2那样还好，只是个 <code class="highlighter-rouge">switch</code> 判断；但是如果有复杂的配置或初始化或判断分支逻辑，显然代码1.4把这些逻辑分散到了各个子类中，需要使用的时候才会执行，明显是优于简单工厂模式的。 
+当然，多数情况下，简单工厂模式就足以胜任了。</p>
+</blockquote>
+
+<p>以上。</p>
+
+
+</article>
+
+
+
+
+
+    
+  
+<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="大白话Javascript设计模式之工厂模式(factory)" data-title="大白话Javascript设计模式之工厂模式(factory)" data-url="http://clancyz.github.io/blog/2015/09/30/Javascript-Design-pattern-factory/"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"clancyz"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end -->
+
+
+        
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+  <div class="p2 wrap">
+    <div class="measure mt1 center">
+      <small>
+        2016 Clancy Zhu
+      </small>
+    </div>
+  </div>
+</footer>
+
+
+
+</body>
+</html>
