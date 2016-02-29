@@ -35,6 +35,6 @@ markdown:     kramdown
 permalink:    pretty
 gems: [jekyll-paginate]
 paginate:     10
-paginate_path: "/blog/page:num/"
+paginate_path: "/pages/page:num/"
 sass:
   compressed: true

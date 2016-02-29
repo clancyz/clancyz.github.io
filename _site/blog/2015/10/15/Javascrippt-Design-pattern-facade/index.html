@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>大白话Javascript设计模式之门面模式(facade) &#8211; Clancy Zhu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="使用门面模式设计出简洁、易于调用、兼容性良好的API。">
+    <meta name="author" content="Clancy Zhu">
+    <meta name="keywords" content="blog">
+    <link rel="canonical" href="http://clancyz.github.io/blog/2015/10/15/Javascrippt-Design-pattern-facade/">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css" type="text/css">
+
+    <!-- Fonts -->
+    <link href='//fonts.useso.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.useso.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+      <link href="//libs.baidu.com/fontawesome/4.2.0/css/font-awesome.css" rel="stylesheet">
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="大白话Javascript设计模式之门面模式(facade)">
+    <meta property="og:description" content="Clancy Zhu's blog">
+    <meta property="og:url" content="http://clancyz.github.io/blog/2015/10/15/Javascrippt-Design-pattern-facade/">
+    <meta property="og:site_name" content="Clancy Zhu">
+    
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?552e4c4f02c7d240bdb63847dd7ea798";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</head>
+
+<body class="">
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="http://clancyz.github.io" class="site-title">Clancy Zhu</a>
+      <nav class="site-nav right">
+        <a href="/about/">About</a>
+<a href="/contact/">Contact</a>
+
+      </nav>
+      <div class="clearfix"></div>
+      
+        <div class="social-icons">
+  <div class="left">
+    
+      <a class="fa fa-github" href="https://github.com/clancyz"></a>
+    
+    <a class="fa fa-rss" href="/feed.xml"></a>
+    
+    
+    
+      <a class="fa fa-envelope" href="mailto:clancyzhu@me.com"></a>
+    
+    
+  </div>
+  <div class="right">
+    
+    
+    
+  </div>
+</div>
+<div class="clearfix"></div>
+
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        
+
+
+<div class="post-header mb2">
+  
+  <h1 class="py2">大白话Javascript设计模式之门面模式(facade)</h1>
+  
+  <span class="post-meta">10月 15日, 2015</span><br>
+  
+  <!-- <span class="post-meta small">3 minute read</span> -->
+</div>
+
+<article class="post-content">
+  <h2 id="section">什么是门面模式</h2>
+
+<p>惯例，抄定义：</p>
+
+<blockquote>
+  <p>门面模式，是指提供一个统一的接口去访问多个子系统的多个不同的接口，它为子系统中的一组接口提供一个统一的高层接口。使得子系统更容易使用。</p>
+</blockquote>
+
+<p>我的理解：门面模式对外暴露了一个易于调用的方法，调用的一方不用关注里面有多复杂的逻辑、流程，直接调就可以了。</p>
+
+<p>可能表述得还不是很清楚，那么看一个实际例子：</p>
+
+<h2 id="section-1">举例说明</h2>
+
+<p>比如我们设计了一个厨师 <code class="highlighter-rouge">Cook</code> 类，厨师能干啥？当然是做菜了。</p>
+
+<p>做一道菜，当然要先 <code class="highlighter-rouge">买菜</code> , <code class="highlighter-rouge">切菜</code> , <code class="highlighter-rouge">洗菜</code> ，最后 <code class="highlighter-rouge">炒菜</code> 。一共有四个步骤。且这四个步骤是有先后顺序的。</p>
+
+<p>用代码来实现一下：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">Cook</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">status</span> <span class="o">=</span> <span class="s1">''</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">dish</span> <span class="o">=</span> <span class="s1">''</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="nx">Cook</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">buy</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">){</span>
+    <span class="c1">// 买回来了</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">dish</span> <span class="o">=</span> <span class="nx">name</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">status</span> <span class="o">=</span> <span class="s1">'bought'</span><span class="p">;</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">status</span><span class="p">);</span>
+  <span class="p">},</span>
+  <span class="na">slice</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// 如果买回来，就切了</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">status</span> <span class="o">===</span> <span class="s1">'bought'</span> <span class="o">||</span> <span class="k">this</span><span class="p">.</span><span class="nx">dish</span> <span class="o">!==</span> <span class="nx">name</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">status</span> <span class="o">=</span> <span class="s1">'sliced'</span><span class="p">;</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">status</span><span class="p">);</span>
+  <span class="p">},</span>
+  <span class="na">wash</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// 如果切好，就洗了</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">status</span> <span class="o">===</span> <span class="s1">'sliced'</span> <span class="o">||</span> <span class="k">this</span><span class="p">.</span><span class="nx">dish</span> <span class="o">!==</span> <span class="nx">name</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">status</span> <span class="o">=</span> <span class="s1">'washed'</span><span class="p">;</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">status</span><span class="p">);</span>
+  <span class="p">},</span>
+  <span class="na">make</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// 如果洗好，就做了</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">status</span> <span class="o">===</span> <span class="s1">'washed'</span> <span class="o">||</span> <span class="k">this</span><span class="p">.</span><span class="nx">dish</span> <span class="o">!==</span> <span class="nx">name</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">status</span> <span class="o">=</span> <span class="s1">'done'</span><span class="p">;</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">status</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>OK，很简单，已经实现好了。那么我要调用它做某道菜时，这么调用即可：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">myCook</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Cook</span><span class="p">();</span>
+<span class="nx">myCook</span><span class="p">.</span><span class="nx">buy</span><span class="p">(</span><span class="s1">'tomato'</span><span class="p">);</span>
+<span class="nx">myCook</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="s1">'tomato'</span><span class="p">);</span>
+<span class="nx">myCook</span><span class="p">.</span><span class="nx">wash</span><span class="p">(</span><span class="s1">'tomato'</span><span class="p">);</span>
+<span class="nx">myCook</span><span class="p">.</span><span class="nx">make</span><span class="p">(</span><span class="s1">'tomato'</span><span class="p">);</span>
+<span class="c1">// =&gt; bought</span>
+<span class="c1">// =&gt; sliced</span>
+<span class="c1">// =&gt; washed</span>
+<span class="c1">// =&gt; done</span></code></pre></figure>
+
+<p>这个运行起来是没问题的。看到这我知道你肯定想吐槽，恩。</p>
+
+<p>如果我现在又想做个<code class="highlighter-rouge">potato</code>的话，我又得调<code class="highlighter-rouge">buy</code>, <code class="highlighter-rouge">slice</code>, <code class="highlighter-rouge">wash</code>, <code class="highlighter-rouge">make</code> 共4次。</p>
+
+<blockquote>
+  <p>烦不烦啊。</p>
+</blockquote>
+
+<p>so, 我们自然而然会想到增加一个原型方法 <code class="highlighter-rouge">cook</code> ，把这4个方法整合到一起；</p>
+
+<p>我才不管你丫买菜切菜洗菜呢，劳资只想吃菜，你给我去弄出来就好了，爱咋咋弄（换句话说，我不关心你怎么做的）。</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">Cook</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">cook</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">buy</span><span class="p">(</span><span class="nx">name</span><span class="p">);</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">wash</span><span class="p">(</span><span class="nx">name</span><span class="p">);</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="nx">name</span><span class="p">);</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">make</span><span class="p">(</span><span class="nx">name</span><span class="p">);</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>这样，调用就变成了：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">myCook</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Cook</span><span class="p">();</span>
+<span class="nx">myCook</span><span class="p">.</span><span class="nx">cook</span><span class="p">(</span><span class="s1">'tomato'</span><span class="p">);</span></code></pre></figure>
+
+<p>简洁明快多了嘛。这就是 <code class="highlighter-rouge">门面模式</code> 的实现。</p>
+
+<h2 id="polyfill">实际例子：浏览器的事件绑定兼容(polyfill)</h2>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">addEvent</span> <span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="nx">type</span><span class="p">,</span> <span class="nx">fn</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">el</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="nx">type</span><span class="p">,</span> <span class="nx">fn</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+  <span class="p">}</span><span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">attachEvent</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">el</span><span class="p">.</span><span class="nx">attachEvent</span><span class="p">(</span><span class="s1">'on'</span> <span class="o">+</span> <span class="nx">type</span><span class="p">,</span> <span class="nx">fn</span><span class="p">)</span>
+  <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+    <span class="nx">el</span><span class="p">[</span><span class="s1">'on'</span> <span class="o">+</span> <span class="nx">type</span><span class="p">]</span> <span class="o">=</span> <span class="nx">fn</span><span class="p">;</span>
+  <span class="p">}</span>
+  
+<span class="p">}</span></code></pre></figure>
+
+<p>这个例子也是同样的，你总不希望每次想进行事件绑定时都要写这么一大坨吧。</p>
+
+<p>直接调用<code class="highlighter-rouge">addEvent</code>即可。</p>
+
+<p>其实门面模式也可以看做是 <code class="highlighter-rouge">Don't repeat yourself</code> 这一精神的体现。</p>
+
+<h2 id="section-2">总结</h2>
+
+<blockquote>
+  <p>门面模式对外暴露了一个易于调用的方法，调用的一方不用关注里面有多复杂的逻辑、流程, 直接调用该方法即可。门面模式可以隐藏/封装内部的实现。使用门面模式可以设计出简洁、易于调用、兼容性良好的API。</p>
+</blockquote>
+
+<p>以上。</p>
+
+</article>
+
+
+
+
+
+    
+  
+<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="大白话Javascript设计模式之门面模式(facade)" data-title="大白话Javascript设计模式之门面模式(facade)" data-url="http://clancyz.github.io/blog/2015/10/15/Javascrippt-Design-pattern-facade/"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"clancyz"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end -->
+
+
+        
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+  <div class="p2 wrap">
+    <div class="measure mt1 center">
+      <small>
+        2016 Clancy Zhu
+      </small>
+    </div>
+  </div>
+</footer>
+
+
+
+</body>
+</html>
