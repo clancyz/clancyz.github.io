@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>大白话Javascript设计模式之职责链模式(Chain of Responsibility) &#8211; Clancy Zhu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="职责链模式可以让对象得到灵活、高效的处理，减轻请求对象和处理对象的耦合。">
+    <meta name="author" content="Clancy Zhu">
+    <meta name="keywords" content="blog">
+    <link rel="canonical" href="http://clancyz.github.io/blog/2015/10/17/Javascript-Design-pattern-Chain-of-responsibility/">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css" type="text/css">
+
+    <!-- Fonts -->
+    <link href='//fonts.useso.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.useso.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+      <link href="//libs.baidu.com/fontawesome/4.2.0/css/font-awesome.css" rel="stylesheet">
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="大白话Javascript设计模式之职责链模式(Chain of Responsibility)">
+    <meta property="og:description" content="Clancy Zhu's blog">
+    <meta property="og:url" content="http://clancyz.github.io/blog/2015/10/17/Javascript-Design-pattern-Chain-of-responsibility/">
+    <meta property="og:site_name" content="Clancy Zhu">
+    
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?552e4c4f02c7d240bdb63847dd7ea798";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</head>
+
+<body class="">
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="http://clancyz.github.io" class="site-title">Clancy Zhu</a>
+      <nav class="site-nav right">
+        <a href="/about/">About</a>
+<a href="/contact/">Contact</a>
+
+      </nav>
+      <div class="clearfix"></div>
+      
+        <div class="social-icons">
+  <div class="left">
+    
+      <a class="fa fa-github" href="https://github.com/clancyz"></a>
+    
+    <a class="fa fa-rss" href="/feed.xml"></a>
+    
+    
+    
+      <a class="fa fa-envelope" href="mailto:clancyzhu@me.com"></a>
+    
+    
+  </div>
+  <div class="right">
+    
+    
+    
+  </div>
+</div>
+<div class="clearfix"></div>
+
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        
+
+
+<div class="post-header mb2">
+  
+  <h1 class="py2">大白话Javascript设计模式之职责链模式(Chain of Responsibility)</h1>
+  
+  <span class="post-meta">10月 17日, 2015</span><br>
+  
+  <!-- <span class="post-meta small">3 minute read</span> -->
+</div>
+
+<article class="post-content">
+  <h2 id="section">什么是职责链模式</h2>
+<blockquote>
+  <p>当一个对象A要办个事儿，就向一个处理对象B发起请求，如果B不处理，可以把请求转给C，如果C不处理，又可以把请求转给D。一直到有一个对象愿意处理这个请求为止。</p>
+
+  <p>B -&gt; C -&gt; D 这就是一条<code class="highlighter-rouge">职责链</code>。</p>
+
+  <p>如果请求一直没人处理，那么这事儿就黄了，搞不定。</p>
+
+  <p>A在一开始是不知道自己会被谁处理的。</p>
+</blockquote>
+
+<h2 id="section-1">实例：俺是个鉴黄的！</h2>
+
+<p>下面举具体的例子来说明。</p>
+
+<p>俺在路上看到一则新闻说关于「鉴黄师」的，心向往之，不禁开了个脑洞。。</p>
+
+<p>现在，假设你是一名拥有强大技能的「鉴黄师」。</p>
+
+<p>当然，因为你是鉴黄师，不是一个只是爱看黄的普通宅男，那么你肯定是要比一般人牛逼的。</p>
+
+<p>那牛逼在哪呢，就在于，你有一套极其牛逼的<code class="highlighter-rouge">自动化工具链</code>。</p>
+
+<p>恩，提到这个闪瞎狗眼的神器，必须得先说下工作内容，额，就是鉴黄嘛。比如，把一个文件夹拖进去，自动鉴定里面的内容是不是黄色内容。如果是黄色内容就嗷嗷叫报警。你们还真一个个点开看啊，营养你跟得上啊，敢不敢更low一点。</p>
+
+<p>那么这工具是怎么工作的呢？</p>
+
+<blockquote>
+  <ul>
+    <li>首先先拿到文件夹下所有文件。废话吗这不。</li>
+    <li>然后工具中的「番号模块」开始工作，具有黄色特征的文件名，比如<code class="highlighter-rouge">ebody</code>, <code class="highlighter-rouge">snis</code>,  <code class="highlighter-rouge">SOE</code> 之类，如果碰上，就是黄的，恩那么就嗷嗷报警。</li>
+    <li>没碰上怎么办呢，「番号模块」就表示无能为力了，把它交给一个很强大的模块「md5模块」。这个<code class="highlighter-rouge">md5</code>是啥玩意儿呢，就是一个文件有唯一的标识符，把这标识符和国内最大的影片存储中心<code class="highlighter-rouge">百度云</code>数据库中的标识符做对比。说白了很简单，这部影片标识符如果和百度云禁片的标识符一样，那么肯定是黄的嘛。牛逼吧。</li>
+    <li>最后一种情况，某片连百度云上都没有，那肿么办，「md5模块」只好把这个文件夹交给最终的大招「视频图像识别模块」，自动识别视频中的图像，如果符合xx特征的，那么就是黄的。</li>
+  </ul>
+</blockquote>
+
+<p>恩，所以这个工具就是这么工作的：</p>
+
+<blockquote>
+  <p>番号模块 -&gt; md5模块 -&gt; 视频图像识别模块</p>
+</blockquote>
+
+<p>这就形成了一条<code class="highlighter-rouge">职责链</code> ，各个模块各司其职，逐级传递。</p>
+
+<h2 id="javascript">Javascript实现</h2>
+
+<p>那么我们怎样用js把它抽象出来呢?</p>
+
+<ul>
+  <li>首先，这仨东西都是模块，我们应该能想到建立一个「模块类」。</li>
+  <li>每个模块都有处理功能，那么模块类应该有一个抽象的方法<code class="highlighter-rouge">handle</code>。</li>
+  <li>每个模块都可以设置「下级模块」，如果自己处理不了，就给下级模块处理（当然，在例子中，视频图像识别模块是没有下级的，它处理不了的，整个工具就都处理不了了）。</li>
+</ul>
+
+<p>那么，先建立一个<code class="highlighter-rouge">模块类</code>：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">Handler</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(){};</span>
+<span class="c1">// 模块的处理方法(抽象方法)</span>
+<span class="nx">Handler</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">handle</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">files</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s1">'俺是父类的一个抽象方法，在子类里面再重载俺吧好伐'</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="c1">// 模块的下级</span>
+<span class="nx">Handler</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">next</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">nextHandler</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">nextHandler</span> <span class="k">instanceof</span> <span class="nx">Handler</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">next</span> <span class="o">=</span> <span class="nx">nextHandler</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>接着来实现番号模块、md5模块、视频图像处理模块。逻辑基本都是一样的：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// 番号模块</span>
+<span class="kd">var</span> <span class="nx">identifierHandler</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(){};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">identifierHandler</span><span class="p">,</span> <span class="nx">Handler</span><span class="p">);</span>
+<span class="nx">identifierHandler</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">handle</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">files</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// 按番号来处理, 如果处理不了，给它的下级模块</span>
+  <span class="k">try</span> <span class="p">{</span>
+    <span class="nx">handleByIdentifier</span><span class="p">();</span>
+    <span class="kd">function</span> <span class="nx">handleByIdentifier</span><span class="p">(){</span>
+      <span class="c1">//...</span>
+    <span class="p">}</span>
+  <span class="p">}</span> <span class="k">catch</span><span class="p">(</span><span class="nx">e</span><span class="p">){</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">next</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">next</span><span class="p">.</span><span class="nx">handle</span><span class="p">(</span><span class="nx">files</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s1">'处理不了'</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// md5模块</span>
+<span class="kd">var</span> <span class="nx">md5Handler</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(){};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">md5Handler</span><span class="p">,</span> <span class="nx">Handler</span><span class="p">);</span>
+<span class="nx">md5Handler</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">handle</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">files</span><span class="p">){</span>
+  <span class="k">try</span> <span class="p">{</span>
+    <span class="nx">handleBymd5</span><span class="p">(</span><span class="nx">files</span><span class="p">);</span>
+    <span class="kd">function</span> <span class="nx">handleBymd5</span><span class="p">(</span><span class="nx">files</span><span class="p">){</span>
+      <span class="c1">//...</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">catch</span><span class="p">(</span><span class="nx">e</span><span class="p">){</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">next</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">next</span><span class="p">.</span><span class="nx">handle</span><span class="p">(</span><span class="nx">files</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s1">'处理不了'</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// 视频图像处理模块</span>
+<span class="kd">var</span> <span class="nx">videoHandler</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(){};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">videoHandler</span><span class="p">,</span> <span class="nx">Handler</span><span class="p">);</span>
+<span class="nx">videoHandler</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">handle</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">files</span><span class="p">){</span>
+  <span class="k">try</span> <span class="p">{</span>
+    <span class="nx">handleByVideo</span><span class="p">(</span><span class="nx">files</span><span class="p">);</span>
+    <span class="kd">function</span> <span class="nx">handleByVideo</span><span class="p">(</span><span class="nx">files</span><span class="p">){</span>
+      <span class="c1">//...</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">catch</span><span class="p">(</span><span class="nx">e</span><span class="p">){</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">next</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">next</span><span class="p">.</span><span class="nx">handle</span><span class="p">(</span><span class="nx">files</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s1">'处理不了'</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>关于extend原型继承函数可以看我的<a href="http://clancyz.github.io/blog/2015/07/27/javascript-prototype-extend/">这篇文章</a>。</p>
+
+<p>现在已经基本实现好了。那么做一个具体的调用，这里我们假设取得了要鉴黄的文件，参数<code class="highlighter-rouge">files</code>是个数组：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">files</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'soe408.mkv'</span><span class="p">,</span> <span class="s1">'snis-242.avi'</span><span class="p">,</span> <span class="s1">'1024.rmvb'</span><span class="p">];</span>
+
+<span class="kd">var</span> <span class="nx">myIdentifierHandler</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">identifierHandler</span><span class="p">();</span>
+
+<span class="kd">var</span> <span class="nx">myMd5Handler</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">md5Handler</span><span class="p">();</span>
+
+<span class="kd">var</span> <span class="nx">myVideoHandler</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">videoHandler</span><span class="p">();</span>
+
+
+<span class="c1">// 设置下级</span>
+<span class="nx">myIdentifierHandler</span><span class="p">.</span><span class="nx">next</span> <span class="o">=</span> <span class="nx">myMd5Handler</span><span class="p">;</span>
+<span class="nx">myMd5Handler</span><span class="p">.</span><span class="nx">next</span> <span class="o">=</span> <span class="nx">myVideoHandler</span><span class="p">;</span>
+
+<span class="c1">// 执行鉴黄</span>
+<span class="nx">myIdentifierHandler</span><span class="p">.</span><span class="nx">handle</span><span class="p">(</span><span class="nx">files</span><span class="p">);</span></code></pre></figure>
+
+<p>由上例可见，我们只要将<code class="highlighter-rouge">files</code>传给职责链中的第一环<code class="highlighter-rouge">myIdentifierHandler</code>就可以了，如果它处理不了，就会将请求传给下一环节。</p>
+
+<p>同时我们可以看出一个重点问题：</p>
+
+<blockquote>
+  <p>我们可以自由设定一个handler的下级。</p>
+</blockquote>
+
+<p>比如我们现在的职责链是：</p>
+
+<p>番号模块 -&gt; md5模块 -&gt; 视频图像识别模块</p>
+
+<p>来了一个新任务，你一瞅，我去，今天是1月2号，来了个<code class="highlighter-rouge">1月1日 新作34连发</code>，这么新的片子，百度云上肯定没有啊，那md5模块检测就基本没有用了，而且这个模块检测还非常耗时，那么你完全可以跳过md5模块：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">myIdentifierHandler</span><span class="p">.</span><span class="nx">next</span> <span class="o">=</span> <span class="nx">myVideoHandler</span><span class="p">;</span>
+<span class="nx">myIdentifierHandler</span><span class="p">.</span><span class="nx">handle</span><span class="p">(</span><span class="nx">files</span><span class="p">);</span></code></pre></figure>
+
+<p>这样，可以根据实际的情况，自由地选择下级职责链中的下一环，在特定的场景中就可以<code class="highlighter-rouge">节约性能开销</code>。</p>
+
+<h2 id="section-2">多扯两句：事件委托</h2>
+
+<p>学过BOM知识的童鞋肯定都有了解，浏览器的「事件冒泡」、「事件委托」or「事件代理」的过程，实际也可以用<code class="highlighter-rouge">职责链</code>来解释：一个事件在某个节点上被触发，然后向根节点传递， 直到被节点捕获。</p>
+
+<p>Javascript的<code class="highlighter-rouge">原型链</code>查找方法也有<code class="highlighter-rouge">职责链</code>的影子：在子类上调用一个方法，如果自身找不到，就沿着原型链一级级向上查找。</p>
+
+<h2 id="section-3">总结</h2>
+
+<p>职责链模式可以让对象得到灵活、高效的处理，减轻请求对象和处理对象的耦合。</p>
+
+<p>是否明白呢亲？</p>
+
+<p>以上。</p>
+
+
+</article>
+
+
+
+
+
+    
+  
+<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="大白话Javascript设计模式之职责链模式(Chain of Responsibility)" data-title="大白话Javascript设计模式之职责链模式(Chain of Responsibility)" data-url="http://clancyz.github.io/blog/2015/10/17/Javascript-Design-pattern-Chain-of-responsibility/"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"clancyz"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end -->
+
+
+        
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+  <div class="p2 wrap">
+    <div class="measure mt1 center">
+      <small>
+        2016 Clancy Zhu
+      </small>
+    </div>
+  </div>
+</footer>
+
+
+
+</body>
+</html>
