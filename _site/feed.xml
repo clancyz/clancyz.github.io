@@ -583,7 +583,7 @@ fisp的规范下，原来设想应该这么写：&lt;/p&gt;
 
 &lt;p&gt;这样，可以根据实际的情况，自由地选择下级职责链中的下一环，在特定的场景中就可以&lt;code class=&quot;highlighter-rouge&quot;&gt;节约性能开销&lt;/code&gt;。&lt;/p&gt;
 
-&lt;h2 id=&quot;section-2&quot;&gt;多扯两句：事件委托&lt;/h2&gt;
+&lt;h2 id=&quot;section-2&quot;&gt;多扯两句：事件委托 / 原型链&lt;/h2&gt;
 
 &lt;p&gt;学过BOM知识的童鞋肯定都有了解，浏览器的「事件冒泡」、「事件委托」or「事件代理」的过程，实际也可以用&lt;code class=&quot;highlighter-rouge&quot;&gt;职责链&lt;/code&gt;来解释：一个事件在某个节点上被触发，然后向根节点传递， 直到被节点捕获。&lt;/p&gt;
 

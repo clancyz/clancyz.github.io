@@ -2,7 +2,7 @@
 layout:     post
 title:      Javascript：重温原型链继承（extend）
 date:       2015-07-27 21:00:22
-summary:    3年前学习js的时候写的笔记，重新编排了下，修改了部分内容。这也是我常问候选人的面试题目之一。
+summary:    2年前学习js的时候写的笔记，重新编排了下，修改了部分内容。这也是我常问候选人的面试题目之一。
 categories: blog
 ---
 
