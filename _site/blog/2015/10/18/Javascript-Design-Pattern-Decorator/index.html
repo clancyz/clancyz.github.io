@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>大白话Javascript设计模式之装饰者模式(Decorator) &#8211; Clancy Zhu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="装饰者模式是为已有的功能动态地添加另一种功能，而不必改变原类文件的方式。装饰者模式可以有效地把类的核心职责和装饰功能区分开来，简化原有的类。">
+    <meta name="author" content="Clancy Zhu">
+    <meta name="keywords" content="blog">
+    <link rel="canonical" href="http://clancyz.github.io/blog/2015/10/18/Javascript-Design-Pattern-Decorator/">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css" type="text/css">
+
+    <!-- Fonts -->
+    <link href='//fonts.useso.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.useso.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+      <link href="//libs.baidu.com/fontawesome/4.2.0/css/font-awesome.css" rel="stylesheet">
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="大白话Javascript设计模式之装饰者模式(Decorator)">
+    <meta property="og:description" content="Clancy Zhu's blog">
+    <meta property="og:url" content="http://clancyz.github.io/blog/2015/10/18/Javascript-Design-Pattern-Decorator/">
+    <meta property="og:site_name" content="Clancy Zhu">
+    
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?552e4c4f02c7d240bdb63847dd7ea798";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</head>
+
+<body class="">
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="http://clancyz.github.io" class="site-title">Clancy Zhu</a>
+      <nav class="site-nav right">
+        <a href="/about/">About</a>
+<a href="/contact/">Contact</a>
+
+      </nav>
+      <div class="clearfix"></div>
+      
+        <div class="social-icons">
+  <div class="left">
+    
+      <a class="fa fa-github" href="https://github.com/clancyz"></a>
+    
+    <a class="fa fa-rss" href="/feed.xml"></a>
+    
+    
+    
+      <a class="fa fa-envelope" href="mailto:clancyzhu@me.com"></a>
+    
+    
+  </div>
+  <div class="right">
+    
+    
+    
+  </div>
+</div>
+<div class="clearfix"></div>
+
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        
+
+
+<div class="post-header mb2">
+  
+  <h1 class="py2">大白话Javascript设计模式之装饰者模式(Decorator)</h1>
+  
+  <span class="post-meta">10月 18日, 2015</span><br>
+  
+  <!-- <span class="post-meta small">4 minute read</span> -->
+</div>
+
+<article class="post-content">
+  <h2 id="section">什么是装饰者模式</h2>
+
+<blockquote>
+  <p>装饰者模式即是动态地给一个对象添加额外的功能。它是用“装饰”来包裹真实的对象。装饰对象和真实对象有同样的接口，客户端对象能以和真实对象相同的方式与其交互。</p>
+</blockquote>
+
+<p>如果感到有些迷糊，没关系，顾名思义，装饰者模式我们可以把它想象成一个人，可以今天穿裙子，明天穿比基尼，后天内裤外穿扮超人嘛。这无非是各种「装饰」，而且这些装饰是「非常灵活」的。我们结合实际的例子来看。</p>
+
+<h2 id="qq">QQ秀</h2>
+
+<p>好吧，虽然俺早已经过了穿各种QQ秀的年纪，但是QQ秀的确是解释装饰者模式的一个很好的例子，就以此为例。</p>
+
+<p>大家都知道，QQ秀是腾讯的吸金狂魔，如果你不付钱，那么你身上就只有一条内裤（哦不，对MM而言，还有一个Bra）。要穿啥衣服都得买。而且衣服是成千上万的。</p>
+
+<p>首先我们应该想到，这个穿QQ秀的实体是「人」，所以要去模拟实现它，很明显地要把人抽象为一个类。并且，对于每个要穿QQ秀的人都是唯一的，我们就取它的QQ号码作为一个私有属性。最后还得收你钱嘛，每件服饰是要钱的。这里我们把「穿QQ秀的人」用<code class="highlighter-rouge">QQshow</code>来表示。</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">QQShow</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">qq</span><span class="p">){</span>
+  <span class="c1">// qq号</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">qq</span> <span class="o">=</span> <span class="nx">qq</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">cost</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span></code></pre></figure>
+
+<p>好，那比如现在我们要穿一件衬衫，一件牛仔裤，一双运动鞋。扩展上面的代码：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"> 
+<span class="nx">QQShow</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">wearShirt</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'穿上了衬衫'</span><span class="p">);</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">cost</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nx">QQShow</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">wearJeans</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'穿上了牛仔裤'</span><span class="p">);</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">cost</span> <span class="o">+=</span> <span class="mi">2</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nx">QQShow</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">wearSneakers</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'穿上了运动鞋'</span><span class="p">);</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">cost</span> <span class="o">+=</span> <span class="mi">3</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">//测试</span>
+<span class="kd">var</span> <span class="nx">myQQShow</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">QQshow</span><span class="p">(</span><span class="mi">123456</span><span class="p">);</span>
+<span class="nx">myQQShow</span><span class="p">.</span><span class="nx">wearShirt</span><span class="p">();</span>
+<span class="nx">myQQShow</span><span class="p">.</span><span class="nx">wearJeans</span><span class="p">();</span>
+<span class="nx">myQQShow</span><span class="p">.</span><span class="nx">wearSneakers</span><span class="p">();</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">myQQShow</span><span class="p">.</span><span class="nx">cost</span><span class="p">);</span>
+<span class="c1">// =&gt; 穿上了衬衫</span>
+<span class="c1">// =&gt; 穿上了牛仔裤</span>
+<span class="c1">// =&gt; 穿上了运动鞋</span>
+<span class="c1">// =&gt; 6</span></code></pre></figure>
+
+<p>上面的代码是可以工作的。当然看到这有些童鞋会想吐槽了。</p>
+
+<blockquote>
+  <p>前面提到过，QQ秀是成千上万的。如果我明天又换了，要穿个裙子，穿个背心，穿个皮鞋呢？那难道要把 <code class="highlighter-rouge">QQShow</code> 这个类无休止地扩大下去吗？这显然是「不优雅」的。</p>
+</blockquote>
+
+<p>现在，很明显地，我们应该想到把这些具体的服饰类和<code class="highlighter-rouge">QQshow</code>类分离开来，而不是在<code class="highlighter-rouge">QQShow</code>类下不断扩大代码。服饰类我们用<code class="highlighter-rouge">Finery</code>表示, 同时它有一个<code class="highlighter-rouge">wear</code>方法表示穿上。当穿上时，给qqshow加上对应的价格。</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">Finery</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">qqshow</span><span class="p">){</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">qqshow</span> <span class="o">=</span> <span class="nx">qqshow</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="nx">Finery</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">wear</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(){</span>
+  <span class="nx">alert</span><span class="p">(</span><span class="s1">'父类的抽象方法'</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kd">var</span> <span class="nx">Shirt</span> <span class="o">=</span>  <span class="kd">function</span> <span class="p">(</span><span class="nx">qqshow</span><span class="p">){</span>
+  <span class="nx">Shirt</span><span class="p">.</span><span class="nx">superClass</span><span class="p">.</span><span class="nx">constructor</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">qqshow</span><span class="p">);</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">Shirt</span><span class="p">,</span> <span class="nx">Finery</span><span class="p">);</span>
+<span class="nx">Shirt</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">wear</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'穿上了衬衫'</span><span class="p">);</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">qqshow</span><span class="p">.</span><span class="nx">cost</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// ...其余类似，不废话了</span>
+
+<span class="c1">// 测试</span>
+<span class="kd">var</span> <span class="nx">myQQShow</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">QQShow</span><span class="p">(</span><span class="mi">123456</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">myShirt</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Shirt</span><span class="p">(</span><span class="nx">myQQShow</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">myJeans</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Jeans</span><span class="p">(</span><span class="nx">myQQShow</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">mySneakers</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Sneakers</span><span class="p">(</span><span class="nx">myQQShow</span><span class="p">);</span>
+<span class="nx">myShirt</span><span class="p">.</span><span class="nx">wear</span><span class="p">();</span>
+<span class="nx">myJeans</span><span class="p">.</span><span class="nx">wear</span><span class="p">();</span>
+<span class="nx">mySneakers</span><span class="p">.</span><span class="nx">wear</span><span class="p">();</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">myQQShow</span><span class="p">.</span><span class="nx">cost</span><span class="p">);</span></code></pre></figure>
+
+<p>上面的代码这个实现好像解决了问题。在这个例子中，<code class="highlighter-rouge">myQQShow</code> 是一个<code class="highlighter-rouge">QQShow</code> 的实例，<code class="highlighter-rouge">Shirt</code>, <code class="highlighter-rouge">Jeans</code>, <code class="highlighter-rouge">Sneakers</code>这几个类保持了对它的引用，且使用<code class="highlighter-rouge">wear</code>方法将这个实例不断地「装饰」，体现为价格不断地增加。</p>
+
+<p>因为上述例子也实现了「装饰」功能，可以说，这就是一个简单的「装饰者模式」。</p>
+
+<h2 id="section-1">改进的装饰者模式</h2>
+
+<p>但是，上述例子并不是一个严格的装饰者模式。</p>
+
+<blockquote>
+  <p>为什么它是一个“伪”装饰者模式?</p>
+</blockquote>
+
+<p>因为严格的装饰者模式规定，装饰对象和真实对象具有同样的接口。</p>
+
+<p>实际上，上面的例子中没有已经定义的接口，从myQQShow被处理的过程来看，我们转移了一个对象符合接口要求的职责。</p>
+
+<p>我们可以想象这样的场景：</p>
+
+<blockquote>
+  <p>我穿上了一件内裤，一件背心，一件衬衫，一件牛仔裤，一双鞋，一双袜子，一顶帽子……等N个步骤之后，我突然不爽了，我要重头再来，再换一套。我想换成「只穿了内裤和背心」的样子，再从新搭配。</p>
+
+  <p>换言之: 在装饰的过程中我想「撤消装饰」，回到以前的某种状态，怎么办？</p>
+</blockquote>
+
+<p>显然，前面的这个例子，在你多次将<code class="highlighter-rouge">myQQShow</code>作为参数传入，执行<code class="highlighter-rouge">wear</code>方法后，要你回到第2步的状态并计算价格，你肯定是会蒙圈的。为啥？</p>
+
+<p>很明显，在你的装饰过程中，并没有「装饰记录」。</p>
+
+<p>那么，我们想象，是否可以每次装饰后，保留当前装饰的状态呢？</p>
+
+<blockquote>
+  <p>实际上我们就可以对此作出改进：每次装饰后，返回一个和原对象相同类的实例。</p>
+</blockquote>
+
+<p>说得明白点：一个人原来身无寸缕，他是可以穿衣服的，即可以「被装饰」；穿上件衬衫后，他还是一个可以被装饰的对象。每个装饰的对象都在原来的对象上增加某些功能，在我们这个例子里，就是价格的增加。</p>
+
+<p>那么，我们可以使用<code class="highlighter-rouge">Finery</code>类来继承<code class="highlighter-rouge">QQShow</code>类，并有一个「装饰」方法：<code class="highlighter-rouge">Decorate</code> 。为什么？因为这样，经过<code class="highlighter-rouge">Finery</code>的子类装饰过的<code class="highlighter-rouge">QQShow</code>, 仍然是一个<code class="highlighter-rouge">QQShow</code>的实例; 那么，就可以继续地一直装饰下去。</p>
+
+<p>在下面的例子中，我们把<code class="highlighter-rouge">cost</code>这个属性改为一个接口方法。</p>
+
+<p>在<code class="highlighter-rouge">Finery</code>这个装饰类中，我们使用一个<code class="highlighter-rouge">Decorate</code>接口方法，接收传入的<code class="highlighter-rouge">QQShow</code>实例，这个实例可以是啥也没穿的，也可以是穿了一些衣服的；接收到实例后，把传入的<code class="highlighter-rouge">QQShow</code>实例保存在自己的属性中。</p>
+
+<p>在<code class="highlighter-rouge">Finery</code>的子类中，我们可以方便地使用<code class="highlighter-rouge">superClass</code>（这个属性由extend继承函数产生），来调用父类的价格，加上自己的价格。</p>
+
+<p>那么，这个实现就呼之欲出了：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">QQShow</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">qq</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">qq</span> <span class="o">=</span> <span class="nx">qq</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">cost</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// 服饰类，继承QQShow</span>
+<span class="kd">var</span> <span class="nx">Finery</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">qq</span><span class="p">){</span>
+  <span class="nx">Finery</span><span class="p">.</span><span class="nx">superClass</span><span class="p">.</span><span class="nx">constructor</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">qq</span><span class="p">);</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">Finery</span><span class="p">,</span> <span class="nx">QQShow</span><span class="p">);</span>
+<span class="nx">Finery</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">Decorate</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">QQShow</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">QQShow</span> <span class="o">=</span> <span class="nx">QQShow</span><span class="p">;</span>
+  <span class="p">},</span>
+  <span class="na">cost</span><span class="p">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">QQShow</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">QQShow</span><span class="p">.</span><span class="nx">cost</span><span class="p">();</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">var</span> <span class="nx">Shirt</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">qq</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">Shirt</span><span class="p">.</span><span class="nx">superClass</span><span class="p">.</span><span class="nx">constructor</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">qq</span><span class="p">);</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">Shirt</span><span class="p">,</span> <span class="nx">Finery</span><span class="p">);</span>
+<span class="nx">Shirt</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">cost</span><span class="p">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'穿上了衬衫'</span><span class="p">);</span>
+    <span class="c1">// 1为Shirt的价格</span>
+    <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">superClass</span><span class="p">.</span><span class="nx">cost</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// ...其余类似，不废话了</span>
+
+<span class="c1">// 测试</span>
+
+<span class="kd">var</span> <span class="nx">myQQShow</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">QQShow</span><span class="p">(</span><span class="mi">123456</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">decorateShirt</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Shirt</span><span class="p">();</span>
+<span class="kd">var</span> <span class="nx">decorateJeans</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Jeans</span><span class="p">();</span>
+<span class="kd">var</span> <span class="nx">decorateSneakers</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Sneakers</span><span class="p">();</span> 
+
+<span class="nx">decorateShirt</span><span class="p">.</span><span class="nx">Decorate</span><span class="p">(</span><span class="nx">myQQShow</span><span class="p">);</span>
+<span class="c1">// 要再次装饰，直接装饰decorateShirt即可！</span>
+<span class="nx">decorateJeans</span><span class="p">.</span><span class="nx">Decorate</span><span class="p">(</span><span class="nx">decorateShirt</span><span class="p">);</span>
+<span class="nx">decorateSneakers</span><span class="p">.</span><span class="nx">Decorate</span><span class="p">(</span><span class="nx">myJeans</span><span class="p">);</span>
+
+<span class="nx">decorateSneakers</span><span class="p">.</span><span class="nx">cost</span><span class="p">();</span>
+
+<span class="c1">// 要撤消装饰，比如要回到只穿衬衫的状态，直接拿取当时的`decorateShirt`即可！</span>
+
+<span class="nx">decorateShirt</span><span class="p">.</span><span class="nx">cost</span><span class="p">();</span></code></pre></figure>
+
+<p>上述的例子便是一个严格的装饰者模式。和前面的<code class="highlighter-rouge">伪装饰者模式</code>相比，有以下优点：</p>
+
+<blockquote>
+  <ul>
+    <li>装饰后的对象仍可以与客户端交互；</li>
+    <li>装饰对象和原对象均有一致的接口，方便交互；</li>
+    <li>可以保持装饰对象的状态；</li>
+    <li>不用去一直调用wear() 这个改变原对象功能的函数，计算价格<code class="highlighter-rouge">cost</code>实际都放在了最后一步一次性清算。这也是符合实际逻辑的：我不管你穿了多少次，脱了多少次，在你保存QQ秀形象，就是节算的时候，系统才会根据你身上的衣服，来算你最后需要付多少银子。</li>
+  </ul>
+</blockquote>
+
+<h2 id="in-jquery">扩展：装饰者模式 in jQuery</h2>
+
+<p>当我们在设计jQuery插件时，通常会写这么一句</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">defaultOptions</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">attr1</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+  <span class="na">attr2</span><span class="p">:</span> <span class="kc">false</span>
+<span class="p">}</span>
+
+<span class="c1">// 实际传入的options对defaultOptions作了拓展或修改</span>
+<span class="kd">var</span> <span class="nx">settings</span> <span class="o">=</span> <span class="nx">$</span><span class="p">.</span><span class="nx">extend</span><span class="p">({},</span><span class="nx">defaultOptions</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span></code></pre></figure>
+
+<p>这也可以视作装饰者模式。</p>
+
+<h2 id="section-2">总结</h2>
+
+<p>装饰者模式是为已有的功能动态地添加另一种功能，而不必改变原类文件的方式。装饰者模式可以有效地把类的核心职责和装饰功能区分开来，简化原有的类。</p>
+
+<p>通过阅读这篇文章，是否对<code class="highlighter-rouge">装饰者模式</code>有了了解呢？</p>
+
+<p>以上。</p>
+
+<p>关于extend原型继承函数可以看我的<a href="http://clancyz.github.io/blog/2015/07/27/javascript-prototype-extend/">这篇文章</a>。</p>
+
+
+</article>
+
+
+  <div class="py2">
+  <blockquote>
+  <p><b>关于此文章：</b></p>
+  <ul>
+      <li>作者：Clancy Zhu</li>
+      <li>版权声明：自由转载-非商用-非衍生-保持署名<a href="http://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh">（CC BY-NC-ND 3.0)</a></li>
+  </ul>
+</blockquote>
+</div>
+
+
+
+
+
+    
+  
+<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="大白话Javascript设计模式之装饰者模式(Decorator)" data-title="大白话Javascript设计模式之装饰者模式(Decorator)" data-url="http://clancyz.github.io/blog/2015/10/18/Javascript-Design-Pattern-Decorator/"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"clancyz"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end -->
+
+
+        
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+  <div class="p2 wrap">
+    <div class="measure mt1 center">
+      <small>
+        2016 Clancy Zhu
+      </small>
+    </div>
+  </div>
+</footer>
+
+
+
+</body>
+</html>

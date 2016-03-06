@@ -240,10 +240,27 @@ var _hmt = _hmt || [];
   <span class="nx">f</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="nx">superClass</span><span class="p">.</span><span class="nx">prototype</span><span class="p">;</span>
   <span class="nx">subClass</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">f</span><span class="p">();</span>
   <span class="nx">subClass</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">constructor</span> <span class="o">=</span> <span class="nx">subClass</span><span class="p">;</span>
+  <span class="c1">// 有可能调用父类方法，所以给予一个superClass属性</span>
+  <span class="nx">subClass</span><span class="p">.</span><span class="nx">superClass</span> <span class="o">=</span> <span class="nx">superClass</span><span class="p">.</span><span class="nx">prototype</span><span class="p">;</span>
+  <span class="c1">// 同样，superClass的constructor需要一个修正。</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">superClass</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">constructor</span> <span class="o">==</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">constructor</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">superClass</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">constructor</span><span class="o">=</span><span class="nx">superClass</span><span class="p">;</span>
+    <span class="p">}</span>
 <span class="p">}</span></code></pre></figure>
 
 
 </article>
+
+
+  <div class="py2">
+  <blockquote>
+  <p><b>关于此文章：</b></p>
+  <ul>
+      <li>作者：Clancy Zhu</li>
+      <li>版权声明：自由转载-非商用-非衍生-保持署名<a href="http://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh">（CC BY-NC-ND 3.0)</a></li>
+  </ul>
+</blockquote>
+</div>
 
 
 

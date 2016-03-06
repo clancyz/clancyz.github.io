@@ -147,5 +147,11 @@ function extend (subClass, superClass) {
   f.prototype = superClass.prototype;
   subClass.prototype = new f();
   subClass.prototype.constructor = subClass;
+  // 有可能调用父类方法，所以给予一个superClass属性
+  subClass.superClass = superClass.prototype;
+  // 同样，superClass的constructor需要一个修正。
+  if (superClass.prototype.constructor == Object.prototype.constructor) {
+      superClass.prototype.constructor=superClass;
+    }
 }
 {% endhighlight %}
