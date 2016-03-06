@@ -6,7 +6,7 @@ title: 大白话Javascript设计模式之门面模式(facade)
 
 date: 2015-10-14 22:45:50
 
-summary: 使用门面模式设计出简洁、易于调用、兼容性良好的API。
+summary: 朕要吃荔枝，你咋弄来的我不管，反正朕要吃荔枝。
 
 categories: blog
 

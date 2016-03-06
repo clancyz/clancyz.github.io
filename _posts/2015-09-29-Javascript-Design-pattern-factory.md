@@ -6,7 +6,7 @@ title: 大白话Javascript设计模式之工厂模式(factory)
 
 date: 2015-09-29 23:14:21
 
-summary: 大白话Javascript设计模式系列之-- 工厂模式。 工厂模式是js开发中使用最广泛的模式之一。
+summary: 从前有一个神灯，你让它给你啥它就给你啥。
 
 categories: blog
 

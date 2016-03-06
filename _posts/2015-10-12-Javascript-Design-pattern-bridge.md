@@ -6,7 +6,7 @@ title: 大白话Javascript设计模式之桥接模式(bridge)
 
 date: 2015-10-12 18:24:50
 
-summary: 大白话Javascript设计模式系列之-- 桥接模式。桥接模式用于弱化它与使用它的类和对象的耦合，作用是将抽象与其实现隔离开来，以便二者独立变化。
+summary: 形形色色，形状是形状，颜色是颜色。我们要的是「喜形于色」。
 
 categories: blog
 

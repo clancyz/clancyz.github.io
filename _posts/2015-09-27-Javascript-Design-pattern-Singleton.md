@@ -6,7 +6,7 @@ title: 大白话Javascript设计模式之单例模式(Singleton)
 
 date: 2015-09-27 23:00:09
 
-summary: 单例模式是JS开发时常用的，也是最简单的模式。大白话系列的开篇。
+summary: “你心里如果有人了，只能有一个。”
 
 categories: blog
 

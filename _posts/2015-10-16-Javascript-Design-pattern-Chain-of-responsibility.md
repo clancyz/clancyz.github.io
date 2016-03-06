@@ -6,7 +6,7 @@ title: 大白话Javascript设计模式之职责链模式(Chain of Responsibility
 
 date: 2015-10-16 22:25:13
 
-summary: 职责链模式可以让对象得到灵活、高效的处理，减轻请求对象和处理对象的耦合。
+summary: 其实，我是一个鉴黄师。专看你们这些演员。
 
 categories: blog
 
