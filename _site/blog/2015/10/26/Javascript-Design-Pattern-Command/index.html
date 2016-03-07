@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>大白话Javascript设计模式之命令模式(Command) &#8211; Clancy Zhu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="这世界上没有什么事是撸上十个串不能解决的；如果有，那你就说：「老板，再来十串」。">
+    <meta name="author" content="Clancy Zhu">
+    <meta name="keywords" content="blog">
+    <link rel="canonical" href="http://clancyz.github.io/blog/2015/10/26/Javascript-Design-Pattern-Command/">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css" type="text/css">
+
+    <!-- Fonts -->
+    <link href='//fonts.useso.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.useso.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+      <link href="//libs.baidu.com/fontawesome/4.2.0/css/font-awesome.css" rel="stylesheet">
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="大白话Javascript设计模式之命令模式(Command)">
+    <meta property="og:description" content="Clancy Zhu's blog">
+    <meta property="og:url" content="http://clancyz.github.io/blog/2015/10/26/Javascript-Design-Pattern-Command/">
+    <meta property="og:site_name" content="Clancy Zhu">
+    
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?552e4c4f02c7d240bdb63847dd7ea798";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</head>
+
+<body class="">
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="http://clancyz.github.io" class="site-title">Clancy Zhu</a>
+      <nav class="site-nav right">
+        <a href="/about/">About</a>
+<a href="/contact/">Contact</a>
+
+      </nav>
+      <div class="clearfix"></div>
+      
+        <div class="social-icons">
+  <div class="left">
+    
+      <a class="fa fa-github" href="https://github.com/clancyz"></a>
+    
+    <a class="fa fa-rss" href="/feed.xml"></a>
+    
+    
+    
+      <a class="fa fa-envelope" href="mailto:clancyzhu@me.com"></a>
+    
+    
+  </div>
+  <div class="right">
+    
+    
+    
+  </div>
+</div>
+<div class="clearfix"></div>
+
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        
+
+
+<div class="post-header mb2">
+  
+  <h1 class="py2">大白话Javascript设计模式之命令模式(Command)</h1>
+  
+  <span class="post-meta">10月 26日, 2015</span><br>
+  
+  <!-- <span class="post-meta small">3 minute read</span> -->
+</div>
+
+<article class="post-content">
+  <h2 id="section">什么是命令模式</h2>
+
+<blockquote>
+  <ul>
+    <li>命令模式旨在解耦请求的发送者与接收者，发送者与接收者之间没有直接引用关系，发送请求的对象只需要知道如何发送请求，而不必知道如何完成请求。</li>
+    <li>命令模式将请求封装为对象，从而使我们可用不同的请求对客户进行参数化；对请求排队或者记录请求日志，以及支持可撤销的操作。</li>
+  </ul>
+</blockquote>
+
+<p>这个系列的惯例，还是用具体的例子来解释。今天我们的例子是「撸串」。</p>
+
+<h2 id="section-1">混乱的小烧烤摊儿</h2>
+
+<p>某天晚上，你胃里的馋虫嗷嗷叫，想到撒着孜然淌着油的羊肉串，哈喇子流了一地。</p>
+
+<p>然后你来到个挺热闹的烤串摊儿，烤串的只有一个，自己烤自己收钱。吃烤串的人挺多。</p>
+
+<p>你上去：“老板来十个羊肉串十个肉筋不要辣椒多放孜然”</p>
+
+<p>老板：哦</p>
+
+<p>10分钟过去了…</p>
+
+<p>你：还有几个人到我呐</p>
+
+<p>老板：哦，你前面还5个人</p>
+
+<p>又20分钟过去了…</p>
+
+<p>你：卧槽，你咋回事，我比他先来的，咋先给他？</p>
+
+<p>老板：哦哦这是你的，呐，给你5个串。</p>
+
+<p>你：我要的是10个啊，还要10个肉筋，还有这有辣椒啊我不要辣椒啊啊啊</p>
+
+<p>老板：哦哦不好意思，人太多了记不过来了，下个给你烤</p>
+
+<p>又20分钟过去了…</p>
+
+<p>你：卧槽，怎么还没我的？</p>
+
+<p>老板：哦哦，马上给你烤</p>
+
+<p>你：妈的，劳资不吃了！</p>
+
+<p>你就准备回家了。边走边想，妈的，这个傻逼，不懂拿个小本儿记一下啊？不懂给个号啊？记性还这么差，弄得劳资没得吃！</p>
+
+<blockquote>
+  <p>上面的事件中，可以看出请求的发送者和接收者之间是「紧耦合」的；请求一多的情况下，很容易发生混乱。你想到的「拿个小本记一下」，实际上就是「解耦合」的一种方法。</p>
+</blockquote>
+
+<h2 id="section-2">正经的烧烤店</h2>
+
+<p>你走到半路，还是馋得不行，看来今晚上不吃到嘴里是睡不着了。</p>
+
+<p>路过一家正经的烧烤店，你一看，我去，串一个要十块！不管了，吃吧！</p>
+
+<p>想想一个人吃也没啥意思，得叫个人来一起吹牛逼，于是你打电话叫了另一只单身狗，小明。</p>
+
+<p>小明：尼玛，不是要我来买单的吧。</p>
+
+<p>你：我草，谁让你买单了，今天我请客。</p>
+
+<p>小明：好呀好呀好呀</p>
+
+<p>你嘀咕：真是个屌丝…额看来这么一吃明天开始得啃馒头了…</p>
+
+<p>到了店里坐毕开始点餐了。</p>
+
+<p>你：服务员，来十个串十个肉筋十个鸡翅两个大腰子～</p>
+
+<p>服务员：好的（拿个笔，记上了）</p>
+
+<p>小明：我要和他一样的</p>
+
+<p>服务员：好的（继续记）</p>
+
+<p>你：卧槽，吃得了那么多吗你，我是点我们两个的！服务员，他说的不要了哈</p>
+
+<p>服务员：好的（划掉）</p>
+
+<p>小明：我去，我今天晚上没吃饭，想多吃点儿。那就再来十个串吧</p>
+
+<p>服务员：好的。那就帮您下单了。</p>
+
+<p>（20分钟后）</p>
+
+<p>服务员：您好，这是您的串</p>
+
+<p>额，终于可以大快朵颐了！撸起！</p>
+
+<h2 id="section-3">效率为什么高？</h2>
+
+<p>好，由此，我们可以观察出：</p>
+
+<blockquote>
+  <ul>
+    <li>正经烧烤店之所以效率高，首先服务员记录了详细的点菜内容；如果想撤消或修改点单中的内容，告诉服务员即可；有了这个记录就不怕遗忘了；烤肉师傅按每桌客人点单的先后顺序来烤。</li>
+    <li>点单的客人（请求发送者）只要跟服务员交互即可，实现了和烤肉师傅（请求接收者）的解耦。</li>
+  </ul>
+</blockquote>
+
+<h2 id="section-4">模拟门店的下单行为</h2>
+
+<p>好，我们来模拟门店的下单行为。</p>
+
+<p>首先，既然我们想到了高效的关键是「服务员」，应该想到增加一个服务员类。那么，实现解耦的对象服务员干了什么事呢？</p>
+
+<ol>
+  <li>从客户处接收所有的请求（包括修改，撤消等），形成一个点菜单。</li>
+  <li>把请求告诉烤肉师傅：烤N个串，烤N个鸡翅…</li>
+</ol>
+
+<p>相当于服务员对烤肉师傅发送了一条条的「命令」，烤肉师傅执行<code class="highlighter-rouge">烤串</code>, <code class="highlighter-rouge">烤鸡翅</code>。</p>
+
+<p>换句话说，一条命令对应着烤肉师傅的一种方法。</p>
+
+<p>首先我们来实现烤肉师傅类：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">Barbecuer</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(){};</span>
+<span class="nx">Barbecuer</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">roastMutton</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">num</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'烤了'</span> <span class="o">+</span> <span class="nx">num</span> <span class="o">+</span> <span class="s1">'串羊肉串'</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="nx">Barbecuer</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">roastRibs</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">num</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'烤了'</span> <span class="o">+</span> <span class="nx">num</span> <span class="o">+</span> <span class="s1">'串肉筋'</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="c1">// ... 其他的雷同，不废话了</span></code></pre></figure>
+
+<p>然后，我们来实现服务员类。</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">Waiter</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(){</span>
+  <span class="c1">// 订单是由一条条的“命令”组成的。写订单就是在写一条条的命令</span>
+  <span class="c1">// 把订单设为一个数组</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">orders</span> <span class="o">=</span> <span class="p">[];</span>
+<span class="p">};</span>
+
+<span class="c1">// 服务员的主要任务之一：写订单</span>
+
+<span class="nx">Waiter</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">writeOrder</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">command</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// 把命令写到订单中</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">orders</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">command</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// 这里，实现一个数组的remove方法, 在取消订单时使用</span>
+<span class="nb">Array</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">remove</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">v</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">v</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">index</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">splice</span><span class="p">(</span><span class="nx">index</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// 取消掉某一个命令</span>
+<span class="nx">Waiter</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">cancelOrder</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">command</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">orders</span><span class="p">.</span><span class="nx">remove</span><span class="p">(</span><span class="nx">command</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// 修改某一个命令,即修改某种串类的数量</span>
+<span class="nx">Waiter</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">modifyOrder</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">command</span><span class="p">,</span> <span class="nx">num</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">orders</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">command</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">index</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">orders</span><span class="p">[</span><span class="nx">index</span><span class="p">].</span><span class="nx">num</span> <span class="o">=</span> <span class="nx">num</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="nx">Waiter</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">notify</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="c1">// 把订单中的每一条命令都执行</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">orders</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">cmd</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">cmd</span><span class="p">.</span><span class="nx">executeCommand</span><span class="p">();</span>
+  <span class="p">})</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>上面例子中的<code class="highlighter-rouge">notify</code>方法中，我们给出了一个<code class="highlighter-rouge">cmd.executeCommand</code>的实现。</p>
+
+<p>如前所述，这个<code class="highlighter-rouge">执行命令</code>即是对应烤肉师傅烤相应的串，如<code class="highlighter-rouge">roastMutton</code>, <code class="highlighter-rouge">roastRib</code>等。</p>
+
+<p>那么，我们剩下来只要实现<code class="highlighter-rouge">Command</code>类与烤肉师傅的烤肉方法的对应关系即可。</p>
+
+<p>实现<code class="highlighter-rouge">Command</code>类时，如<code class="highlighter-rouge">烤羊肉串</code>，<code class="highlighter-rouge">烤肉筋</code>都是<code class="highlighter-rouge">Command</code>的子类。</p>
+
+<p>同时，为了实现对应关系，需要将烤肉师傅作为参数传入：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">Command</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">barbecuer</span><span class="p">,</span> <span class="nx">num</span><span class="p">){</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">barbecuer</span> <span class="o">=</span> <span class="nx">barbecuer</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">num</span> <span class="o">=</span> <span class="nx">num</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="c1">// 抽象方法</span>
+<span class="nx">Command</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">executeCommand</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(){</span>
+  <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s1">'俺是父类抽象方法'</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// 烤羊肉串命令，继承Command</span>
+<span class="kd">var</span> <span class="nx">roastMuttonCommand</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">barbecuer</span><span class="p">,</span> <span class="nx">num</span><span class="p">){</span>
+  <span class="nx">roastMuttonCommand</span><span class="p">.</span><span class="nx">superClass</span><span class="p">.</span><span class="nx">constructor</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">barbecuer</span><span class="p">,</span> <span class="nx">num</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">roastMuttonCommand</span><span class="p">,</span> <span class="nx">Command</span><span class="p">);</span>
+<span class="nx">roastMuttonCommand</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">executeCommand</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="c1">// 对应上烤肉师傅的roastMutton方法：</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">barbecuer</span><span class="p">.</span><span class="nx">roastMutton</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">num</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// 烤肉筋命令与上面雷同，不废话了</span></code></pre></figure>
+
+<p>ok, 下面我们来看实际的客户端调用。假设我们点单过程是这样的：</p>
+
+<ol>
+  <li>点10个串，点10个肉筋</li>
+  <li>取消掉10个肉筋</li>
+  <li>修改10个串为5个</li>
+  <li>下单</li>
+</ol>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// 首先，烤肉师傅和服务员得就位</span>
+<span class="kd">var</span> <span class="nx">myBarbecuer</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Barbecuer</span><span class="p">();</span>
+<span class="kd">var</span> <span class="nx">myWaiter</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Waiter</span><span class="p">();</span>
+<span class="c1">// 点10个串</span>
+<span class="kd">var</span> <span class="nx">command1</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">roastMuttonCommand</span><span class="p">(</span><span class="nx">myBarbecuer</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+<span class="c1">// 服务员记下</span>
+<span class="nx">myWaiter</span><span class="p">.</span><span class="nx">writeOrder</span><span class="p">(</span><span class="nx">command1</span><span class="p">);</span>
+<span class="c1">// 点10个肉筋</span>
+<span class="kd">var</span> <span class="nx">command2</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">roastRibCommand</span><span class="p">(</span><span class="nx">myBarbecuer</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+<span class="c1">// 服务员记下</span>
+<span class="nx">myWaiter</span><span class="p">.</span><span class="nx">writerOrder</span><span class="p">(</span><span class="nx">command2</span><span class="p">);</span>
+<span class="c1">// 取消掉10个肉筋，服务员划掉</span>
+<span class="nx">myWaiter</span><span class="p">.</span><span class="nx">cancelOrder</span><span class="p">(</span><span class="nx">command2</span><span class="p">);</span>
+<span class="c1">// 修改10个串为5个，服务员改掉</span>
+<span class="nx">myWaiter</span><span class="p">.</span><span class="nx">modifyOrder</span><span class="p">(</span><span class="nx">command1</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
+<span class="c1">// 下单, 师傅烤串去</span>
+<span class="nx">myWaiter</span><span class="p">.</span><span class="nx">notify</span><span class="p">();</span></code></pre></figure>
+
+<p>上面的例子很符合实际生活的体验。这便是<code class="highlighter-rouge">命令模式</code>。毕竟设计模式都是来源于生活的嘛。</p>
+
+<h2 id="section-5">总结</h2>
+
+<p>我们再来看看命令模式的好处：</p>
+
+<ul>
+  <li>比较容易设计一个命令队列。在我们的例子中order即是命令队列。</li>
+  <li>对命令有详细的记录。</li>
+  <li>对命令可执行修改和撤销。</li>
+  <li>增加具体的命令类非常容易。</li>
+  <li>关键的一点，实现了请求发送者和接收者的解耦。</li>
+</ul>
+
+<p>是否明白呢亲？</p>
+
+<p>以上。</p>
+
+<p>注：关于extend原型继承函数及超类superClass可以看我的<a href="http://clancyz.github.io/blog/2015/07/27/javascript-prototype-extend/">这篇文章</a>。</p>
+
+
+</article>
+
+
+  <div class="py2">
+  <blockquote>
+  <p><b>关于此文章：</b></p>
+  <ul>
+      <li>作者：Clancy Zhu</li>
+      <li>版权声明：自由转载-非商用-非衍生-保持署名<a href="http://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh">（CC BY-NC-ND 3.0)</a></li>
+  </ul>
+</blockquote>
+</div>
+
+
+
+
+
+    
+  
+<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="大白话Javascript设计模式之命令模式(Command)" data-title="大白话Javascript设计模式之命令模式(Command)" data-url="http://clancyz.github.io/blog/2015/10/26/Javascript-Design-Pattern-Command/"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"clancyz"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end -->
+
+
+        
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+  <div class="p2 wrap">
+    <div class="measure mt1 center">
+      <small>
+        2016 Clancy Zhu
+      </small>
+    </div>
+  </div>
+</footer>
+
+
+
+</body>
+</html>

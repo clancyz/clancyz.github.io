@@ -417,6 +417,263 @@ fisp的规范下，原来设想应该这么写：&lt;/p&gt;
       </item>
     
       <item>
+        <title>大白话Javascript设计模式之命令模式(Command)</title>
+        <description>&lt;h2 id=&quot;section&quot;&gt;什么是命令模式&lt;/h2&gt;
+
+&lt;blockquote&gt;
+  &lt;ul&gt;
+    &lt;li&gt;命令模式旨在解耦请求的发送者与接收者，发送者与接收者之间没有直接引用关系，发送请求的对象只需要知道如何发送请求，而不必知道如何完成请求。&lt;/li&gt;
+    &lt;li&gt;命令模式将请求封装为对象，从而使我们可用不同的请求对客户进行参数化；对请求排队或者记录请求日志，以及支持可撤销的操作。&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;这个系列的惯例，还是用具体的例子来解释。今天我们的例子是「撸串」。&lt;/p&gt;
+
+&lt;h2 id=&quot;section-1&quot;&gt;混乱的小烧烤摊儿&lt;/h2&gt;
+
+&lt;p&gt;某天晚上，你胃里的馋虫嗷嗷叫，想到撒着孜然淌着油的羊肉串，哈喇子流了一地。&lt;/p&gt;
+
+&lt;p&gt;然后你来到个挺热闹的烤串摊儿，烤串的只有一个，自己烤自己收钱。吃烤串的人挺多。&lt;/p&gt;
+
+&lt;p&gt;你上去：“老板来十个羊肉串十个肉筋不要辣椒多放孜然”&lt;/p&gt;
+
+&lt;p&gt;老板：哦&lt;/p&gt;
+
+&lt;p&gt;10分钟过去了…&lt;/p&gt;
+
+&lt;p&gt;你：还有几个人到我呐&lt;/p&gt;
+
+&lt;p&gt;老板：哦，你前面还5个人&lt;/p&gt;
+
+&lt;p&gt;又20分钟过去了…&lt;/p&gt;
+
+&lt;p&gt;你：卧槽，你咋回事，我比他先来的，咋先给他？&lt;/p&gt;
+
+&lt;p&gt;老板：哦哦这是你的，呐，给你5个串。&lt;/p&gt;
+
+&lt;p&gt;你：我要的是10个啊，还要10个肉筋，还有这有辣椒啊我不要辣椒啊啊啊&lt;/p&gt;
+
+&lt;p&gt;老板：哦哦不好意思，人太多了记不过来了，下个给你烤&lt;/p&gt;
+
+&lt;p&gt;又20分钟过去了…&lt;/p&gt;
+
+&lt;p&gt;你：卧槽，怎么还没我的？&lt;/p&gt;
+
+&lt;p&gt;老板：哦哦，马上给你烤&lt;/p&gt;
+
+&lt;p&gt;你：妈的，劳资不吃了！&lt;/p&gt;
+
+&lt;p&gt;你就准备回家了。边走边想，妈的，这个傻逼，不懂拿个小本儿记一下啊？不懂给个号啊？记性还这么差，弄得劳资没得吃！&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;上面的事件中，可以看出请求的发送者和接收者之间是「紧耦合」的；请求一多的情况下，很容易发生混乱。你想到的「拿个小本记一下」，实际上就是「解耦合」的一种方法。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;section-2&quot;&gt;正经的烧烤店&lt;/h2&gt;
+
+&lt;p&gt;你走到半路，还是馋得不行，看来今晚上不吃到嘴里是睡不着了。&lt;/p&gt;
+
+&lt;p&gt;路过一家正经的烧烤店，你一看，我去，串一个要十块！不管了，吃吧！&lt;/p&gt;
+
+&lt;p&gt;想想一个人吃也没啥意思，得叫个人来一起吹牛逼，于是你打电话叫了另一只单身狗，小明。&lt;/p&gt;
+
+&lt;p&gt;小明：尼玛，不是要我来买单的吧。&lt;/p&gt;
+
+&lt;p&gt;你：我草，谁让你买单了，今天我请客。&lt;/p&gt;
+
+&lt;p&gt;小明：好呀好呀好呀&lt;/p&gt;
+
+&lt;p&gt;你嘀咕：真是个屌丝…额看来这么一吃明天开始得啃馒头了…&lt;/p&gt;
+
+&lt;p&gt;到了店里坐毕开始点餐了。&lt;/p&gt;
+
+&lt;p&gt;你：服务员，来十个串十个肉筋十个鸡翅两个大腰子～&lt;/p&gt;
+
+&lt;p&gt;服务员：好的（拿个笔，记上了）&lt;/p&gt;
+
+&lt;p&gt;小明：我要和他一样的&lt;/p&gt;
+
+&lt;p&gt;服务员：好的（继续记）&lt;/p&gt;
+
+&lt;p&gt;你：卧槽，吃得了那么多吗你，我是点我们两个的！服务员，他说的不要了哈&lt;/p&gt;
+
+&lt;p&gt;服务员：好的（划掉）&lt;/p&gt;
+
+&lt;p&gt;小明：我去，我今天晚上没吃饭，想多吃点儿。那就再来十个串吧&lt;/p&gt;
+
+&lt;p&gt;服务员：好的。那就帮您下单了。&lt;/p&gt;
+
+&lt;p&gt;（20分钟后）&lt;/p&gt;
+
+&lt;p&gt;服务员：您好，这是您的串&lt;/p&gt;
+
+&lt;p&gt;额，终于可以大快朵颐了！撸起！&lt;/p&gt;
+
+&lt;h2 id=&quot;section-3&quot;&gt;效率为什么高？&lt;/h2&gt;
+
+&lt;p&gt;好，由此，我们可以观察出：&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;ul&gt;
+    &lt;li&gt;正经烧烤店之所以效率高，首先服务员记录了详细的点菜内容；如果想撤消或修改点单中的内容，告诉服务员即可；有了这个记录就不怕遗忘了；烤肉师傅按每桌客人点单的先后顺序来烤。&lt;/li&gt;
+    &lt;li&gt;点单的客人（请求发送者）只要跟服务员交互即可，实现了和烤肉师傅（请求接收者）的解耦。&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;section-4&quot;&gt;模拟门店的下单行为&lt;/h2&gt;
+
+&lt;p&gt;好，我们来模拟门店的下单行为。&lt;/p&gt;
+
+&lt;p&gt;首先，既然我们想到了高效的关键是「服务员」，应该想到增加一个服务员类。那么，实现解耦的对象服务员干了什么事呢？&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;从客户处接收所有的请求（包括修改，撤消等），形成一个点菜单。&lt;/li&gt;
+  &lt;li&gt;把请求告诉烤肉师傅：烤N个串，烤N个鸡翅…&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;相当于服务员对烤肉师傅发送了一条条的「命令」，烤肉师傅执行&lt;code class=&quot;highlighter-rouge&quot;&gt;烤串&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;烤鸡翅&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;换句话说，一条命令对应着烤肉师傅的一种方法。&lt;/p&gt;
+
+&lt;p&gt;首先我们来实现烤肉师傅类：&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Barbecuer&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(){};&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;Barbecuer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;prototype&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;roastMutton&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;num&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;烤了&#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;num&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;串羊肉串&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;Barbecuer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;prototype&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;roastRibs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;num&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;烤了&#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;num&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;串肉筋&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// ... 其他的雷同，不废话了&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;然后，我们来实现服务员类。&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Waiter&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;// 订单是由一条条的“命令”组成的。写订单就是在写一条条的命令&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;// 把订单设为一个数组&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;orders&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[];&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// 服务员的主要任务之一：写订单&lt;/span&gt;
+
+&lt;span class=&quot;nx&quot;&gt;Waiter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;prototype&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;writeOrder&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;// 把命令写到订单中&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;orders&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;push&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// 这里，实现一个数组的remove方法, 在取消订单时使用&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;Array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;prototype&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;remove&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;index&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;indexOf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;index&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;splice&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// 取消掉某一个命令&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;Waiter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;prototype&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;cancelOrder&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;orders&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;remove&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// 修改某一个命令,即修改某种串类的数量&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;Waiter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;prototype&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;modifyOrder&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;num&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;index&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;orders&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;indexOf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;index&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;orders&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;num&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;num&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;nx&quot;&gt;Waiter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;prototype&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;notify&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;// 把订单中的每一条命令都执行&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;orders&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;forEach&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;cmd&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;cmd&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;executeCommand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;上面例子中的&lt;code class=&quot;highlighter-rouge&quot;&gt;notify&lt;/code&gt;方法中，我们给出了一个&lt;code class=&quot;highlighter-rouge&quot;&gt;cmd.executeCommand&lt;/code&gt;的实现。&lt;/p&gt;
+
+&lt;p&gt;如前所述，这个&lt;code class=&quot;highlighter-rouge&quot;&gt;执行命令&lt;/code&gt;即是对应烤肉师傅烤相应的串，如&lt;code class=&quot;highlighter-rouge&quot;&gt;roastMutton&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;roastRib&lt;/code&gt;等。&lt;/p&gt;
+
+&lt;p&gt;那么，我们剩下来只要实现&lt;code class=&quot;highlighter-rouge&quot;&gt;Command&lt;/code&gt;类与烤肉师傅的烤肉方法的对应关系即可。&lt;/p&gt;
+
+&lt;p&gt;实现&lt;code class=&quot;highlighter-rouge&quot;&gt;Command&lt;/code&gt;类时，如&lt;code class=&quot;highlighter-rouge&quot;&gt;烤羊肉串&lt;/code&gt;，&lt;code class=&quot;highlighter-rouge&quot;&gt;烤肉筋&lt;/code&gt;都是&lt;code class=&quot;highlighter-rouge&quot;&gt;Command&lt;/code&gt;的子类。&lt;/p&gt;
+
+&lt;p&gt;同时，为了实现对应关系，需要将烤肉师傅作为参数传入：&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Command&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;barbecuer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;num&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;barbecuer&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;barbecuer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;num&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;num&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// 抽象方法&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;Command&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;prototype&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;executeCommand&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;throw&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;俺是父类抽象方法&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// 烤羊肉串命令，继承Command&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;roastMuttonCommand&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;barbecuer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;num&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;roastMuttonCommand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;superClass&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;constructor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;barbecuer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;num&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;extend&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;roastMuttonCommand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Command&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;roastMuttonCommand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;prototype&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;executeCommand&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;// 对应上烤肉师傅的roastMutton方法：&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;barbecuer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;roastMutton&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;num&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// 烤肉筋命令与上面雷同，不废话了&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;ok, 下面我们来看实际的客户端调用。假设我们点单过程是这样的：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;点10个串，点10个肉筋&lt;/li&gt;
+  &lt;li&gt;取消掉10个肉筋&lt;/li&gt;
+  &lt;li&gt;修改10个串为5个&lt;/li&gt;
+  &lt;li&gt;下单&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;&lt;span class=&quot;c1&quot;&gt;// 首先，烤肉师傅和服务员得就位&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;myBarbecuer&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Barbecuer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;myWaiter&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Waiter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// 点10个串&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;command1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;roastMuttonCommand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;myBarbecuer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// 服务员记下&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;myWaiter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;writeOrder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;command1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// 点10个肉筋&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;command2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;roastRibCommand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;myBarbecuer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// 服务员记下&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;myWaiter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;writerOrder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;command2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// 取消掉10个肉筋，服务员划掉&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;myWaiter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;cancelOrder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;command2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// 修改10个串为5个，服务员改掉&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;myWaiter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;modifyOrder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;command1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// 下单, 师傅烤串去&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;myWaiter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;notify&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;上面的例子很符合实际生活的体验。这便是&lt;code class=&quot;highlighter-rouge&quot;&gt;命令模式&lt;/code&gt;。毕竟设计模式都是来源于生活的嘛。&lt;/p&gt;
+
+&lt;h2 id=&quot;section-5&quot;&gt;总结&lt;/h2&gt;
+
+&lt;p&gt;我们再来看看命令模式的好处：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;比较容易设计一个命令队列。在我们的例子中order即是命令队列。&lt;/li&gt;
+  &lt;li&gt;对命令有详细的记录。&lt;/li&gt;
+  &lt;li&gt;对命令可执行修改和撤销。&lt;/li&gt;
+  &lt;li&gt;增加具体的命令类非常容易。&lt;/li&gt;
+  &lt;li&gt;关键的一点，实现了请求发送者和接收者的解耦。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;是否明白呢亲？&lt;/p&gt;
+
+&lt;p&gt;以上。&lt;/p&gt;
+
+&lt;p&gt;注：关于extend原型继承函数及超类superClass可以看我的&lt;a href=&quot;http://clancyz.github.io/blog/2015/07/27/javascript-prototype-extend/&quot;&gt;这篇文章&lt;/a&gt;。&lt;/p&gt;
+
+</description>
+        <pubDate>Mon, 26 Oct 2015 02:55:20 +0800</pubDate>
+        <link>http://clancyz.github.io/blog/2015/10/26/Javascript-Design-Pattern-Command/</link>
+        <guid isPermaLink="true">http://clancyz.github.io/blog/2015/10/26/Javascript-Design-Pattern-Command/</guid>
+      </item>
+    
+      <item>
         <title>大白话Javascript设计模式之装饰者模式(Decorator)</title>
         <description>&lt;h2 id=&quot;section&quot;&gt;什么是装饰者模式&lt;/h2&gt;
 
@@ -1762,184 +2019,6 @@ select选择框的内容有三种：img(图片), link(链接), text(文本)。
         <pubDate>Tue, 08 Sep 2015 07:06:21 +0800</pubDate>
         <link>http://clancyz.github.io/blog/2015/09/08/The-reason-of-long-ttfb-spend/</link>
         <guid isPermaLink="true">http://clancyz.github.io/blog/2015/09/08/The-reason-of-long-ttfb-spend/</guid>
-      </item>
-    
-      <item>
-        <title>某前端项目重构及性能优化记录</title>
-        <description>&lt;h2 id=&quot;section&quot;&gt;项目背景&lt;/h2&gt;
-
-&lt;p&gt;我还是从前端的技术角度来阐述。&lt;/p&gt;
-
-&lt;p&gt;首先，在框架选择上，这个项目的使用的主要技术是：&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;ul&gt;
-    &lt;li&gt;fis-plus，用于工程化&lt;/li&gt;
-    &lt;li&gt;jQuery + 各种自定义plugin，开源的不太满足需求，自己写&lt;/li&gt;
-    &lt;li&gt;D3，需要的图形化结果没有任何一个D3的demo可以满足的，基本是自己做二次开发的&lt;/li&gt;
-  &lt;/ul&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;项目在我加入时，已经由一个FE同学开发了2个月。然而，当项目需求井喷的时候，哥们说要创业，走了…&lt;/p&gt;
-
-&lt;p&gt;后来我就在 &lt;code class=&quot;highlighter-rouge&quot;&gt;1个前端，9个后端&lt;/code&gt; 的情况下死撑… 一个月码4w多行js+html+css，最多的一天有checkin近2000行js… 当然，那次2000行主要是用jQuery写业务代码，可能跟大牛比起来微不足道，但是我之前没经历过这样的压力，现在回想起来，也是段难得的经历。&lt;/p&gt;
-
-&lt;p&gt;好了有点跑偏，这个项目后来在 &lt;code class=&quot;highlighter-rouge&quot;&gt;需求相对稳定&lt;/code&gt; 的时候，相对得闲了，就想做些优化了…&lt;/p&gt;
-
-&lt;h2 id=&quot;section-1&quot;&gt;项目结构的问题&lt;/h2&gt;
-
-&lt;p&gt;当时的我接手后的项目结构是这样的：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/images/6.png&quot; alt=&quot;6.png&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;如上图的项目目录，实际上并没有遵循 &lt;code class=&quot;highlighter-rouge&quot;&gt;fis-plus&lt;/code&gt; 的 &lt;code class=&quot;highlighter-rouge&quot;&gt;模块规范&lt;/code&gt;。　带来的问题是：&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;
-    &lt;p&gt;没有抽离公共模块和页面模块，页面和母版、插件等混杂在一起；&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;整个项目只有一个fis-conf.js配置文件（用于fis编译），每次改动要发布整个项目；如果项目加入optimize压缩静态资源等策略，则会特别耗时。就当时项目规模而言，采用md5/optimize压缩后，一次编译耗时接近3分钟。&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;没有使用组件化思想。具体如下：&lt;/p&gt;
-
-    &lt;ul&gt;
-      &lt;li&gt;平台的前端母版页没有进行组件分离，header/footer的行为都集成在一个文件中，且未模块化，代码混乱；&lt;/li&gt;
-      &lt;li&gt;有两个页面使用了左导航栏，但未进行组件化复用，造成效果不一；&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;未进行模块化改造。具体如下：&lt;/p&gt;
-
-    &lt;ul&gt;
-      &lt;li&gt;前端与后端交互的接口地址列表应该模块化并统一维护；&lt;/li&gt;
-      &lt;li&gt;前端的各页面的预处理中，将产品线等urlParam的处理为一个全局变量window.util且与header/footer的行为混杂，难以解耦和维护；&lt;/li&gt;
-      &lt;li&gt;前端的模块加载器采用fisp默认的mod.js, 不利于amd标准（一种通用的前端模块化标准）的模块化加载（如echart）。&lt;/li&gt;
-      &lt;li&gt;前端现在所有插件基本均为一次加载全部，影响页面性能。&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h2 id=&quot;section-2&quot;&gt;具体的代码问题&lt;/h2&gt;
-
-&lt;p&gt;页面代码问题，主要问题有以下几点：(涉及业务的已经略去)&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;代码没有结构化，UI、事件绑定和数据请求混杂在一起，代码注释少，维护难度大。&lt;/li&gt;
-  &lt;li&gt;存在部分无用逻辑。&lt;/li&gt;
-  &lt;li&gt;某些页面注册了多个domReady事件。&lt;/li&gt;
-  &lt;li&gt;选择器存在多次重复使用的问题。&lt;/li&gt;
-  &lt;li&gt;函数重复定义，如timeFormat。&lt;/li&gt;
-  &lt;li&gt;某页面的 &lt;code class=&quot;highlighter-rouge&quot;&gt;树状表格&lt;/code&gt; 重复N次DOM操作，渲染性能低下。如遇到稍大的表格，其渲染时间可超过5s，严重影响体验。&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h2 id=&quot;section-3&quot;&gt;当时自己的一个失误&lt;/h2&gt;
-
-&lt;p&gt;当时自己在写这篇重构文档时提到了一个问题，即页面加载速度缓慢。&lt;/p&gt;
-
-&lt;p&gt;当时使用 &lt;code class=&quot;highlighter-rouge&quot;&gt;DevTool&lt;/code&gt; 来观察页面加载时间时，发现：&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;所有页面的DomContentLoaded在4s左右，Load在5~6s之间。&lt;/p&gt;
-
-  &lt;p&gt;卧槽，这也太慢了吧！&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;当时我经过分析，应该是 &lt;code class=&quot;highlighter-rouge&quot;&gt;服务端&lt;/code&gt; 的问题，不是前端问题。还给后端同学提了建议让他们去优化。结果证明，完全是我自己的问题，我也感到很羞愧。关于这个问题我也专门总结了一番，可以看我的 &lt;a href=&quot;http://clancyz.github.io/blog/2015/09/08/The-reason-of-long-ttfb-spend/&quot;&gt;这篇文章&lt;/a&gt;。&lt;/p&gt;
-
-&lt;h2 id=&quot;section-4&quot;&gt;优化过程&lt;/h2&gt;
-
-&lt;h3 id=&quot;section-5&quot;&gt;组件化：&lt;/h3&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;抽离项目代码为common公共部分和页面部分；&lt;/li&gt;
-  &lt;li&gt;抽离页面header和footer成为组件；&lt;/li&gt;
-  &lt;li&gt;抽离可多页面共用的页面组件，如左导航成为组件；&lt;/li&gt;
-  &lt;li&gt;表格组件优化，暴露出refresh接口，在新的ajax请求完成渲染表格后或翻页后触发refresh事件。&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h3 id=&quot;section-6&quot;&gt;模块化：&lt;/h3&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;
-    &lt;p&gt;将预处理的js、需要在多个页面中使用中的函数进行模块化。
-如通用功能函数util； 时间函数timeformat；获取urlParam函数getUrlParam等。&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;页面js处理，将可以按需加载（用户点击时才加载）的js资源（如复制插件，绘图插件等）使用require.async异步加载。&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h3 id=&quot;section-7&quot;&gt;工程化：&lt;/h3&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;
-    &lt;p&gt;打包策略：将资源打包，减少http请求。在打包的考虑中要同时考虑 &lt;code class=&quot;highlighter-rouge&quot;&gt;同类模块&lt;/code&gt; ， &lt;code class=&quot;highlighter-rouge&quot;&gt;打包后的大小&lt;/code&gt;　， &lt;code class=&quot;highlighter-rouge&quot;&gt;浏览器并发&lt;/code&gt;　这三要素；目前的css可以全部进行打包；js文件如果全部打包会把不需要的js都加载，造成单页加载速度较慢，故将js打包策略集中于模块化的js。&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;时间戳缓存策略：页面资源打时间戳（天为单位）；这里不打md5戳的原因主要是上线比较频繁，如果打md5戳会造成源代码量增加过快。调整fis的roadmap.path中的query即可。&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;压缩策略（可选）：压缩代码，减少下载量。由于在局域网环境下资源加载速度较快，压缩后带来的优化并不大；而压缩混淆代码后如有线上问题，将不方便调试。现在没有线下黑盒环境，后续可考虑此措施。&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;改造fisp原生mod.js为amd模块加载器：&lt;/p&gt;
-
-    &lt;ul&gt;
-      &lt;li&gt;改造为 &lt;code class=&quot;highlighter-rouge&quot;&gt;esl.js&lt;/code&gt;　方便使用amd规范的插件如 &lt;code class=&quot;highlighter-rouge&quot;&gt;echarts&lt;/code&gt;&lt;/li&gt;
-      &lt;li&gt;改造fis.conf中modules.postprocessor / settings.postprocessor&lt;/li&gt;
-      &lt;li&gt;修改fis smarty插件中的FISResource.class.php为支持amd标准的模块加载&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h3 id=&quot;section-8&quot;&gt;业务代码优化&lt;/h3&gt;
-
-&lt;h4 id=&quot;section-9&quot;&gt;这里我主要是提出了一些　&lt;code class=&quot;highlighter-rouge&quot;&gt;代码规范&lt;/code&gt;,　评审通过后要求大家遵循。&lt;/h4&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;首先，对页面代码（每个页面对应的jquery代码，不包含插件组件）做如下规范：
-    &lt;ul&gt;
-      &lt;li&gt;页面代码目录中static/* 中只允许有页面代码，不允许有公共组件。&lt;/li&gt;
-      &lt;li&gt;与后端交互的接口路径统一放到config文件中。&lt;/li&gt;
-      &lt;li&gt;页面代码使用require引入所需资源，页面tpl中不使用模板require引入资源；&lt;/li&gt;
-      &lt;li&gt;页面代码需要使用自执行函数以防变量污染；&lt;/li&gt;
-      &lt;li&gt;页面代码中第一行需要声明严格模式（use strict）；&lt;/li&gt;
-      &lt;li&gt;代码中需要使用的jquery选择器统一定义在页面最上方；&lt;/li&gt;
-      &lt;li&gt;代码中需要使用的页面级全局变量定义在页面最上方，选择器下部；&lt;/li&gt;
-      &lt;li&gt;定义一个页面object变量，定义initUI()和bind()函数，执行加载UI与绑定事件两种功能；&lt;/li&gt;
-      &lt;li&gt;定义一个fn的object用于写页面功能函数；&lt;/li&gt;
-      &lt;li&gt;所有function均需要加入业务功能注释。&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;对于某页面A：&lt;/p&gt;
-
-    &lt;ul&gt;
-      &lt;li&gt;代码重构，优化代码逻辑，去掉无用逻辑。&lt;/li&gt;
-      &lt;li&gt;页码计算的c方法去掉（可调用组件）。&lt;/li&gt;
-      &lt;li&gt;函数整合。&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;对于某页面B：&lt;/p&gt;
-
-    &lt;ul&gt;
-      &lt;li&gt;代码重构，优化代码逻辑，去掉无用逻辑。&lt;/li&gt;
-      &lt;li&gt;优化页面表格加载方式，使用模板引擎减少dom操作，加载完后再考虑二次处理。&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h2 id=&quot;section-10&quot;&gt;总结&lt;/h2&gt;
-
-&lt;p&gt;以上便是整个重构优化的过程，可能没有结合具体的例子来讲，有些笼统；但是，经过这次重构和优化后，项目代码的结构更加清晰，易于部署，可维护性更好；页面普遍的加载速度快了1s以上。对自己也算是一次完整的重构经历，也有一定的成长。&lt;/p&gt;
-
-</description>
-        <pubDate>Fri, 21 Aug 2015 06:06:21 +0800</pubDate>
-        <link>http://clancyz.github.io/blog/2015/08/21/A-Project-refactor-notes/</link>
-        <guid isPermaLink="true">http://clancyz.github.io/blog/2015/08/21/A-Project-refactor-notes/</guid>
       </item>
     
   </channel>
