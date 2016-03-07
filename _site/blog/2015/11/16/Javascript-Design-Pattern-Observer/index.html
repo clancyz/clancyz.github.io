@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>大白话Javascript设计模式之观察者模式(Observer) &#8211; Clancy Zhu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="小明，你妈喊你回家吃饭了。">
+    <meta name="author" content="Clancy Zhu">
+    <meta name="keywords" content="blog">
+    <link rel="canonical" href="http://clancyz.github.io/blog/2015/11/16/Javascript-Design-Pattern-Observer/">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css" type="text/css">
+
+    <!-- Fonts -->
+    <link href='//fonts.useso.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.useso.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+      <link href="//libs.baidu.com/fontawesome/4.2.0/css/font-awesome.css" rel="stylesheet">
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="大白话Javascript设计模式之观察者模式(Observer)">
+    <meta property="og:description" content="Clancy Zhu's blog">
+    <meta property="og:url" content="http://clancyz.github.io/blog/2015/11/16/Javascript-Design-Pattern-Observer/">
+    <meta property="og:site_name" content="Clancy Zhu">
+    
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?552e4c4f02c7d240bdb63847dd7ea798";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</head>
+
+<body class="">
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="http://clancyz.github.io" class="site-title">Clancy Zhu</a>
+      <nav class="site-nav right">
+        <a href="/about/">About</a>
+<a href="/contact/">Contact</a>
+
+      </nav>
+      <div class="clearfix"></div>
+      
+        <div class="social-icons">
+  <div class="left">
+    
+      <a class="fa fa-github" href="https://github.com/clancyz"></a>
+    
+    <a class="fa fa-rss" href="/feed.xml"></a>
+    
+    
+    
+      <a class="fa fa-envelope" href="mailto:clancyzhu@me.com"></a>
+    
+    
+  </div>
+  <div class="right">
+    
+    
+    
+  </div>
+</div>
+<div class="clearfix"></div>
+
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        
+
+
+<div class="post-header mb2">
+  
+  <h1 class="py2">大白话Javascript设计模式之观察者模式(Observer)</h1>
+  
+  <span class="post-meta">11月 16日, 2015</span><br>
+  
+  <!-- <span class="post-meta small">4 minute read</span> -->
+</div>
+
+<article class="post-content">
+  <h2 id="section">什么是观察者模式</h2>
+
+<blockquote>
+  <p>观察者模式(Observer Pattern)：定义对象间的一种一对多依赖关系，使得每当一个对象状态发生改变时，其相关依赖对象皆得到通知并被自动更新。</p>
+</blockquote>
+
+<h2 id="eventhandler-vs-eventlistener">日常的使用：EventHandler vs EventListener</h2>
+
+<p>我们先来复习一下基础知识。</p>
+
+<p>大家都知道，大多数时间里面，FE都是面向浏览器编程的，即基于DOM脚本的编程环境来工作。</p>
+
+<p>在开发过程中，用户与浏览器的交互是少不了的，所以我们必须基于「事件驱动」去做一些事情。</p>
+
+<p>最简单的例子，绑定一个<code class="highlighter-rouge">button</code>元素的点击事件：</p>
+
+<figure class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;button</span> <span class="na">id=</span><span class="s">"btn"</span> <span class="na">onclick=</span><span class="s">"alert('被猛击了！')"</span><span class="nt">&gt;</span>猛击我吧<span class="nt">&lt;/button&gt;</span></code></pre></figure>
+
+<p>当然，我们更多希望点击事件是在js代码中方便维护。so:</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">btn</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">'btn'</span><span class="p">);</span>
+<span class="nx">btn</span><span class="p">.</span><span class="nx">onclick</span> <span class="o">=</span> <span class="nx">fn1</span><span class="p">;</span>
+<span class="kd">function</span> <span class="nx">fn1</span> <span class="p">(){</span>
+  <span class="nx">alert</span><span class="p">(</span><span class="s1">'被猛击了！'</span><span class="p">)</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>好，那上面我们做的事情，就是给<code class="highlighter-rouge">button</code>附加了一个「事件处理器」（Eventhandler）来监听点击事件。</p>
+
+<p>那么，如果我再往上加一个事件处理函数呢？</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">btn</span><span class="p">.</span><span class="nx">onclick</span> <span class="o">=</span> <span class="nx">fn2</span><span class="p">;</span>
+<span class="kd">function</span> <span class="nx">fn2</span> <span class="p">(){</span>
+  <span class="nx">alert</span><span class="p">(</span><span class="s1">'被暴击了！'</span><span class="p">);</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>那么最后我点击按钮，执行了什么？</p>
+
+<blockquote>
+  <p>被暴击了！</p>
+</blockquote>
+
+<p>为啥没有执行”被猛击了”呢？因为事件处理器对于一种特定的事件类型，最多只能注册一个程序。上面的例子中，fn2把fn1覆盖掉了。</p>
+
+<p>那么我希望顺序执行fn1和fn2怎么办？当然就是使用addEventListener这种「事件监听器」（EventListener）方法拉。</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">btn</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">'btn'</span><span class="p">);</span>
+<span class="c1">// 兼容性啥的我这就不写了 </span>
+<span class="nx">btn</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">'click'</span><span class="p">,</span> <span class="nx">fn1</span><span class="p">);</span>
+<span class="kd">function</span> <span class="nx">fn1</span><span class="p">(){</span>
+  <span class="nx">alert</span><span class="p">(</span><span class="s1">'被猛击了！'</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="nx">btn</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">'click'</span><span class="p">,</span> <span class="nx">fn2</span><span class="p">);</span>
+<span class="kd">function</span> <span class="nx">fn2</span><span class="p">(){</span>
+  <span class="nx">alert</span><span class="p">(</span><span class="s1">'被暴击了！'</span><span class="p">);</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>点击之：</p>
+
+<blockquote>
+  <p>被猛击了！</p>
+
+  <p>被暴击了！</p>
+</blockquote>
+
+<p>好，那我们来看，在这个过程中，<code class="highlighter-rouge">EventListener</code>这个事件监听器做了哪些事情：</p>
+
+<blockquote>
+  <ul>
+    <li>监听了<code class="highlighter-rouge">click</code>事件，并附加了2个处理函数。说明一个事件可对应多个监听函数。</li>
+    <li>当用户点击时，顺序执行这2个函数。</li>
+    <li>fn1和fn2之间是没有联系的。我也可以很方便地再加个fn3。</li>
+  </ul>
+</blockquote>
+
+<p>实际上，EventListener就是一个浏览器内部实现的<code class="highlighter-rouge">观察者模式</code>：</p>
+
+<blockquote>
+  <ul>
+    <li>一个对象发生改变（用户点击）时，通知其他对象（执行监听函数）。</li>
+    <li>发生改变的对象称为观察目标，而被通知的对象称为观察者，一个观察目标可以对应多个观察者。</li>
+    <li>这些观察者之间没有相互联系，可以根据需要增加和删除观察者（removeEventListener），使得系统更易于扩展。</li>
+  </ul>
+</blockquote>
+
+<p>OK，我们已经看到了<code class="highlighter-rouge">观察者模式</code>的使用，那么下面我们来实现观察者模式。</p>
+
+<h2 id="pm25">观察者模式的实现：PM2.5</h2>
+
+<p>最近帝都的PM2.5几乎天天爆表，在各大应用市场中，PM2.5实时指数的APP下载量也一路飙升。</p>
+
+<p>如果PM2.5指数高于200就算是重度污染，所以，产品狗打算开发个功能，用户可以通过APP的某个设置开关来订阅是否发送空气污染的预警提醒。</p>
+
+<p>那么空气污染指数多高算高呢？有些用户认为300以上是高，有些用户认为100就很高了。</p>
+
+<p>那么，这个值交由用户来设置。</p>
+
+<p>如果用户订阅之后，用户希望当高于用户的设置值时，用户手机就会触发一个预警提醒，提醒出门好戴口罩。</p>
+
+<p>下面我们来做一个具体的实现。</p>
+
+<p>首先是我们的观察者，这里就可以认为是<code class="highlighter-rouge">服务器</code>; 服务器上存储了订阅用户的信息，并有通知用户的功能。当然，还具有获取并设置PM2.5的功能。</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">Server</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="c1">// 订阅的用户名单</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">list</span> <span class="o">=</span> <span class="p">[];</span>
+  <span class="c1">// 初始的PM2.5值</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">airCondition</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="c1">// 如果有新用户订阅，就在名单上添加</span>
+<span class="nx">Server</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">observe</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">user</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">list</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">user</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// 如果用户退订，就从名单上删除</span>
+<span class="nx">Server</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">unobserve</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">user</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">for</span><span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">_list</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span><span class="p">(</span> <span class="k">this</span><span class="p">.</span><span class="nx">list</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">===</span> <span class="nx">user</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">list</span><span class="p">.</span><span class="nx">splice</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span> <span class="s1">'取消订阅了'</span> <span class="p">);</span>
+        <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// 通过同步等手段，获取PM2.5并设置（这里我们略去了获取PM2.5的过程）</span>
+<span class="c1">// 并通知用户</span>
+
+<span class="nx">Server</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">setAirCondition</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">num</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">airCondition</span> <span class="o">=</span> <span class="nx">num</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">notify</span><span class="p">(</span><span class="nx">num</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// 发送通知后，接收通知的用户app来判断是否大于设定值，这里是analyze方法</span>
+
+<span class="nx">Server</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">notify</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">args</span> <span class="o">=</span> <span class="nb">Array</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span> <span class="nx">arguments</span><span class="p">,</span> <span class="mi">0</span> <span class="p">);</span>
+  <span class="k">for</span><span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">list</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">list</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">analyze</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">args</span> <span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">};</span></code></pre></figure>
+
+<p>好，下面我们来实现用户类<code class="highlighter-rouge">User</code>。用户的关键方法是<code class="highlighter-rouge">analyze</code>, 即比对当前空气污染指数和设定值。同时用户有个唯一标识符<code class="highlighter-rouge">id</code>。</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">User</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">id</span><span class="p">,</span> <span class="nx">setNum</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">id</span> <span class="o">=</span> <span class="nx">id</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">setNum</span> <span class="o">=</span> <span class="nx">setNum</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">analyze</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">num</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">num</span> <span class="o">&gt;</span> <span class="nx">setNum</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">alert</span><span class="p">(</span><span class="s1">'用户'</span> <span class="o">+</span> <span class="nx">id</span> <span class="o">+</span> <span class="s1">'：当前空气污染指数高于您的设定值！'</span><span class="p">)</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">};</span></code></pre></figure>
+
+<p>好，现在我们来做一个具体的调用：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// 服务器准备就绪</span>
+<span class="kd">var</span> <span class="nx">server</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">();</span>
+<span class="c1">//id为1的用户，设定的预警值为100</span>
+<span class="kd">var</span> <span class="nx">user1</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">User</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">);</span>
+<span class="c1">// 服务器将此人加入订阅列表</span>
+<span class="nx">server</span><span class="p">.</span><span class="nx">observe</span><span class="p">(</span><span class="nx">user1</span><span class="p">);</span>
+<span class="c1">// id为2的用户，设定的预警值为200</span>
+<span class="kd">var</span> <span class="nx">user2</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">User</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">200</span><span class="p">);</span>
+<span class="c1">// 服务器将此人加入订阅列表</span>
+<span class="nx">server</span><span class="p">.</span><span class="nx">observe</span><span class="p">(</span><span class="nx">user2</span><span class="p">);</span>
+
+<span class="c1">// 服务器获取到当前的空气污染指数为150，并设置</span>
+<span class="nx">server</span><span class="p">.</span><span class="nx">setAirCondition</span><span class="p">(</span><span class="mi">150</span><span class="p">);</span>
+
+<span class="c1">// 设置的同时，通知用户，用户执行analyze方法</span>
+
+<span class="c1">// =&gt; 用户1：当前空气污染指数高于您的设定值！</span>
+
+<span class="c1">// 用户1退订，服务器将此人从订阅列表删除</span>
+<span class="nx">server</span><span class="p">.</span><span class="nx">unobserve</span><span class="p">(</span><span class="nx">user1</span><span class="p">);</span>
+
+<span class="c1">// 服务器获取到当前的空气污染指数为250，并设置</span>
+<span class="nx">server</span><span class="p">.</span><span class="nx">setAirCondition</span><span class="p">(</span><span class="mi">250</span><span class="p">);</span>
+
+<span class="c1">// =&gt; 用户2：当前空气污染指数高于您的设定值！</span></code></pre></figure>
+
+<p>例子可以运行得很好。</p>
+
+<p>上面的例子中可以看出：</p>
+
+<blockquote>
+  <ul>
+    <li>用户在例子中即是「观察者」，服务器为「观察对象」；</li>
+    <li>「服务器」和「用户」是一个一对多的关系；可以根据需要增加或删除用户</li>
+    <li>当服务器的空气污染指数改变时，会实时通知用户，用户去执行自身的更新方法（例子中为<code class="highlighter-rouge">analyze</code>，大多数写法会写成<code class="highlighter-rouge">update</code>）。</li>
+    <li>用户彼此之间是没有关系的。</li>
+  </ul>
+</blockquote>
+
+<h2 id="section-1">回到事件监听器</h2>
+
+<p>现在让我们回到事件监听器。</p>
+
+<p>再次分析，我们可以认为，fn1和fn2都是观察者，而dom的点击事件是被观察对象。</p>
+
+<p>如果点击了，那么就执行fn1和fn2。这里的部分伪代码如下：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">Browser</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">notify</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">thisObj</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">scope</span> <span class="o">=</span> <span class="nx">thisObj</span> <span class="o">||</span> <span class="nb">window</span><span class="p">;</span>
+  <span class="kd">var</span> <span class="nx">args</span> <span class="o">=</span> <span class="nb">Array</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span> <span class="nx">arguments</span><span class="p">,</span> <span class="mi">1</span> <span class="p">);</span>
+  <span class="k">for</span><span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">list</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// 这里list[i]即为某个事件函数，执行即可。</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">list</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">call</span><span class="p">(</span> <span class="nx">scope</span><span class="p">,</span> <span class="nx">args</span> <span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">};</span></code></pre></figure>
+
+<h2 id="section-2">总结</h2>
+
+<p>观察者模式的优点如下：</p>
+
+<blockquote>
+  <ul>
+    <li>观察者模式可以实现表示层和数据逻辑层的分离，并定义了稳定的消息更新传递机制，抽象了更新接口，使得可以有各种各样不同的表示层作为具体观察者角色。</li>
+    <li>观察者模式在观察目标和观察者之间建立一个抽象的耦合。</li>
+    <li>观察者模式支持「事件广播」。</li>
+    <li>观察者模式符合“开闭原则”的要求。</li>
+  </ul>
+</blockquote>
+
+<p>是否明白呢亲？</p>
+
+<p>以上。</p>
+
+
+</article>
+
+
+  <div class="py2">
+  <blockquote>
+  <p><b>关于此文章：</b></p>
+  <ul>
+      <li>作者：Clancy Zhu</li>
+      <li>版权声明：自由转载-非商用-非衍生-保持署名<a href="http://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh">（CC BY-NC-ND 3.0)</a></li>
+  </ul>
+</blockquote>
+</div>
+
+
+
+
+
+    
+  
+<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="大白话Javascript设计模式之观察者模式(Observer)" data-title="大白话Javascript设计模式之观察者模式(Observer)" data-url="http://clancyz.github.io/blog/2015/11/16/Javascript-Design-Pattern-Observer/"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"clancyz"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end -->
+
+
+        
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+  <div class="p2 wrap">
+    <div class="measure mt1 center">
+      <small>
+        2016 Clancy Zhu
+      </small>
+    </div>
+  </div>
+</footer>
+
+
+
+</body>
+</html>

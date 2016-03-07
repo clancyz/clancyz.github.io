@@ -417,6 +417,245 @@ fisp的规范下，原来设想应该这么写：&lt;/p&gt;
       </item>
     
       <item>
+        <title>大白话Javascript设计模式之观察者模式(Observer)</title>
+        <description>&lt;h2 id=&quot;section&quot;&gt;什么是观察者模式&lt;/h2&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;观察者模式(Observer Pattern)：定义对象间的一种一对多依赖关系，使得每当一个对象状态发生改变时，其相关依赖对象皆得到通知并被自动更新。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;eventhandler-vs-eventlistener&quot;&gt;日常的使用：EventHandler vs EventListener&lt;/h2&gt;
+
+&lt;p&gt;我们先来复习一下基础知识。&lt;/p&gt;
+
+&lt;p&gt;大家都知道，大多数时间里面，FE都是面向浏览器编程的，即基于DOM脚本的编程环境来工作。&lt;/p&gt;
+
+&lt;p&gt;在开发过程中，用户与浏览器的交互是少不了的，所以我们必须基于「事件驱动」去做一些事情。&lt;/p&gt;
+
+&lt;p&gt;最简单的例子，绑定一个&lt;code class=&quot;highlighter-rouge&quot;&gt;button&lt;/code&gt;元素的点击事件：&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-html&quot; data-lang=&quot;html&quot;&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;button&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;btn&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;onclick=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;alert(&#39;被猛击了！&#39;)&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;猛击我吧&lt;span class=&quot;nt&quot;&gt;&amp;lt;/button&amp;gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;当然，我们更多希望点击事件是在js代码中方便维护。so:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;btn&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;document&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;getElementById&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;btn&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;btn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;onclick&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;fn1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;fn1&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;alert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;被猛击了！&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;好，那上面我们做的事情，就是给&lt;code class=&quot;highlighter-rouge&quot;&gt;button&lt;/code&gt;附加了一个「事件处理器」（Eventhandler）来监听点击事件。&lt;/p&gt;
+
+&lt;p&gt;那么，如果我再往上加一个事件处理函数呢？&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;&lt;span class=&quot;nx&quot;&gt;btn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;onclick&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;fn2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;fn2&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;alert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;被暴击了！&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;那么最后我点击按钮，执行了什么？&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;被暴击了！&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;为啥没有执行”被猛击了”呢？因为事件处理器对于一种特定的事件类型，最多只能注册一个程序。上面的例子中，fn2把fn1覆盖掉了。&lt;/p&gt;
+
+&lt;p&gt;那么我希望顺序执行fn1和fn2怎么办？当然就是使用addEventListener这种「事件监听器」（EventListener）方法拉。&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;btn&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;document&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;getElementById&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;btn&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// 兼容性啥的我这就不写了 &lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;btn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;addEventListener&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;click&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;fn1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;fn1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;alert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;被猛击了！&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;nx&quot;&gt;btn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;addEventListener&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;click&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;fn2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;fn2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;alert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;被暴击了！&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;点击之：&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;被猛击了！&lt;/p&gt;
+
+  &lt;p&gt;被暴击了！&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;好，那我们来看，在这个过程中，&lt;code class=&quot;highlighter-rouge&quot;&gt;EventListener&lt;/code&gt;这个事件监听器做了哪些事情：&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;ul&gt;
+    &lt;li&gt;监听了&lt;code class=&quot;highlighter-rouge&quot;&gt;click&lt;/code&gt;事件，并附加了2个处理函数。说明一个事件可对应多个监听函数。&lt;/li&gt;
+    &lt;li&gt;当用户点击时，顺序执行这2个函数。&lt;/li&gt;
+    &lt;li&gt;fn1和fn2之间是没有联系的。我也可以很方便地再加个fn3。&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;实际上，EventListener就是一个浏览器内部实现的&lt;code class=&quot;highlighter-rouge&quot;&gt;观察者模式&lt;/code&gt;：&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;ul&gt;
+    &lt;li&gt;一个对象发生改变（用户点击）时，通知其他对象（执行监听函数）。&lt;/li&gt;
+    &lt;li&gt;发生改变的对象称为观察目标，而被通知的对象称为观察者，一个观察目标可以对应多个观察者。&lt;/li&gt;
+    &lt;li&gt;这些观察者之间没有相互联系，可以根据需要增加和删除观察者（removeEventListener），使得系统更易于扩展。&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;OK，我们已经看到了&lt;code class=&quot;highlighter-rouge&quot;&gt;观察者模式&lt;/code&gt;的使用，那么下面我们来实现观察者模式。&lt;/p&gt;
+
+&lt;h2 id=&quot;pm25&quot;&gt;观察者模式的实现：PM2.5&lt;/h2&gt;
+
+&lt;p&gt;最近帝都的PM2.5几乎天天爆表，在各大应用市场中，PM2.5实时指数的APP下载量也一路飙升。&lt;/p&gt;
+
+&lt;p&gt;如果PM2.5指数高于200就算是重度污染，所以，产品狗打算开发个功能，用户可以通过APP的某个设置开关来订阅是否发送空气污染的预警提醒。&lt;/p&gt;
+
+&lt;p&gt;那么空气污染指数多高算高呢？有些用户认为300以上是高，有些用户认为100就很高了。&lt;/p&gt;
+
+&lt;p&gt;那么，这个值交由用户来设置。&lt;/p&gt;
+
+&lt;p&gt;如果用户订阅之后，用户希望当高于用户的设置值时，用户手机就会触发一个预警提醒，提醒出门好戴口罩。&lt;/p&gt;
+
+&lt;p&gt;下面我们来做一个具体的实现。&lt;/p&gt;
+
+&lt;p&gt;首先是我们的观察者，这里就可以认为是&lt;code class=&quot;highlighter-rouge&quot;&gt;服务器&lt;/code&gt;; 服务器上存储了订阅用户的信息，并有通知用户的功能。当然，还具有获取并设置PM2.5的功能。&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Server&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;// 订阅的用户名单&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;list&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[];&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;// 初始的PM2.5值&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;airCondition&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// 如果有新用户订阅，就在名单上添加&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;Server&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;prototype&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;observe&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;push&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// 如果用户退订，就从名单上删除&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;Server&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;prototype&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;unobserve&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;len&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;_list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;===&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;user&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;splice&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;取消订阅了&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// 通过同步等手段，获取PM2.5并设置（这里我们略去了获取PM2.5的过程）&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// 并通知用户&lt;/span&gt;
+
+&lt;span class=&quot;nx&quot;&gt;Server&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;prototype&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;setAirCondition&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;num&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;airCondition&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;num&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;notify&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;num&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// 发送通知后，接收通知的用户app来判断是否大于设定值，这里是analyze方法&lt;/span&gt;
+
+&lt;span class=&quot;nx&quot;&gt;Server&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;prototype&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;notify&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;args&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;prototype&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;slice&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;arguments&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;len&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;analyze&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;args&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;好，下面我们来实现用户类&lt;code class=&quot;highlighter-rouge&quot;&gt;User&lt;/code&gt;。用户的关键方法是&lt;code class=&quot;highlighter-rouge&quot;&gt;analyze&lt;/code&gt;, 即比对当前空气污染指数和设定值。同时用户有个唯一标识符&lt;code class=&quot;highlighter-rouge&quot;&gt;id&lt;/code&gt;。&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;User&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;setNum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;setNum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;setNum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;analyze&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;num&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;num&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;setNum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;alert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;用户&#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;：当前空气污染指数高于您的设定值！&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;好，现在我们来做一个具体的调用：&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;&lt;span class=&quot;c1&quot;&gt;// 服务器准备就绪&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;server&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Server&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;//id为1的用户，设定的预警值为100&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;user1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;User&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// 服务器将此人加入订阅列表&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;observe&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;user1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// id为2的用户，设定的预警值为200&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;user2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;User&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;200&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// 服务器将此人加入订阅列表&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;observe&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;user2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// 服务器获取到当前的空气污染指数为150，并设置&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;setAirCondition&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;150&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// 设置的同时，通知用户，用户执行analyze方法&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// =&amp;gt; 用户1：当前空气污染指数高于您的设定值！&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// 用户1退订，服务器将此人从订阅列表删除&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;unobserve&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;user1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// 服务器获取到当前的空气污染指数为250，并设置&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;setAirCondition&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;250&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// =&amp;gt; 用户2：当前空气污染指数高于您的设定值！&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;例子可以运行得很好。&lt;/p&gt;
+
+&lt;p&gt;上面的例子中可以看出：&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;ul&gt;
+    &lt;li&gt;用户在例子中即是「观察者」，服务器为「观察对象」；&lt;/li&gt;
+    &lt;li&gt;「服务器」和「用户」是一个一对多的关系；可以根据需要增加或删除用户&lt;/li&gt;
+    &lt;li&gt;当服务器的空气污染指数改变时，会实时通知用户，用户去执行自身的更新方法（例子中为&lt;code class=&quot;highlighter-rouge&quot;&gt;analyze&lt;/code&gt;，大多数写法会写成&lt;code class=&quot;highlighter-rouge&quot;&gt;update&lt;/code&gt;）。&lt;/li&gt;
+    &lt;li&gt;用户彼此之间是没有关系的。&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;section-1&quot;&gt;回到事件监听器&lt;/h2&gt;
+
+&lt;p&gt;现在让我们回到事件监听器。&lt;/p&gt;
+
+&lt;p&gt;再次分析，我们可以认为，fn1和fn2都是观察者，而dom的点击事件是被观察对象。&lt;/p&gt;
+
+&lt;p&gt;如果点击了，那么就执行fn1和fn2。这里的部分伪代码如下：&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;&lt;span class=&quot;nx&quot;&gt;Browser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;prototype&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;notify&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;thisObj&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;scope&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;thisObj&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;window&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;args&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;prototype&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;slice&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;arguments&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;len&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// 这里list[i]即为某个事件函数，执行即可。&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;scope&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;args&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;section-2&quot;&gt;总结&lt;/h2&gt;
+
+&lt;p&gt;观察者模式的优点如下：&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;ul&gt;
+    &lt;li&gt;观察者模式可以实现表示层和数据逻辑层的分离，并定义了稳定的消息更新传递机制，抽象了更新接口，使得可以有各种各样不同的表示层作为具体观察者角色。&lt;/li&gt;
+    &lt;li&gt;观察者模式在观察目标和观察者之间建立一个抽象的耦合。&lt;/li&gt;
+    &lt;li&gt;观察者模式支持「事件广播」。&lt;/li&gt;
+    &lt;li&gt;观察者模式符合“开闭原则”的要求。&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;是否明白呢亲？&lt;/p&gt;
+
+&lt;p&gt;以上。&lt;/p&gt;
+
+</description>
+        <pubDate>Mon, 16 Nov 2015 06:31:50 +0800</pubDate>
+        <link>http://clancyz.github.io/blog/2015/11/16/Javascript-Design-Pattern-Observer/</link>
+        <guid isPermaLink="true">http://clancyz.github.io/blog/2015/11/16/Javascript-Design-Pattern-Observer/</guid>
+      </item>
+    
+      <item>
         <title>大白话Javascript设计模式之命令模式(Command)</title>
         <description>&lt;h2 id=&quot;section&quot;&gt;什么是命令模式&lt;/h2&gt;
 
@@ -1885,140 +2124,6 @@ select选择框的内容有三种：img(图片), link(链接), text(文本)。
         <pubDate>Mon, 28 Sep 2015 07:00:09 +0800</pubDate>
         <link>http://clancyz.github.io/blog/2015/09/28/Javascript-Design-pattern-Singleton/</link>
         <guid isPermaLink="true">http://clancyz.github.io/blog/2015/09/28/Javascript-Design-pattern-Singleton/</guid>
-      </item>
-    
-      <item>
-        <title>TTFB响应时间缓慢，到底是谁的问题？</title>
-        <description>&lt;h3 id=&quot;section&quot;&gt;问题发生的背景&lt;/h3&gt;
-
-&lt;p&gt;这篇文章部分来源于我做的一次性能优化，具体的背景可看我的&lt;a href=&quot;http://clancyz.github.io/blog/2015/08/21/A-Project-refactor-notes/&quot;&gt;这篇文章&lt;/a&gt;。&lt;/p&gt;
-
-&lt;p&gt;当时，我在我自己的机器（thinkpad x240）上测试，发现页面的平均加载速度为 &lt;code class=&quot;highlighter-rouge&quot;&gt;3.92s&lt;/code&gt;　。&lt;/p&gt;
-
-&lt;p&gt;这个显然是不能忍受的，因为我们这个项目是局域网项目，加载的资源也没有多少个，怎么可能会这么慢？&lt;/p&gt;
-
-&lt;p&gt;于是我进行了分析。&lt;/p&gt;
-
-&lt;h3 id=&quot;devtool&quot;&gt;Devtool大法好~&lt;/h3&gt;
-
-&lt;p&gt;我用Devtools里面的 &lt;code class=&quot;highlighter-rouge&quot;&gt;timeline&lt;/code&gt; 工具查看了耗时分布的情况，并截了以下的图：&lt;/p&gt;
-
-&lt;p&gt;图1: 当时某页面的所有资源请求耗时&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/images/7.png&quot; alt=&quot;7.png&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;图2: 对于某个资源的具体耗时&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/images/8.png&quot; alt=&quot;8.png&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;图3　当时另外一个局域网平台的耗时&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/images/9.png&quot; alt=&quot;9.png&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;当时我的分析如下：&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;ul&gt;
-    &lt;li&gt;下载的资源都较小，最大不过36kb。ContentDownload时间几乎可忽略。&lt;/li&gt;
-    &lt;li&gt;页面只有33个request，除去base64编码的图片（基本是0ms）和ajax请求（DomContentLoaded不计入）只有26个，这个请求数量并不算多。&lt;/li&gt;
-    &lt;li&gt;从图2可看出，主要资源加载的时间处于Waiting(TTFB)这一栏，即浏览器发出请求后，1.22s之后才收到服务器响应（注：TTFB即Time To First Byte，即从request sent至收到服务器发出的首字节的时间）。&lt;/li&gt;
-    &lt;li&gt;计算了所有静态资源的TTFB时间，得出页面平均的TTFB时间为：883ms。&lt;/li&gt;
-    &lt;li&gt;对比同类型的内部（局域网）平台的资源加载时间），可见，平台加载一个资源的服务器响应时间大大超出了正常时间，主要为TTFB时间加载到了百倍级别。而正常的公网网站，TTFB时间也应控制在100ms以下。&lt;/li&gt;
-  &lt;/ul&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;然后我得出了结论：&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;这特么绝壁是后端的问题。为啥别人的平台返回那么快，咱们平台返回这么慢？是不是服务器设定的问题？&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;section-1&quot;&gt;撕逼开始&lt;/h2&gt;
-
-&lt;p&gt;于是我带着我的电脑去找了一个后端的同学，又像上面一样给他展示了一遍。&lt;/p&gt;
-
-&lt;p&gt;他看了也皱了眉头，这咋回事？&lt;/p&gt;
-
-&lt;p&gt;我说：这个很明显的，是你后端的问题，尽快解决吧，现在这慢得一b，很影响用户体验的。&lt;/p&gt;
-
-&lt;p&gt;他说：OK，我去看看服务器的相关设定。&lt;/p&gt;
-
-&lt;h2 id=&quot;section-2&quot;&gt;被打脸&lt;/h2&gt;
-
-&lt;p&gt;过了一会哥们蹭蹭跑过来：你的测试方法是不是有问题，我用我的机器看了一下，没你这么慢啊，这TTFB时间很短的。&lt;/p&gt;
-
-&lt;p&gt;我一看傻了，他的机器上，同样打开timeline工具，几乎是没有TTFB时间的。资源加载的速度比我的机器快多了。&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;卧槽，这咋回事？难道是我的人品有问题？&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;yy&quot;&gt;开始YY&lt;/h2&gt;
-
-&lt;p&gt;首先我先又在自己机器上看了一遍，TTFB时间还是很长，跟原来测试结果没啥区别。&lt;/p&gt;
-
-&lt;p&gt;我先YY，难道是我网的问题？大家都连着wifi的啊。难道是我网卡的问题？难道是我的机器性能不行？&lt;/p&gt;
-
-&lt;p&gt;这个首先被排除了，那哥们就离我两三米远，为啥人家没问题。而且我连其他的局域网网站，TTFB的时间也几乎没有。我电脑是X240，他的还是早一年的X230呢。&lt;/p&gt;
-
-&lt;p&gt;那么，核心问题就集中在一点：&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;为啥我连接其他局域网网站TTFB时间都很短，就连自己的平台TTFB时间这么长？&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;section-3&quot;&gt;找出罪魁祸首&lt;/h2&gt;
-
-&lt;p&gt;我想了半天越想越迷糊，始终找不到这两者的必然联系。&lt;/p&gt;
-
-&lt;p&gt;然后我就去 &lt;code class=&quot;highlighter-rouge&quot;&gt;蹲坑&lt;/code&gt; 了。&lt;/p&gt;
-
-&lt;p&gt;事实证明 &lt;strong&gt;蹲坑大法好&lt;/strong&gt; 啊，我蹲着蹲着，突然想到：&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;我TM的肯定人为地干了什么事！&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;那我人为地干预了啥呢？干预了我和这个平台的连接？有什么东西能干预我和这个平台的连接？&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;卧槽。。。。 肯定是这玩意，&lt;code class=&quot;highlighter-rouge&quot;&gt;Fiddler&lt;/code&gt; !&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Fiddler&lt;/code&gt; 相信很多FE同学都用过，是一个 &lt;code class=&quot;highlighter-rouge&quot;&gt;代理软件&lt;/code&gt; ，我们主要用来调试线上问题的。Fiddler的主要作用有：&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;ul&gt;
-    &lt;li&gt;作为一个代理，可以替换浏览器加载的文件，比如线上有个文件是a.js, 你发现出了bug, 可以用你本机修改过的a1.js来替代,　那么你的浏览器加载的是你本机的这个a1.js，就可以看你修改的内容是否符合要求。&lt;/li&gt;
-    &lt;li&gt;可以设定过滤器，设定A网站使用fiddler代理，B网站直接连接&lt;/li&gt;
-  &lt;/ul&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;我当时设定的过滤器规则是：对于 &lt;code class=&quot;highlighter-rouge&quot;&gt;xxx.baidu.com&lt;/code&gt; (我们平台的域名)，都使用fiddler来代理，方便调试线上问题。在开发过程中，我陆续也设定了好几个js使用本地js替代加载。&lt;/p&gt;
-
-&lt;p&gt;那么问题就很清晰了：&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;ul&gt;
-    &lt;li&gt;我连接项目平台时，相当于中间多了个代理，做了替换资源等操作，所以TTFB时间明显变慢。&lt;/li&gt;
-    &lt;li&gt;我对当前平台做了fiddler代理，但对其他局域网平台没做，所以其他局域网平台的TTFB时间就很短。&lt;/li&gt;
-  &lt;/ul&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;这样结论就是，完全是我自己的问题。只是没有注意到 &lt;code class=&quot;highlighter-rouge&quot;&gt;fiddler&lt;/code&gt; 这货的存在。&lt;/p&gt;
-
-&lt;p&gt;想起之前还blabla写了一堆关于这TTFB的时间给大家看说后端性能差，就觉得很丢脸…&lt;/p&gt;
-
-&lt;h2 id=&quot;section-4&quot;&gt;总结&lt;/h2&gt;
-
-&lt;p&gt;这次给我的教训就是，在你认为某问题的原因不是你导致的而需要沟通时，一定要把当前这个问题定位清楚，因为，这个问题往往不是“你认为的”　那样。&lt;/p&gt;
-
-&lt;p&gt;进行测试的时候要充分，找不同环境来复现（例如，找个别人的机器来试试是否有同样的问题）。&lt;/p&gt;
-
-</description>
-        <pubDate>Tue, 08 Sep 2015 07:06:21 +0800</pubDate>
-        <link>http://clancyz.github.io/blog/2015/09/08/The-reason-of-long-ttfb-spend/</link>
-        <guid isPermaLink="true">http://clancyz.github.io/blog/2015/09/08/The-reason-of-long-ttfb-spend/</guid>
       </item>
     
   </channel>
