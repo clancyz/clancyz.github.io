@@ -195,7 +195,18 @@ var _hmt = _hmt || [];
 <p>在这里，DevilHunter是一个立即执行的函数，最终的结果也是返回一个对象字面量。与之前的不同是，可以自由定义私有变量了。</p>
 
 <blockquote>
-  <p>实际上，这便是「模块模式」的实现。我们相当于声明了一个DevilHunter的全局模块，有一个公开方法<code class="highlighter-rouge">attackCall</code>, 同时，匿名函数的闭包维持了私有的内部状态。</p>
+  <p>实际上，这便是「模块模式」的实现。</p>
+
+  <p>我们相当于声明了一个DevilHunter的全局模块，有一个公开方法<code class="highlighter-rouge">attackCall</code>, 同时，匿名函数的闭包维持了私有的内部状态。</p>
+
+  <p>Javascript中实现模块，除了对象字面量和闭包之外，还包括：</p>
+
+  <ul>
+    <li>AMD / CMD / CommonJS</li>
+    <li>ES6 Module</li>
+  </ul>
+
+  <p>这些模块的使用方式，在本文中就不做详细介绍了。</p>
 </blockquote>
 
 <p><strong>1.3的例子「模块模式」， 其实实用性已经不错了。那，还有什么可以改进的地方？</strong></p>
@@ -295,13 +306,16 @@ var _hmt = _hmt || [];
 
 <h2 id="section-3">总结</h2>
 
-<ul>
-  <li>模块模式可以是简单对象自变量，也可以使用闭包创建；</li>
-  <li>严格单例模式需要可实例化，对于资源密集或者配置开销很大导致初始化消耗性能较多的单例，可以进行惰性实例化。</li>
-</ul>
+<blockquote>
+  <ul>
+    <li>模块模式可以是简单对象自变量，也可以使用闭包创建；</li>
+    <li>严格单例模式需要可实例化，对于资源密集或者配置开销很大导致初始化消耗性能较多的单例，可以进行惰性实例化。</li>
+  </ul>
+</blockquote>
 
-<p>是否明白呢亲？
-以上。</p>
+<p>是否明白呢亲？</p>
+
+<p>以上。</p>
 
 
 </article>
