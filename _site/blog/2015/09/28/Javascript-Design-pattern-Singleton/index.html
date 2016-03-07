@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>大白话Javascript设计模式之单例模式(Singleton) &#8211; Clancy Zhu</title>
+    <title>大白话Javascript设计模式之单例模式(Singleton) / 模块模式(Module) &#8211; Clancy Zhu</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="“你心里如果有人了，只能有一个。”">
     <meta name="author" content="Clancy Zhu">
@@ -24,7 +24,7 @@
     <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
     <meta property="og:locale" content="en_US">
     <meta property="og:type" content="article">
-    <meta property="og:title" content="大白话Javascript设计模式之单例模式(Singleton)">
+    <meta property="og:title" content="大白话Javascript设计模式之单例模式(Singleton) / 模块模式(Module)">
     <meta property="og:description" content="Clancy Zhu's blog">
     <meta property="og:url" content="http://clancyz.github.io/blog/2015/09/28/Javascript-Design-pattern-Singleton/">
     <meta property="og:site_name" content="Clancy Zhu">
@@ -91,11 +91,11 @@ var _hmt = _hmt || [];
 
 <div class="post-header mb2">
   
-  <h1 class="py2">大白话Javascript设计模式之单例模式(Singleton)</h1>
+  <h1 class="py2">大白话Javascript设计模式之单例模式(Singleton) / 模块模式(Module)</h1>
   
   <span class="post-meta">09月 28日, 2015</span><br>
   
-  <!-- <span class="post-meta small">2 minute read</span> -->
+  <!-- <span class="post-meta small">3 minute read</span> -->
 </div>
 
 <article class="post-content">
@@ -120,7 +120,7 @@ var _hmt = _hmt || [];
   </ul>
 </blockquote>
 
-<h2 id="section">最简单例模式：恶魔猎手</h2>
+<h2 id="section">最简单例模式(最简模块模式)：恶魔猎手</h2>
 
 <p>最简单的单例模式代码, 就是一个{}表示的object对象，即<strong>对象字面量</strong>。</p>
 
@@ -148,6 +148,12 @@ var _hmt = _hmt || [];
 （是不是感觉枯燥多了。。）</p>
 </blockquote>
 
+<p>同时，要进一步指出的是：</p>
+
+<blockquote>
+  <p>以上例子实际也可以视作Javascript中的一种「模块实现」，即我可以说，我定义了一个DevilHunter模块，随用随取即可。</p>
+</blockquote>
+
 <p><strong>好，那上面的DevilHunter例子，有什么问题么？（话外音：同学们，这是送分题啊~）</strong></p>
 
 <p>很显然，DevilHunter中的所有属性和方法，都能被外界直接访问到。</p>
@@ -156,7 +162,7 @@ var _hmt = _hmt || [];
 
 <p>要使用js从根本上解决这个问题，只能拿个东西把这些不想暴露在外面的属性或方法包起来，那么就是使用 <code class="highlighter-rouge">闭包</code> 啦。</p>
 
-<h2 id="section-1">使用闭包的单例模式</h2>
+<h2 id="section-1">模块模式：使用闭包的单例模式</h2>
 
 <p>这种方法使用了一个<strong>自执行函数</strong>,在函数体内就可以定义私有变量了。
 因为js的执行作用域是<strong>函数级作用域</strong>，说白了就是：</p>
@@ -188,7 +194,13 @@ var _hmt = _hmt || [];
 
 <p>在这里，DevilHunter是一个立即执行的函数，最终的结果也是返回一个对象字面量。与之前的不同是，可以自由定义私有变量了。</p>
 
-<p><strong>1.3的例子其实实用性已经不错了。那，还有什么可以改进的地方？</strong></p>
+<blockquote>
+  <p>实际上，这便是「模块模式」的实现。我们相当于声明了一个DevilHunter的全局模块，有一个公开方法<code class="highlighter-rouge">attackCall</code>, 同时，匿名函数的闭包维持了私有的内部状态。</p>
+</blockquote>
+
+<p><strong>1.3的例子「模块模式」， 其实实用性已经不错了。那，还有什么可以改进的地方？</strong></p>
+
+<h2 id="section-2">严格单例模式</h2>
 
 <p>代码1.2和1.3的共有问题：</p>
 
@@ -238,7 +250,7 @@ var _hmt = _hmt || [];
 <blockquote>
   <p>这个性能问题一般是在定义一个需要 <code class="highlighter-rouge">加载众多配置项</code> 或者 <code class="highlighter-rouge">读取大量数据</code> 的Singleton时会出现。</p>
 
-  <p>一般情况下，1.3的例子已经够用拉。</p>
+  <p>一般情况下，1.3的例子「模块模式」已经够用拉。</p>
 </blockquote>
 
 <p>在这种情况下，在脚本加载时，我们其实有其他优先级更高的事情做，,即我们希望叫恶魔猎手攻击的时候，再给我去做那些初始化(花2s时间召唤)的工作, 即所谓的 <code class="highlighter-rouge">lazyload</code>。</p>
@@ -281,7 +293,15 @@ var _hmt = _hmt || [];
 <span class="nx">Warlock</span><span class="p">.</span><span class="nx">getInstance</span><span class="p">({</span><span class="na">hp</span><span class="p">:</span> <span class="mi">200</span><span class="p">})</span>
 <span class="c1">// =&gt; SingletonConstructor {hp: 100} 未改变</span></code></pre></figure>
 
-<p>以上。</p>
+<h2 id="section-3">总结</h2>
+
+<ul>
+  <li>模块模式可以是简单对象自变量，也可以使用闭包创建；</li>
+  <li>严格单例模式需要可实例化，对于资源密集或者配置开销很大导致初始化消耗性能较多的单例，可以进行惰性实例化。</li>
+</ul>
+
+<p>是否明白呢亲？
+以上。</p>
 
 
 </article>
@@ -304,7 +324,7 @@ var _hmt = _hmt || [];
     
   
 <!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="大白话Javascript设计模式之单例模式(Singleton)" data-title="大白话Javascript设计模式之单例模式(Singleton)" data-url="http://clancyz.github.io/blog/2015/09/28/Javascript-Design-pattern-Singleton/"></div>
+	<div class="ds-thread" data-thread-key="大白话Javascript设计模式之单例模式(Singleton) / 模块模式(Module)" data-title="大白话Javascript设计模式之单例模式(Singleton) / 模块模式(Module)" data-url="http://clancyz.github.io/blog/2015/09/28/Javascript-Design-pattern-Singleton/"></div>
 <!-- 多说评论框 end -->
 <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 <script type="text/javascript">

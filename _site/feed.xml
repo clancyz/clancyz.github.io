@@ -1935,7 +1935,7 @@ select选择框的内容有三种：img(图片), link(链接), text(文本)。
       </item>
     
       <item>
-        <title>大白话Javascript设计模式之单例模式(Singleton)</title>
+        <title>大白话Javascript设计模式之单例模式(Singleton) / 模块模式(Module)</title>
         <description>&lt;p&gt;传统上对单例模式的解释，就一句话：&lt;/p&gt;
 
 &lt;blockquote&gt;
@@ -1957,7 +1957,7 @@ select选择框的内容有三种：img(图片), link(链接), text(文本)。
   &lt;/ul&gt;
 &lt;/blockquote&gt;
 
-&lt;h2 id=&quot;section&quot;&gt;最简单例模式：恶魔猎手&lt;/h2&gt;
+&lt;h2 id=&quot;section&quot;&gt;最简单例模式(最简模块模式)：恶魔猎手&lt;/h2&gt;
 
 &lt;p&gt;最简单的单例模式代码, 就是一个{}表示的object对象，即&lt;strong&gt;对象字面量&lt;/strong&gt;。&lt;/p&gt;
 
@@ -1985,6 +1985,12 @@ select选择框的内容有三种：img(图片), link(链接), text(文本)。
 （是不是感觉枯燥多了。。）&lt;/p&gt;
 &lt;/blockquote&gt;
 
+&lt;p&gt;同时，要进一步指出的是：&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;以上例子实际也可以视作Javascript中的一种「模块实现」，即我可以说，我定义了一个DevilHunter模块，随用随取即可。&lt;/p&gt;
+&lt;/blockquote&gt;
+
 &lt;p&gt;&lt;strong&gt;好，那上面的DevilHunter例子，有什么问题么？（话外音：同学们，这是送分题啊~）&lt;/strong&gt;&lt;/p&gt;
 
 &lt;p&gt;很显然，DevilHunter中的所有属性和方法，都能被外界直接访问到。&lt;/p&gt;
@@ -1993,7 +1999,7 @@ select选择框的内容有三种：img(图片), link(链接), text(文本)。
 
 &lt;p&gt;要使用js从根本上解决这个问题，只能拿个东西把这些不想暴露在外面的属性或方法包起来，那么就是使用 &lt;code class=&quot;highlighter-rouge&quot;&gt;闭包&lt;/code&gt; 啦。&lt;/p&gt;
 
-&lt;h2 id=&quot;section-1&quot;&gt;使用闭包的单例模式&lt;/h2&gt;
+&lt;h2 id=&quot;section-1&quot;&gt;模块模式：使用闭包的单例模式&lt;/h2&gt;
 
 &lt;p&gt;这种方法使用了一个&lt;strong&gt;自执行函数&lt;/strong&gt;,在函数体内就可以定义私有变量了。
 因为js的执行作用域是&lt;strong&gt;函数级作用域&lt;/strong&gt;，说白了就是：&lt;/p&gt;
@@ -2025,7 +2031,13 @@ select选择框的内容有三种：img(图片), link(链接), text(文本)。
 
 &lt;p&gt;在这里，DevilHunter是一个立即执行的函数，最终的结果也是返回一个对象字面量。与之前的不同是，可以自由定义私有变量了。&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;1.3的例子其实实用性已经不错了。那，还有什么可以改进的地方？&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;实际上，这便是「模块模式」的实现。我们相当于声明了一个DevilHunter的全局模块，有一个公开方法&lt;code class=&quot;highlighter-rouge&quot;&gt;attackCall&lt;/code&gt;, 同时，匿名函数的闭包维持了私有的内部状态。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;strong&gt;1.3的例子「模块模式」， 其实实用性已经不错了。那，还有什么可以改进的地方？&lt;/strong&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;section-2&quot;&gt;严格单例模式&lt;/h2&gt;
 
 &lt;p&gt;代码1.2和1.3的共有问题：&lt;/p&gt;
 
@@ -2075,7 +2087,7 @@ select选择框的内容有三种：img(图片), link(链接), text(文本)。
 &lt;blockquote&gt;
   &lt;p&gt;这个性能问题一般是在定义一个需要 &lt;code class=&quot;highlighter-rouge&quot;&gt;加载众多配置项&lt;/code&gt; 或者 &lt;code class=&quot;highlighter-rouge&quot;&gt;读取大量数据&lt;/code&gt; 的Singleton时会出现。&lt;/p&gt;
 
-  &lt;p&gt;一般情况下，1.3的例子已经够用拉。&lt;/p&gt;
+  &lt;p&gt;一般情况下，1.3的例子「模块模式」已经够用拉。&lt;/p&gt;
 &lt;/blockquote&gt;
 
 &lt;p&gt;在这种情况下，在脚本加载时，我们其实有其他优先级更高的事情做，,即我们希望叫恶魔猎手攻击的时候，再给我去做那些初始化(花2s时间召唤)的工作, 即所谓的 &lt;code class=&quot;highlighter-rouge&quot;&gt;lazyload&lt;/code&gt;。&lt;/p&gt;
@@ -2118,7 +2130,15 @@ select选择框的内容有三种：img(图片), link(链接), text(文本)。
 &lt;span class=&quot;nx&quot;&gt;Warlock&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;getInstance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;hp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;200&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
 &lt;span class=&quot;c1&quot;&gt;// =&amp;gt; SingletonConstructor {hp: 100} 未改变&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;p&gt;以上。&lt;/p&gt;
+&lt;h2 id=&quot;section-3&quot;&gt;总结&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;模块模式可以是简单对象自变量，也可以使用闭包创建；&lt;/li&gt;
+  &lt;li&gt;严格单例模式需要可实例化，对于资源密集或者配置开销很大导致初始化消耗性能较多的单例，可以进行惰性实例化。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;是否明白呢亲？
+以上。&lt;/p&gt;
 
 </description>
         <pubDate>Mon, 28 Sep 2015 07:00:09 +0800</pubDate>
