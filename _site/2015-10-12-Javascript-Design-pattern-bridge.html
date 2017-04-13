@@ -1,105 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>大白话Javascript设计模式之桥接模式(bridge) &#8211; Clancy Zhu</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="形形色色，形状是形状，颜色是颜色。我们要的是「喜形于色」。">
-    <meta name="author" content="Clancy Zhu">
-    <meta name="keywords" content="blog">
-    <link rel="canonical" href="http://clancyz.github.io/blog/2015/10/13/Javascript-Design-pattern-bridge/">
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="/css/pixyll.css" type="text/css">
-
-    <!-- Fonts -->
-    <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
-    <link href='//fonts.googleapis.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
-    
-      <link href="//libs.baidu.com/fontawesome/4.2.0/css/font-awesome.css" rel="stylesheet">
-    
-
-    <!-- Open Graph -->
-    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
-    <meta property="og:locale" content="en_US">
-    <meta property="og:type" content="article">
-    <meta property="og:title" content="大白话Javascript设计模式之桥接模式(bridge)">
-    <meta property="og:description" content="Clancy Zhu's blog">
-    <meta property="og:url" content="http://clancyz.github.io/blog/2015/10/13/Javascript-Design-pattern-bridge/">
-    <meta property="og:site_name" content="Clancy Zhu">
-    
-
-<script>
-var _hmt = _hmt || [];
-(function() {
-  var hm = document.createElement("script");
-  hm.src = "//hm.baidu.com/hm.js?552e4c4f02c7d240bdb63847dd7ea798";
-  var s = document.getElementsByTagName("script")[0]; 
-  s.parentNode.insertBefore(hm, s);
-})();
-</script>
-
-
-
-</head>
-
-<body class="">
-  <div class="site-wrap">
-    <header class="site-header px2 px-responsive">
-  <div class="mt2 wrap">
-    <div class="measure">
-      <a href="http://clancyz.github.io" class="site-title">Clancy Zhu</a>
-      <nav class="site-nav right">
-        <a href="/about/">About</a>
-<a href="/contact/">Contact</a>
-
-      </nav>
-      <div class="clearfix"></div>
-      
-        <div class="social-icons">
-  <div class="left">
-    
-      <a class="fa fa-github" href="https://github.com/clancyz"></a>
-    
-    <a class="fa fa-rss" href="/feed.xml"></a>
-    
-    
-    
-      <a class="fa fa-envelope" href="mailto:clancyzhu@me.com"></a>
-    
-    
-  </div>
-  <div class="right">
-    
-    
-    
-  </div>
-</div>
-<div class="clearfix"></div>
-
-      
-    </div>
-  </div>
-</header>
-
-
-    <div class="post p2 p-responsive wrap" role="main">
-      <div class="measure">
-        
-
-
-<div class="post-header mb2">
-  
-  <h1 class="py2">大白话Javascript设计模式之桥接模式(bridge)</h1>
-  
-  <span class="post-meta">10月 13日, 2015</span><br>
-  
-  <!-- <span class="post-meta small">5 minute read</span> -->
-</div>
-
-<article class="post-content">
-  <h2 id="section">什么是桥接模式</h2>
+<h2 id="什么是桥接模式">什么是桥接模式</h2>
 
 <blockquote>
   <p>抄一个GOF的定义：</p>
@@ -114,7 +13,7 @@ var _hmt = _hmt || [];
 
 <p>在解释之前，我还是继续 <code class="highlighter-rouge">产品狗与程序猿</code> 的故事系列吧。相信你看了一定很快懂。</p>
 
-<h2 id="section-1">那么，需求来了</h2>
+<h2 id="那么需求来了">那么，需求来了</h2>
 
 <blockquote>
   <p>产品狗：哎呀，我们现在要开发个底层canvas图形库。</p>
@@ -179,7 +78,7 @@ var _hmt = _hmt || [];
 
 <p>但是程序猿看这着两团黑乎乎的东东（canvas默认颜色为黑），心里头想：卧槽，以那只的操性，后面肯定叫劳资上颜色，tmd。</p>
 
-<h2 id="section-2">“咱都是做互联网的嘛，唯一不变的，只有变化”</h2>
+<h2 id="咱都是做互联网的嘛唯一不变的只有变化">“咱都是做互联网的嘛，唯一不变的，只有变化”</h2>
 
 <blockquote>
   <p>第二天。</p>
@@ -288,7 +187,7 @@ var _hmt = _hmt || [];
   <p>我们来分析一下，为啥这样的代码会更优雅呢？</p>
 </blockquote>
 
-<h2 id="section-3">看下图，秒懂</h2>
+<h2 id="看下图秒懂">看下图，秒懂</h2>
 
 <p>原来是这样</p>
 
@@ -321,66 +220,9 @@ var _hmt = _hmt || [];
 
 <p>以上。</p>
 
-<h2 id="section-4">备注</h2>
+<h2 id="备注">备注</h2>
 
 <p>关于 <code class="highlighter-rouge">复杂工厂模式</code> 可以看我的 <a href="http://clancyz.github.io/blog/2015/09/30/Javascript-Design-pattern-factory/">这篇文章</a>。</p>
 
 <p>关于 <code class="highlighter-rouge">extend</code> 函数可以看我的 <a href="http://clancyz.github.io/blog/2015/07/27/javascript-prototype-extend/">这篇文章</a>。</p>
 
-
-</article>
-
-
-  <div class="py2">
-  <blockquote>
-  <p><b>关于此文章：</b></p>
-  <ul>
-      <li>作者：Clancy Zhu</li>
-      <li>版权声明：自由转载-非商用-非衍生-保持署名<a href="http://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh">（CC BY-NC-ND 3.0)</a></li>
-  </ul>
-</blockquote>
-</div>
-
-
-
-
-
-    
-  
-<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="大白话Javascript设计模式之桥接模式(bridge)" data-title="大白话Javascript设计模式之桥接模式(bridge)" data-url="http://clancyz.github.io/blog/2015/10/13/Javascript-Design-pattern-bridge/"></div>
-<!-- 多说评论框 end -->
-<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
-<script type="text/javascript">
-var duoshuoQuery = {short_name:"clancyz"};
-	(function() {
-		var ds = document.createElement('script');
-		ds.type = 'text/javascript';ds.async = true;
-		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
-		ds.charset = 'UTF-8';
-		(document.getElementsByTagName('head')[0] 
-		 || document.getElementsByTagName('body')[0]).appendChild(ds);
-	})();
-	</script>
-<!-- 多说公共JS代码 end -->
-
-
-        
-      </div>
-    </div>
-  </div>
-
-  <footer class="footer">
-  <div class="p2 wrap">
-    <div class="measure mt1 center">
-      <small>
-        2016 Clancy Zhu
-      </small>
-    </div>
-  </div>
-</footer>
-
-
-
-</body>
-</html>

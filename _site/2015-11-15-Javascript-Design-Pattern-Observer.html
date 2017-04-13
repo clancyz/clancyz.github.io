@@ -1,111 +1,10 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>大白话Javascript设计模式之观察者模式(Observer) &#8211; Clancy Zhu</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="小明，你妈喊你回家吃饭了。">
-    <meta name="author" content="Clancy Zhu">
-    <meta name="keywords" content="blog">
-    <link rel="canonical" href="http://clancyz.github.io/blog/2015/11/16/Javascript-Design-Pattern-Observer/">
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="/css/pixyll.css" type="text/css">
-
-    <!-- Fonts -->
-    <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
-    <link href='//fonts.googleapis.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
-    
-      <link href="//libs.baidu.com/fontawesome/4.2.0/css/font-awesome.css" rel="stylesheet">
-    
-
-    <!-- Open Graph -->
-    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
-    <meta property="og:locale" content="en_US">
-    <meta property="og:type" content="article">
-    <meta property="og:title" content="大白话Javascript设计模式之观察者模式(Observer)">
-    <meta property="og:description" content="Clancy Zhu's blog">
-    <meta property="og:url" content="http://clancyz.github.io/blog/2015/11/16/Javascript-Design-Pattern-Observer/">
-    <meta property="og:site_name" content="Clancy Zhu">
-    
-
-<script>
-var _hmt = _hmt || [];
-(function() {
-  var hm = document.createElement("script");
-  hm.src = "//hm.baidu.com/hm.js?552e4c4f02c7d240bdb63847dd7ea798";
-  var s = document.getElementsByTagName("script")[0]; 
-  s.parentNode.insertBefore(hm, s);
-})();
-</script>
-
-
-
-</head>
-
-<body class="">
-  <div class="site-wrap">
-    <header class="site-header px2 px-responsive">
-  <div class="mt2 wrap">
-    <div class="measure">
-      <a href="http://clancyz.github.io" class="site-title">Clancy Zhu</a>
-      <nav class="site-nav right">
-        <a href="/about/">About</a>
-<a href="/contact/">Contact</a>
-
-      </nav>
-      <div class="clearfix"></div>
-      
-        <div class="social-icons">
-  <div class="left">
-    
-      <a class="fa fa-github" href="https://github.com/clancyz"></a>
-    
-    <a class="fa fa-rss" href="/feed.xml"></a>
-    
-    
-    
-      <a class="fa fa-envelope" href="mailto:clancyzhu@me.com"></a>
-    
-    
-  </div>
-  <div class="right">
-    
-    
-    
-  </div>
-</div>
-<div class="clearfix"></div>
-
-      
-    </div>
-  </div>
-</header>
-
-
-    <div class="post p2 p-responsive wrap" role="main">
-      <div class="measure">
-        
-
-
-<div class="post-header mb2">
-  
-  <h1 class="py2">大白话Javascript设计模式之观察者模式(Observer)</h1>
-  
-  <span class="post-meta">11月 16日, 2015</span><br>
-  
-  <!-- <span class="post-meta small">4 minute read</span> -->
-</div>
-
-<article class="post-content">
-  <h2 id="section">什么是观察者模式</h2>
+<h2 id="什么是观察者模式">什么是观察者模式</h2>
 
 <blockquote>
   <p>观察者模式(Observer Pattern)：定义对象间的一种一对多依赖关系，使得每当一个对象状态发生改变时，其相关依赖对象皆得到通知并被自动更新。</p>
 </blockquote>
 
-<h2 id="eventhandler-vs-eventlistener">日常的使用：EventHandler vs EventListener</h2>
+<h2 id="日常的使用eventhandler-vs-eventlistener">日常的使用：EventHandler vs EventListener</h2>
 
 <p>我们先来复习一下基础知识。</p>
 
@@ -186,7 +85,7 @@ var _hmt = _hmt || [];
 
 <p>OK，我们已经看到了<code class="highlighter-rouge">观察者模式</code>的使用，那么下面我们来实现观察者模式。</p>
 
-<h2 id="pm25">观察者模式的实现：PM2.5</h2>
+<h2 id="观察者模式的实现pm25">观察者模式的实现：PM2.5</h2>
 
 <p>最近帝都的PM2.5几乎天天爆表，在各大应用市场中，PM2.5实时指数的APP下载量也一路飙升。</p>
 
@@ -296,7 +195,7 @@ var _hmt = _hmt || [];
   </ul>
 </blockquote>
 
-<h2 id="section-1">回到事件监听器</h2>
+<h2 id="回到事件监听器">回到事件监听器</h2>
 
 <p>现在让我们回到事件监听器。</p>
 
@@ -313,7 +212,7 @@ var _hmt = _hmt || [];
   <span class="p">}</span>
 <span class="p">};</span></code></pre></figure>
 
-<h2 id="section-2">总结</h2>
+<h2 id="总结">总结</h2>
 
 <p>观察者模式的优点如下：</p>
 
@@ -330,60 +229,3 @@ var _hmt = _hmt || [];
 
 <p>以上。</p>
 
-
-</article>
-
-
-  <div class="py2">
-  <blockquote>
-  <p><b>关于此文章：</b></p>
-  <ul>
-      <li>作者：Clancy Zhu</li>
-      <li>版权声明：自由转载-非商用-非衍生-保持署名<a href="http://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh">（CC BY-NC-ND 3.0)</a></li>
-  </ul>
-</blockquote>
-</div>
-
-
-
-
-
-    
-  
-<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="大白话Javascript设计模式之观察者模式(Observer)" data-title="大白话Javascript设计模式之观察者模式(Observer)" data-url="http://clancyz.github.io/blog/2015/11/16/Javascript-Design-Pattern-Observer/"></div>
-<!-- 多说评论框 end -->
-<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
-<script type="text/javascript">
-var duoshuoQuery = {short_name:"clancyz"};
-	(function() {
-		var ds = document.createElement('script');
-		ds.type = 'text/javascript';ds.async = true;
-		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
-		ds.charset = 'UTF-8';
-		(document.getElementsByTagName('head')[0] 
-		 || document.getElementsByTagName('body')[0]).appendChild(ds);
-	})();
-	</script>
-<!-- 多说公共JS代码 end -->
-
-
-        
-      </div>
-    </div>
-  </div>
-
-  <footer class="footer">
-  <div class="p2 wrap">
-    <div class="measure mt1 center">
-      <small>
-        2016 Clancy Zhu
-      </small>
-    </div>
-  </div>
-</footer>
-
-
-
-</body>
-</html>

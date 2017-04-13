@@ -1,105 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>使用angular+fis-plus+oclazyload搭建单页应用 &#8211; Clancy Zhu</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="给去年年底的一个angular项目做个总结，使用angular+fis-plus搭建前端单页应用的一些小心得。">
-    <meta name="author" content="Clancy Zhu">
-    <meta name="keywords" content="blog">
-    <link rel="canonical" href="http://clancyz.github.io/blog/2016/02/21/angular-and-fisp-frontend-architecture/">
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="/css/pixyll.css" type="text/css">
-
-    <!-- Fonts -->
-    <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
-    <link href='//fonts.googleapis.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
-    
-      <link href="//libs.baidu.com/fontawesome/4.2.0/css/font-awesome.css" rel="stylesheet">
-    
-
-    <!-- Open Graph -->
-    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
-    <meta property="og:locale" content="en_US">
-    <meta property="og:type" content="article">
-    <meta property="og:title" content="使用angular+fis-plus+oclazyload搭建单页应用">
-    <meta property="og:description" content="Clancy Zhu's blog">
-    <meta property="og:url" content="http://clancyz.github.io/blog/2016/02/21/angular-and-fisp-frontend-architecture/">
-    <meta property="og:site_name" content="Clancy Zhu">
-    
-
-<script>
-var _hmt = _hmt || [];
-(function() {
-  var hm = document.createElement("script");
-  hm.src = "//hm.baidu.com/hm.js?552e4c4f02c7d240bdb63847dd7ea798";
-  var s = document.getElementsByTagName("script")[0]; 
-  s.parentNode.insertBefore(hm, s);
-})();
-</script>
-
-
-
-</head>
-
-<body class="">
-  <div class="site-wrap">
-    <header class="site-header px2 px-responsive">
-  <div class="mt2 wrap">
-    <div class="measure">
-      <a href="http://clancyz.github.io" class="site-title">Clancy Zhu</a>
-      <nav class="site-nav right">
-        <a href="/about/">About</a>
-<a href="/contact/">Contact</a>
-
-      </nav>
-      <div class="clearfix"></div>
-      
-        <div class="social-icons">
-  <div class="left">
-    
-      <a class="fa fa-github" href="https://github.com/clancyz"></a>
-    
-    <a class="fa fa-rss" href="/feed.xml"></a>
-    
-    
-    
-      <a class="fa fa-envelope" href="mailto:clancyzhu@me.com"></a>
-    
-    
-  </div>
-  <div class="right">
-    
-    
-    
-  </div>
-</div>
-<div class="clearfix"></div>
-
-      
-    </div>
-  </div>
-</header>
-
-
-    <div class="post p2 p-responsive wrap" role="main">
-      <div class="measure">
-        
-
-
-<div class="post-header mb2">
-  
-  <h1 class="py2">使用angular+fis-plus+oclazyload搭建单页应用</h1>
-  
-  <span class="post-meta">02月 21日, 2016</span><br>
-  
-  <!-- <span class="post-meta small">6 minute read</span> -->
-</div>
-
-<article class="post-content">
-  <h2 id="section">项目背景</h2>
+<h2 id="项目背景">项目背景</h2>
 
 <p>此项目前端为一个单页（Single Page Application），header和footer固定，中间视图页随导航点击而变化。后端为百度内部的PHP框架ODP。
 使用的主要框架和类库有：</p>
@@ -116,13 +15,13 @@ var _hmt = _hmt || [];
   </ul>
 </blockquote>
 
-<h2 id="section-1">框架选型的考虑</h2>
+<h2 id="框架选型的考虑">框架选型的考虑</h2>
 
 <p>当时angular的最新版本是1.4.7，俺学习angular的时候版本为1.2。选新不选旧的原则，就上了最新版本。
 前端ui框架方面选择了angular-bootstrap, 因为组内对bs还是比较熟的。
 工程化方面，后端同学是搞PHP的，以前配合的时候都是使用fis-plus, 所以继续采用。</p>
 
-<h2 id="section-2">项目架构</h2>
+<h2 id="项目架构">项目架构</h2>
 
 <p><img src="/assets/images/5.png" alt="image" /></p>
 
@@ -143,9 +42,9 @@ var _hmt = _hmt || [];
   </ul>
 </blockquote>
 
-<h2 id="section-3">搭建架构和开发的一些心得</h2>
+<h2 id="搭建架构和开发的一些心得">搭建架构和开发的一些心得</h2>
 
-<h3 id="section-4">业务优先，类型次之</h3>
+<h3 id="业务优先类型次之">业务优先，类型次之</h3>
 
 <p>首先，刚开始的时候想过用view/controller/directive/service这样的结构的。
 （之前做一个backbone项目的时候就是使用view/model/collection/这样的分层，当时没有使用啥工程化手段）</p>
@@ -159,7 +58,7 @@ fisp编译一个模块：</p>
 我们更多需要的是 <code class="highlighter-rouge">只编译修改的部分</code> 。
 所以形成了business目录，下面一个页面一个模块，这样很清晰，也符合fisp的规范。</p>
 
-<h3 id="section-5">应用程序入口</h3>
+<h3 id="应用程序入口">应用程序入口</h3>
 <p>由于是一个单页应用，服务器配置路由来加载index.tpl首页。
 index.tpl除了加载各种公共静态资源外，会进行以下的配置行为：</p>
 
@@ -172,7 +71,7 @@ index.tpl除了加载各种公共静态资源外，会进行以下的配置行�
   </ul>
 </blockquote>
 
-<h3 id="oclazyloadui-router">使用oclazyload配合ui-router实现按需加载</h3>
+<h3 id="使用oclazyload配合ui-router实现按需加载">使用oclazyload配合ui-router实现按需加载</h3>
 <p>首先来看<a href="https://github.com/ocombe/ocLazyLoad">oclazyload</a>的官方key features:</p>
 
 <blockquote>
@@ -251,7 +150,7 @@ index.tpl除了加载各种公共静态资源外，会进行以下的配置行�
   </ul>
 </blockquote>
 
-<h3 id="section-6">缓存设计</h3>
+<h3 id="缓存设计">缓存设计</h3>
 
 <p>项目需要缓存一些默认信息，比如产品线信息。
 我是使用了localStorage来缓存，在body的controller对应的$scope.setting中存储。
@@ -268,7 +167,7 @@ index.tpl除了加载各种公共静态资源外，会进行以下的配置行�
 
 <p>这样，在页面开发中如果要更改某些信息，修改app.settings即可。</p>
 
-<h3 id="section-7">静态资源的缓存</h3>
+<h3 id="静态资源的缓存">静态资源的缓存</h3>
 <p>如果使用fisp的规范，每个页面是一个tpl, 经过服务器编译；而项目是个单页，一开始只向服务器请求index.tpl模板编译, 后续路由由前端来设定，每个view均是html。
 这样带来了一个问题：</p>
 
@@ -283,11 +182,11 @@ index.tpl除了加载各种公共静态资源外，会进行以下的配置行�
 每个视图加载的静态资源由oclazyload控制；组件类的静态资源缓存（因为基本不修改），业务类的静态资源不缓存（因为经常修改）</p>
 </blockquote>
 
-<h3 id="section-8">代码规范</h3>
+<h3 id="代码规范">代码规范</h3>
 
 <p>代码规范主要依据的是著名的<a href="https://github.com/johnpapa/angular-styleguide/blob/master/a1/i18n/zh-CN.md">angular-styleguide</a>。建议在项目开始时组织项目成员都学习一遍，定期code review。</p>
 
-<h3 id="section-9">工程化</h3>
+<h3 id="工程化">工程化</h3>
 <p>因为项目主要使用fisp, 使用svn做代码管理（度厂估计今年有可能转git），所以主要的部署逻辑是：</p>
 
 <ol>
@@ -301,9 +200,9 @@ index.tpl除了加载各种公共静态资源外，会进行以下的配置行�
 
 <p>在fisp的配置fis-conf里面，除了遵循一些odp服务器的目录规范外，主要是 <code class="highlighter-rouge">合并零散资源</code> ，比如一个页面有多个controller, 最终会打包成controller.pack.js. 一些公共组件也做了相应的打包。</p>
 
-<h2 id="section-10">最后说一些坑。。</h2>
+<h2 id="最后说一些坑">最后说一些坑。。</h2>
 
-<h3 id="html-ng-appfisp">html ng-app结合fisp报错问题</h3>
+<h3 id="html-ng-app结合fisp报错问题">html ng-app结合fisp报错问题</h3>
 
 <p>如上所述，我们只有入口点index.tpl去请求服务器编译。
 fisp的规范下，原来设想应该这么写：</p>
@@ -322,7 +221,7 @@ fisp的规范下，原来设想应该这么写：</p>
     <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">setAttribute</span><span class="p">(</span><span class="s1">'ng-controller'</span><span class="p">,</span> <span class="s1">'AppCtrl'</span><span class="p">);</span>
 <span class="o">&lt;</span><span class="sr">/script&gt;</span></code></pre></figure>
 
-<h3 id="section-11">使用包管理工具安装依赖</h3>
+<h3 id="使用包管理工具安装依赖">使用包管理工具安装依赖</h3>
 <p>angular-boostrap是依赖angular主干版本的，所以最好使用包管理工具如 <code class="highlighter-rouge">bower</code> 之类的来安装。
 否则会报这样的问题</p>
 
@@ -330,7 +229,7 @@ fisp的规范下，原来设想应该这么写：</p>
 
 <p>用好像还是可以用的，但是强迫症，还是升级版本吧。</p>
 
-<h3 id="section-12">避免头咬尾巴的行为</h3>
+<h3 id="避免头咬尾巴的行为">避免头咬尾巴的行为</h3>
 
 <figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">$scope</span><span class="p">.</span><span class="nx">$watch</span><span class="p">(</span><span class="s1">'users'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
   <span class="nx">$scope</span><span class="p">.</span><span class="nx">users</span> <span class="o">=</span> <span class="p">[];</span>
@@ -428,60 +327,3 @@ fisp的规范下，原来设想应该这么写：</p>
 
 <p>额，暂时要去搬砖了，以后有想到的再来更。</p>
 
-
-</article>
-
-
-  <div class="py2">
-  <blockquote>
-  <p><b>关于此文章：</b></p>
-  <ul>
-      <li>作者：Clancy Zhu</li>
-      <li>版权声明：自由转载-非商用-非衍生-保持署名<a href="http://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh">（CC BY-NC-ND 3.0)</a></li>
-  </ul>
-</blockquote>
-</div>
-
-
-
-
-
-    
-  
-<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="使用angular+fis-plus+oclazyload搭建单页应用" data-title="使用angular+fis-plus+oclazyload搭建单页应用" data-url="http://clancyz.github.io/blog/2016/02/21/angular-and-fisp-frontend-architecture/"></div>
-<!-- 多说评论框 end -->
-<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
-<script type="text/javascript">
-var duoshuoQuery = {short_name:"clancyz"};
-	(function() {
-		var ds = document.createElement('script');
-		ds.type = 'text/javascript';ds.async = true;
-		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
-		ds.charset = 'UTF-8';
-		(document.getElementsByTagName('head')[0] 
-		 || document.getElementsByTagName('body')[0]).appendChild(ds);
-	})();
-	</script>
-<!-- 多说公共JS代码 end -->
-
-
-        
-      </div>
-    </div>
-  </div>
-
-  <footer class="footer">
-  <div class="p2 wrap">
-    <div class="measure mt1 center">
-      <small>
-        2016 Clancy Zhu
-      </small>
-    </div>
-  </div>
-</footer>
-
-
-
-</body>
-</html>

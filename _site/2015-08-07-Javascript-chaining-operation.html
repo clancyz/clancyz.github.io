@@ -1,0 +1,67 @@
+<p>这个问题我在面试普通工程师的时候经常会问：</p>
+
+<blockquote>
+  <p>问：用过jQuery的链式操作吗？</p>
+
+  <p>答：用过，blablabla…</p>
+
+  <p>问：能设计一个类，支持类似jQuery链式操作吗？</p>
+
+  <p>答：…</p>
+</blockquote>
+
+<p>其实，很多初级工程师只是 <code class="highlighter-rouge">能这样用</code> 没有思考 <code class="highlighter-rouge">为啥能这么用</code>　…</p>
+
+<p>即使没有去想过，当场仔细思考下应该都OK的。</p>
+
+<p>我给个我自己能接受的答案吧…</p>
+
+<p>链式操作在 <code class="highlighter-rouge">jQuery</code> 里面应该已经很常见，例如：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"> 
+<span class="nx">$</span><span class="p">(</span><span class="s1">'.red'</span><span class="p">).</span><span class="nx">addClass</span><span class="p">(</span><span class="s1">'green'</span><span class="p">).</span><span class="nx">setStyle</span><span class="p">(</span><span class="s1">'padding'</span><span class="p">,</span> <span class="s1">'0'</span><span class="p">).</span><span class="nx">removeClass</span><span class="p">(</span><span class="s1">'red'</span><span class="p">);</span></code></pre></figure>
+
+<p>自己实现一个支持链式操作的API也很简单，即：</p>
+
+<blockquote>
+  <p>如果一个对象有方法A，B，当一个对象执行完该对象的方法A后，再把该对象返回，就可以继续调用方法B。</p>
+</blockquote>
+
+<p>链式操作最核心的一句话就是 <code class="highlighter-rouge">return this</code>。</p>
+
+<p>比如设计一个 <code class="highlighter-rouge">Dog</code> 类，又能 <code class="highlighter-rouge">eat</code> 又能 <code class="highlighter-rouge">sleep</code>。</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"> 
+<span class="p">(</span><span class="kd">function</span> <span class="p">(){</span>
+  <span class="c1">//　用于实例化</span>
+  <span class="kd">function</span> <span class="nx">_Dog</span><span class="p">(){</span>
+    <span class="c1">//do something to Arguments</span>
+  <span class="p">}</span>
+  
+  <span class="nx">_Dog</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="na">eat</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">food</span><span class="p">){</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'eat '</span> <span class="o">+</span> <span class="nx">food</span><span class="p">);</span>
+      <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+    <span class="p">},</span>
+    <span class="na">sleep</span><span class="p">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'sleeping now'</span><span class="p">);</span>
+      <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  
+  <span class="nb">window</span><span class="p">.</span><span class="nx">Dog</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(){</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nx">_Dog</span><span class="p">(</span><span class="nx">arguments</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">})();</span></code></pre></figure>
+
+<p>这里使用了　<code class="highlighter-rouge">延迟实例化</code>　。</p>
+
+<p>调用：</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"> 
+<span class="nx">Dog</span><span class="p">().</span><span class="nx">eat</span><span class="p">(</span><span class="s1">'meat'</span><span class="p">).</span><span class="nx">sleep</span><span class="p">();</span>
+<span class="c1">// =&gt; eat meat</span>
+<span class="c1">// =&gt; sleeping now </span></code></pre></figure>
+
+<p>以上。</p>
+

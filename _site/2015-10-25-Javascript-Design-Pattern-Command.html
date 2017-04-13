@@ -1,105 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>大白话Javascript设计模式之命令模式(Command) &#8211; Clancy Zhu</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="这世界上没有什么事是撸上十个串不能解决的；如果有，那你就说：「老板，再来十串」。">
-    <meta name="author" content="Clancy Zhu">
-    <meta name="keywords" content="blog">
-    <link rel="canonical" href="http://clancyz.github.io/blog/2015/10/26/Javascript-Design-Pattern-Command/">
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="/css/pixyll.css" type="text/css">
-
-    <!-- Fonts -->
-    <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
-    <link href='//fonts.googleapis.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
-    
-      <link href="//libs.baidu.com/fontawesome/4.2.0/css/font-awesome.css" rel="stylesheet">
-    
-
-    <!-- Open Graph -->
-    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
-    <meta property="og:locale" content="en_US">
-    <meta property="og:type" content="article">
-    <meta property="og:title" content="大白话Javascript设计模式之命令模式(Command)">
-    <meta property="og:description" content="Clancy Zhu's blog">
-    <meta property="og:url" content="http://clancyz.github.io/blog/2015/10/26/Javascript-Design-Pattern-Command/">
-    <meta property="og:site_name" content="Clancy Zhu">
-    
-
-<script>
-var _hmt = _hmt || [];
-(function() {
-  var hm = document.createElement("script");
-  hm.src = "//hm.baidu.com/hm.js?552e4c4f02c7d240bdb63847dd7ea798";
-  var s = document.getElementsByTagName("script")[0]; 
-  s.parentNode.insertBefore(hm, s);
-})();
-</script>
-
-
-
-</head>
-
-<body class="">
-  <div class="site-wrap">
-    <header class="site-header px2 px-responsive">
-  <div class="mt2 wrap">
-    <div class="measure">
-      <a href="http://clancyz.github.io" class="site-title">Clancy Zhu</a>
-      <nav class="site-nav right">
-        <a href="/about/">About</a>
-<a href="/contact/">Contact</a>
-
-      </nav>
-      <div class="clearfix"></div>
-      
-        <div class="social-icons">
-  <div class="left">
-    
-      <a class="fa fa-github" href="https://github.com/clancyz"></a>
-    
-    <a class="fa fa-rss" href="/feed.xml"></a>
-    
-    
-    
-      <a class="fa fa-envelope" href="mailto:clancyzhu@me.com"></a>
-    
-    
-  </div>
-  <div class="right">
-    
-    
-    
-  </div>
-</div>
-<div class="clearfix"></div>
-
-      
-    </div>
-  </div>
-</header>
-
-
-    <div class="post p2 p-responsive wrap" role="main">
-      <div class="measure">
-        
-
-
-<div class="post-header mb2">
-  
-  <h1 class="py2">大白话Javascript设计模式之命令模式(Command)</h1>
-  
-  <span class="post-meta">10月 26日, 2015</span><br>
-  
-  <!-- <span class="post-meta small">3 minute read</span> -->
-</div>
-
-<article class="post-content">
-  <h2 id="section">什么是命令模式</h2>
+<h2 id="什么是命令模式">什么是命令模式</h2>
 
 <blockquote>
   <ul>
@@ -110,7 +9,7 @@ var _hmt = _hmt || [];
 
 <p>这个系列的惯例，还是用具体的例子来解释。今天我们的例子是「撸串」。</p>
 
-<h2 id="section-1">混乱的小烧烤摊儿</h2>
+<h2 id="混乱的小烧烤摊儿">混乱的小烧烤摊儿</h2>
 
 <p>某天晚上，你胃里的馋虫嗷嗷叫，想到撒着孜然淌着油的羊肉串，哈喇子流了一地。</p>
 
@@ -150,7 +49,7 @@ var _hmt = _hmt || [];
   <p>上面的事件中，可以看出请求的发送者和接收者之间是「紧耦合」的；请求一多的情况下，很容易发生混乱。你想到的「拿个小本记一下」，实际上就是「解耦合」的一种方法。</p>
 </blockquote>
 
-<h2 id="section-2">正经的烧烤店</h2>
+<h2 id="正经的烧烤店">正经的烧烤店</h2>
 
 <p>你走到半路，还是馋得不行，看来今晚上不吃到嘴里是睡不着了。</p>
 
@@ -190,7 +89,7 @@ var _hmt = _hmt || [];
 
 <p>额，终于可以大快朵颐了！撸起！</p>
 
-<h2 id="section-3">效率为什么高？</h2>
+<h2 id="效率为什么高">效率为什么高？</h2>
 
 <p>好，由此，我们可以观察出：</p>
 
@@ -201,7 +100,7 @@ var _hmt = _hmt || [];
   </ul>
 </blockquote>
 
-<h2 id="section-4">模拟门店的下单行为</h2>
+<h2 id="模拟门店的下单行为">模拟门店的下单行为</h2>
 
 <p>好，我们来模拟门店的下单行为。</p>
 
@@ -330,7 +229,7 @@ var _hmt = _hmt || [];
 
 <p>上面的例子很符合实际生活的体验。这便是<code class="highlighter-rouge">命令模式</code>。毕竟设计模式都是来源于生活的嘛。</p>
 
-<h2 id="section-5">总结</h2>
+<h2 id="总结">总结</h2>
 
 <p>我们再来看看命令模式的好处：</p>
 
@@ -348,60 +247,3 @@ var _hmt = _hmt || [];
 
 <p>注：关于extend原型继承函数及超类superClass可以看我的<a href="http://clancyz.github.io/blog/2015/07/27/javascript-prototype-extend/">这篇文章</a>。</p>
 
-
-</article>
-
-
-  <div class="py2">
-  <blockquote>
-  <p><b>关于此文章：</b></p>
-  <ul>
-      <li>作者：Clancy Zhu</li>
-      <li>版权声明：自由转载-非商用-非衍生-保持署名<a href="http://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh">（CC BY-NC-ND 3.0)</a></li>
-  </ul>
-</blockquote>
-</div>
-
-
-
-
-
-    
-  
-<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="大白话Javascript设计模式之命令模式(Command)" data-title="大白话Javascript设计模式之命令模式(Command)" data-url="http://clancyz.github.io/blog/2015/10/26/Javascript-Design-Pattern-Command/"></div>
-<!-- 多说评论框 end -->
-<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
-<script type="text/javascript">
-var duoshuoQuery = {short_name:"clancyz"};
-	(function() {
-		var ds = document.createElement('script');
-		ds.type = 'text/javascript';ds.async = true;
-		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
-		ds.charset = 'UTF-8';
-		(document.getElementsByTagName('head')[0] 
-		 || document.getElementsByTagName('body')[0]).appendChild(ds);
-	})();
-	</script>
-<!-- 多说公共JS代码 end -->
-
-
-        
-      </div>
-    </div>
-  </div>
-
-  <footer class="footer">
-  <div class="p2 wrap">
-    <div class="measure mt1 center">
-      <small>
-        2016 Clancy Zhu
-      </small>
-    </div>
-  </div>
-</footer>
-
-
-
-</body>
-</html>

@@ -1,105 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>大白话Javascript设计模式之职责链模式(Chain of Responsibility) &#8211; Clancy Zhu</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="其实，我是一个鉴黄师。专看你们这些演员。">
-    <meta name="author" content="Clancy Zhu">
-    <meta name="keywords" content="blog">
-    <link rel="canonical" href="http://clancyz.github.io/blog/2015/10/17/Javascript-Design-pattern-Chain-of-responsibility/">
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="/css/pixyll.css" type="text/css">
-
-    <!-- Fonts -->
-    <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
-    <link href='//fonts.googleapis.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
-    
-      <link href="//libs.baidu.com/fontawesome/4.2.0/css/font-awesome.css" rel="stylesheet">
-    
-
-    <!-- Open Graph -->
-    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
-    <meta property="og:locale" content="en_US">
-    <meta property="og:type" content="article">
-    <meta property="og:title" content="大白话Javascript设计模式之职责链模式(Chain of Responsibility)">
-    <meta property="og:description" content="Clancy Zhu's blog">
-    <meta property="og:url" content="http://clancyz.github.io/blog/2015/10/17/Javascript-Design-pattern-Chain-of-responsibility/">
-    <meta property="og:site_name" content="Clancy Zhu">
-    
-
-<script>
-var _hmt = _hmt || [];
-(function() {
-  var hm = document.createElement("script");
-  hm.src = "//hm.baidu.com/hm.js?552e4c4f02c7d240bdb63847dd7ea798";
-  var s = document.getElementsByTagName("script")[0]; 
-  s.parentNode.insertBefore(hm, s);
-})();
-</script>
-
-
-
-</head>
-
-<body class="">
-  <div class="site-wrap">
-    <header class="site-header px2 px-responsive">
-  <div class="mt2 wrap">
-    <div class="measure">
-      <a href="http://clancyz.github.io" class="site-title">Clancy Zhu</a>
-      <nav class="site-nav right">
-        <a href="/about/">About</a>
-<a href="/contact/">Contact</a>
-
-      </nav>
-      <div class="clearfix"></div>
-      
-        <div class="social-icons">
-  <div class="left">
-    
-      <a class="fa fa-github" href="https://github.com/clancyz"></a>
-    
-    <a class="fa fa-rss" href="/feed.xml"></a>
-    
-    
-    
-      <a class="fa fa-envelope" href="mailto:clancyzhu@me.com"></a>
-    
-    
-  </div>
-  <div class="right">
-    
-    
-    
-  </div>
-</div>
-<div class="clearfix"></div>
-
-      
-    </div>
-  </div>
-</header>
-
-
-    <div class="post p2 p-responsive wrap" role="main">
-      <div class="measure">
-        
-
-
-<div class="post-header mb2">
-  
-  <h1 class="py2">大白话Javascript设计模式之职责链模式(Chain of Responsibility)</h1>
-  
-  <span class="post-meta">10月 17日, 2015</span><br>
-  
-  <!-- <span class="post-meta small">3 minute read</span> -->
-</div>
-
-<article class="post-content">
-  <h2 id="section">什么是职责链模式</h2>
+<h2 id="什么是职责链模式">什么是职责链模式</h2>
 <blockquote>
   <p>当一个对象A要办个事儿，就向一个处理对象B发起请求，如果B不处理，可以把请求转给C，如果C不处理，又可以把请求转给D。一直到有一个对象愿意处理这个请求为止。</p>
 
@@ -110,7 +9,7 @@ var _hmt = _hmt || [];
   <p>A在一开始是不知道自己会被谁处理的。</p>
 </blockquote>
 
-<h2 id="section-1">实例：俺是个鉴黄的！</h2>
+<h2 id="实例俺是个鉴黄的">实例：俺是个鉴黄的！</h2>
 
 <p>下面举具体的例子来说明。</p>
 
@@ -143,7 +42,7 @@ var _hmt = _hmt || [];
 
 <p>这就形成了一条<code class="highlighter-rouge">职责链</code> ，各个模块各司其职，逐级传递。</p>
 
-<h2 id="javascript">Javascript实现</h2>
+<h2 id="javascript实现">Javascript实现</h2>
 
 <p>那么我们怎样用js把它抽象出来呢?</p>
 
@@ -264,13 +163,13 @@ var _hmt = _hmt || [];
 
 <p>这样，可以根据实际的情况，自由地选择下级职责链中的下一环，在特定的场景中就可以<code class="highlighter-rouge">节约性能开销</code>。</p>
 
-<h2 id="section-2">多扯两句：事件委托 / 原型链</h2>
+<h2 id="多扯两句事件委托--原型链">多扯两句：事件委托 / 原型链</h2>
 
 <p>学过BOM知识的童鞋肯定都有了解，浏览器的「事件冒泡」、「事件委托」or「事件代理」的过程，实际也可以用<code class="highlighter-rouge">职责链</code>来解释：一个事件在某个节点上被触发，然后向根节点传递， 直到被节点捕获。</p>
 
 <p>Javascript的<code class="highlighter-rouge">原型链</code>查找方法也有<code class="highlighter-rouge">职责链</code>的影子：在子类上调用一个方法，如果自身找不到，就沿着原型链一级级向上查找。</p>
 
-<h2 id="section-3">总结</h2>
+<h2 id="总结">总结</h2>
 
 <p>职责链模式可以让对象得到灵活、高效的处理，减轻请求对象和处理对象的耦合。</p>
 
@@ -278,60 +177,3 @@ var _hmt = _hmt || [];
 
 <p>以上。</p>
 
-
-</article>
-
-
-  <div class="py2">
-  <blockquote>
-  <p><b>关于此文章：</b></p>
-  <ul>
-      <li>作者：Clancy Zhu</li>
-      <li>版权声明：自由转载-非商用-非衍生-保持署名<a href="http://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh">（CC BY-NC-ND 3.0)</a></li>
-  </ul>
-</blockquote>
-</div>
-
-
-
-
-
-    
-  
-<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="大白话Javascript设计模式之职责链模式(Chain of Responsibility)" data-title="大白话Javascript设计模式之职责链模式(Chain of Responsibility)" data-url="http://clancyz.github.io/blog/2015/10/17/Javascript-Design-pattern-Chain-of-responsibility/"></div>
-<!-- 多说评论框 end -->
-<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
-<script type="text/javascript">
-var duoshuoQuery = {short_name:"clancyz"};
-	(function() {
-		var ds = document.createElement('script');
-		ds.type = 'text/javascript';ds.async = true;
-		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
-		ds.charset = 'UTF-8';
-		(document.getElementsByTagName('head')[0] 
-		 || document.getElementsByTagName('body')[0]).appendChild(ds);
-	})();
-	</script>
-<!-- 多说公共JS代码 end -->
-
-
-        
-      </div>
-    </div>
-  </div>
-
-  <footer class="footer">
-  <div class="p2 wrap">
-    <div class="measure mt1 center">
-      <small>
-        2016 Clancy Zhu
-      </small>
-    </div>
-  </div>
-</footer>
-
-
-
-</body>
-</html>

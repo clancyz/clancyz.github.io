@@ -1,105 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>某前端项目重构及性能优化记录 &#8211; Clancy Zhu</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="我的一次前端“推倒式重构”的经历。由我总结的一篇项目文档修改而来，因为是内部项目，隐去了具体项目内容。经过重构和优化后，项目代码的结构更加清晰，易于部署，可维护性更好；页面普遍的加载速度快了1s以上。">
-    <meta name="author" content="Clancy Zhu">
-    <meta name="keywords" content="blog">
-    <link rel="canonical" href="http://clancyz.github.io/blog/2015/08/21/A-Project-refactor-notes/">
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="/css/pixyll.css" type="text/css">
-
-    <!-- Fonts -->
-    <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
-    <link href='//fonts.googleapis.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
-    
-      <link href="//libs.baidu.com/fontawesome/4.2.0/css/font-awesome.css" rel="stylesheet">
-    
-
-    <!-- Open Graph -->
-    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
-    <meta property="og:locale" content="en_US">
-    <meta property="og:type" content="article">
-    <meta property="og:title" content="某前端项目重构及性能优化记录">
-    <meta property="og:description" content="Clancy Zhu's blog">
-    <meta property="og:url" content="http://clancyz.github.io/blog/2015/08/21/A-Project-refactor-notes/">
-    <meta property="og:site_name" content="Clancy Zhu">
-    
-
-<script>
-var _hmt = _hmt || [];
-(function() {
-  var hm = document.createElement("script");
-  hm.src = "//hm.baidu.com/hm.js?552e4c4f02c7d240bdb63847dd7ea798";
-  var s = document.getElementsByTagName("script")[0]; 
-  s.parentNode.insertBefore(hm, s);
-})();
-</script>
-
-
-
-</head>
-
-<body class="">
-  <div class="site-wrap">
-    <header class="site-header px2 px-responsive">
-  <div class="mt2 wrap">
-    <div class="measure">
-      <a href="http://clancyz.github.io" class="site-title">Clancy Zhu</a>
-      <nav class="site-nav right">
-        <a href="/about/">About</a>
-<a href="/contact/">Contact</a>
-
-      </nav>
-      <div class="clearfix"></div>
-      
-        <div class="social-icons">
-  <div class="left">
-    
-      <a class="fa fa-github" href="https://github.com/clancyz"></a>
-    
-    <a class="fa fa-rss" href="/feed.xml"></a>
-    
-    
-    
-      <a class="fa fa-envelope" href="mailto:clancyzhu@me.com"></a>
-    
-    
-  </div>
-  <div class="right">
-    
-    
-    
-  </div>
-</div>
-<div class="clearfix"></div>
-
-      
-    </div>
-  </div>
-</header>
-
-
-    <div class="post p2 p-responsive wrap" role="main">
-      <div class="measure">
-        
-
-
-<div class="post-header mb2">
-  
-  <h1 class="py2">某前端项目重构及性能优化记录</h1>
-  
-  <span class="post-meta">08月 21日, 2015</span><br>
-  
-  <!-- <span class="post-meta small">1 minute read</span> -->
-</div>
-
-<article class="post-content">
-  <h2 id="section">项目背景</h2>
+<h2 id="项目背景">项目背景</h2>
 
 <p>我还是从前端的技术角度来阐述。</p>
 
@@ -119,7 +18,7 @@ var _hmt = _hmt || [];
 
 <p>好了有点跑偏，这个项目后来在 <code class="highlighter-rouge">需求相对稳定</code> 的时候，相对得闲了，就想做些优化了…</p>
 
-<h2 id="section-1">项目结构的问题</h2>
+<h2 id="项目结构的问题">项目结构的问题</h2>
 
 <p>当时的我接手后的项目结构是这样的：</p>
 
@@ -154,7 +53,7 @@ var _hmt = _hmt || [];
   </li>
 </ol>
 
-<h2 id="section-2">具体的代码问题</h2>
+<h2 id="具体的代码问题">具体的代码问题</h2>
 
 <p>页面代码问题，主要问题有以下几点：(涉及业务的已经略去)</p>
 
@@ -167,7 +66,7 @@ var _hmt = _hmt || [];
   <li>某页面的 <code class="highlighter-rouge">树状表格</code> 重复N次DOM操作，渲染性能低下。如遇到稍大的表格，其渲染时间可超过5s，严重影响体验。</li>
 </ol>
 
-<h2 id="section-3">当时自己的一个失误</h2>
+<h2 id="当时自己的一个失误">当时自己的一个失误</h2>
 
 <p>当时自己在写这篇重构文档时提到了一个问题，即页面加载速度缓慢。</p>
 
@@ -181,9 +80,9 @@ var _hmt = _hmt || [];
 
 <p>当时我经过分析，应该是 <code class="highlighter-rouge">服务端</code> 的问题，不是前端问题。还给后端同学提了建议让他们去优化。结果证明，完全是我自己的问题，我也感到很羞愧。关于这个问题我也专门总结了一番，可以看我的 <a href="http://clancyz.github.io/blog/2015/09/08/The-reason-of-long-ttfb-spend/">这篇文章</a>。</p>
 
-<h2 id="section-4">优化过程</h2>
+<h2 id="优化过程">优化过程</h2>
 
-<h3 id="section-5">组件化：</h3>
+<h3 id="组件化">组件化：</h3>
 
 <ol>
   <li>抽离项目代码为common公共部分和页面部分；</li>
@@ -192,7 +91,7 @@ var _hmt = _hmt || [];
   <li>表格组件优化，暴露出refresh接口，在新的ajax请求完成渲染表格后或翻页后触发refresh事件。</li>
 </ol>
 
-<h3 id="section-6">模块化：</h3>
+<h3 id="模块化">模块化：</h3>
 
 <ol>
   <li>
@@ -204,7 +103,7 @@ var _hmt = _hmt || [];
   </li>
 </ol>
 
-<h3 id="section-7">工程化：</h3>
+<h3 id="工程化">工程化：</h3>
 
 <ol>
   <li>
@@ -227,9 +126,9 @@ var _hmt = _hmt || [];
   </li>
 </ol>
 
-<h3 id="section-8">业务代码优化</h3>
+<h3 id="业务代码优化">业务代码优化</h3>
 
-<h4 id="section-9">这里我主要是提出了一些　<code class="highlighter-rouge">代码规范</code>,　评审通过后要求大家遵循。</h4>
+<h4 id="这里我主要是提出了一些代码规范评审通过后要求大家遵循">这里我主要是提出了一些　<code class="highlighter-rouge">代码规范</code>,　评审通过后要求大家遵循。</h4>
 
 <ol>
   <li>首先，对页面代码（每个页面对应的jquery代码，不包含插件组件）做如下规范：
@@ -265,64 +164,7 @@ var _hmt = _hmt || [];
   </li>
 </ol>
 
-<h2 id="section-10">总结</h2>
+<h2 id="总结">总结</h2>
 
 <p>以上便是整个重构优化的过程，可能没有结合具体的例子来讲，有些笼统；但是，经过这次重构和优化后，项目代码的结构更加清晰，易于部署，可维护性更好；页面普遍的加载速度快了1s以上。对自己也算是一次完整的重构经历，也有一定的成长。</p>
 
-
-</article>
-
-
-  <div class="py2">
-  <blockquote>
-  <p><b>关于此文章：</b></p>
-  <ul>
-      <li>作者：Clancy Zhu</li>
-      <li>版权声明：自由转载-非商用-非衍生-保持署名<a href="http://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh">（CC BY-NC-ND 3.0)</a></li>
-  </ul>
-</blockquote>
-</div>
-
-
-
-
-
-    
-  
-<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="某前端项目重构及性能优化记录" data-title="某前端项目重构及性能优化记录" data-url="http://clancyz.github.io/blog/2015/08/21/A-Project-refactor-notes/"></div>
-<!-- 多说评论框 end -->
-<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
-<script type="text/javascript">
-var duoshuoQuery = {short_name:"clancyz"};
-	(function() {
-		var ds = document.createElement('script');
-		ds.type = 'text/javascript';ds.async = true;
-		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
-		ds.charset = 'UTF-8';
-		(document.getElementsByTagName('head')[0] 
-		 || document.getElementsByTagName('body')[0]).appendChild(ds);
-	})();
-	</script>
-<!-- 多说公共JS代码 end -->
-
-
-        
-      </div>
-    </div>
-  </div>
-
-  <footer class="footer">
-  <div class="p2 wrap">
-    <div class="measure mt1 center">
-      <small>
-        2016 Clancy Zhu
-      </small>
-    </div>
-  </div>
-</footer>
-
-
-
-</body>
-</html>
